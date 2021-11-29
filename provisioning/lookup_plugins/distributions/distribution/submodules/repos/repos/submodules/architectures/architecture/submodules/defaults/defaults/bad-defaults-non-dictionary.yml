@@ -1,0 +1,31 @@
+---
+# This is a badly formatted defaults file.  A defaults file is organized as a
+# dictionary of dictionaries of arbitrary depth with the highest-level key
+# 'defaults' as a requirement.
+- defaults:
+  global1: some-global-value
+  global2: another-global-value
+
+  # Group1 defaults:
+  group1:
+    default: group1-default
+    subgroup1:
+      default: subgroup1-default
+      value1: value11
+      value2: value12
+    subgroup2:
+      default: subgroup2-default
+      value1: value21
+      value2: value22
+
+  # Group2 defaults:
+  group2:
+    default: group2-default
+    subgroup1:
+      default: subgroup1-default
+      value1: value11
+      value2: value12
+    subgroup2:
+      default: subgroup2-default
+      value1: value21
+      value2: value22

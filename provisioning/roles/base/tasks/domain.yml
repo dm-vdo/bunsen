@@ -1,0 +1,7 @@
+---
+# Set the domain if one has been specified.
+- block:
+  - name: Set domain
+    shell: hostnamectl set-hostname "{{ inventory_hostname }}.{{ domain }}"
+    become: yes
+    when: domain is defined

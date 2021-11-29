@@ -1,0 +1,55 @@
+---
+- block:
+  - name: Create Repository base directories
+    file:
+      name: "{{ item['dest'] | dirname }}"
+      mode: 0755
+      owner: "{{ master_user }}"
+      state: directory
+    with_items: "{{ permabuild_installs }}"
+
+  - name: Clone the permabuild software from git repos
+    git:
+      repo: "{{ item['url'] }}"
+      dest: "{{ item['dest'] }}"
+      version: "{{ item['version'] | default('master') }}"
+      bare: "{{ item['bare'] | default('no') }}"
+    become_user: "{{ master_user }}"
+    become: yes
+    with_items:
+      - "{{ permabuild_installs
+          | selectattr('type', 'match', '^git$') | list }}"
+
+  - include_tasks: git_p4_clone.yml
+    vars:
+      p4server: "{{ item['url'] | urlsplit('netloc') }}"
+      depot_path: "{{ item['url'] | scm_request }}"
+      git_repo_path: "{{ item['dest'] }}"
+    args:
+      apply:
+        become: yes
+        become_user: "{{ master_user }}"
+    with_items: "{{ permabuild_installs
+                    | selectattr('type', 'match', '^perforce$') | list }}"
+
+  - block:
+    - name: Stat common Repository base directories
+      stat:
+        path: "{{ item['dest'] | dirname }}/{{ item['src'] }}.common.{{
+                                                              item['type'] }}"
+      with_items: "{{ permabuild_common_link_installs }}"
+      register: link_results
+
+    - name: Provide common links to our Repository base directories
+      file:
+        src: "{{ spec['dest'] | basename }}"
+        dest: "{{ spec['dest'] | dirname }}/{{ spec['src'] }}.common.{{
+                                                              spec['type'] }}"
+        follow: no
+        state: link
+      become_user: "{{ master_user }}"
+      become: yes
+      vars:
+        spec: "{{ item['item'] }}"
+      when: not item['stat'].exists
+      with_items: "{{ link_results.results }}"

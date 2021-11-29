@@ -1,0 +1,128 @@
+---
+- include: import.yml
+
+# N.B.: /u1 is used for farm test storage, and we may want one machine to be
+# configurable for both resource and farm roles. So use /u2 here.
+- name: Create /u2 directory
+  file:
+    path: /u2
+    owner: root
+    group: root
+    mode: 0777
+    state: directory
+
+- block:
+  # There are three ways in which we can get the UDS source to use.
+  # We can get it ourself if one of the following:
+  #   - the source is specified via a git uri
+  #   - the source is specified via a perforce uri and we are an x86 machine
+  #
+  # If neither of the above is true we must rely on the infrastructure machine
+  # to provide the source.  This includes scenarios in which the source is
+  # specified by a uri we don't understand in which case we depend on the
+  # infrastructure machine to provide it in a form we can use.
+
+  - block:
+    - name: Clone the UDS tree from git
+      git:
+        repo: "{{ permabuild_uds_spec['url'] }}"
+        version: "{{ permabuild_uds_spec['version'] }}"
+        dest: "{{ udsdir }}"
+        clone: yes
+        depth: 1
+      become: yes
+      become_user: "{{ master_user }}"
+      when: is_git | bool
+
+    - name: Clone the UDS tree from Perforce
+      include_role:
+        name: permabuild_server
+        tasks_from: git_p4_clone
+      vars:
+        p4server: "{{ permabuild_uds_spec['url'] | urlsplit('netloc') }}"
+        depot_path: "{{ permabuild_uds_spec['url'] | scm_request }}"
+        git_repo_path: "{{ udsdir }}"
+      args:
+        apply:
+          become: yes
+          become_user: "{{ master_user }}"
+      when: is_perforce | bool
+
+    - name: Compile the UDS tree
+      become: yes
+      become_user: "{{ master_user }}"
+      shell: |
+        cd "{{ udsdir }}" &&
+        make -j "{{ ansible_processor_vcpus | default(2) }}"
+      args:
+        warn: False
+
+    when: (is_git | bool) or ((is_perforce | bool) and (is_family_x86 | bool))
+
+  - block:
+    - name: Check for the presence of our preferred UDS
+      stat:
+        path: "{{ permabuild_uds_spec['dest'] }}"
+      register: pbit_uds
+      failed_when: not pbit_uds.stat.exists
+
+    - name: Clone the UDS tree from infrastructure machine
+      become: yes
+      become_user: "{{ master_user }}"
+      git:
+        repo: "{{ permabuild_uds_spec['dest'] }}"
+        dest: "{{ workdir }}/{{ permabuild_uds_spec['dest'] | basename }}"
+        force: yes
+
+    - name: Compile the cloned UDS tree
+      become: yes
+      become_user: "{{ master_user }}"
+      shell: |
+        make -C "{{ clonedir }}" -j "{{ ansible_processor_vcpus | default(2) }}"
+      args:
+        warn: False
+
+    # N.B.: tar doesn't do globbing on the file input list, so make the shell
+    # do it.
+    - name: Install the cloned UDS tree
+      become: yes
+      become_user: "{{ master_user }}"
+      shell: |
+        cd "{{ clonedir }}" &&
+        rm -rf "{{ udsdir }}" &&
+        mkdir -p "{{ udsdir }}" &&
+        egrep -v "^#" < "{{ clonedir }}/.buildManifest" > "{{ clonedir }}/.buildManifest.bunsen" &&
+        tar -C "{{ clonedir }}" -c -f bunsenInstall.tar $(cat .buildManifest.bunsen) &&
+        tar -C "{{ udsdir }}" -x -f "{{ clonedir }}/bunsenInstall.tar" &&
+        rm -rf "{{ workdir }}"
+      args:
+        warn: False
+    when: not ((is_git | bool)
+                or ((is_perforce | bool) and (is_family_x86 | bool)))
+
+  - name: Add UDS_TOP to environment (csh)
+    template:
+      src: uds_top.csh
+      dest: /etc/profile.d/uds_top.csh
+      mode: 0644
+
+  - name: Add UDS_TOP to environment (sh)
+    template:
+      src: uds_top.sh
+      dest: /etc/profile.d/uds_top.sh
+      mode: 0644
+
+  vars:
+    is_git: "{{ permabuild_uds_spec['type'] == 'git' }}"
+    is_perforce: "{{ permabuild_uds_spec['type'] == 'perforce' }}"
+    master_user: "{{ master_user_account }}"
+    udsdir: /u2/uds
+    workdir: /u2/uds-build
+    clonedir: "{{ workdir }}/{{ permabuild_uds_spec['dest']  | basename }}"
+
+# Default priority is 50; system owner can override.
+- name: Set up UDS dev installer
+  alternatives:
+    name: install-uds-devel
+    link: /usr/bin/install-uds-devel
+    path: /permabit/build/tools/lastrun/install-uds-devel-from-srpm.sh

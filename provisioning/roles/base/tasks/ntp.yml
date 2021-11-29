@@ -1,0 +1,73 @@
+---
+# If we're not in a "checkServer requires NTP configuration, the distro may
+# still be running chronyd, and for VMs, that may turn out to be the right
+# thing these days, as some don't automatically stay in sync with the host
+# clock. So update the config files for both daemons.
+- block:
+    - name: Checking service status
+      service_facts:
+
+    - include_tasks: ntpconfig.yml
+      vars:
+        config_file: /etc/chrony.conf
+        daemon_name: chronyd
+        unit_name: chronyd.service
+
+    - include_tasks: ntpconfig.yml
+      vars:
+        config_file: /etc/ntp.conf
+        daemon_name: ntpd
+        unit_name: ntpd.service
+
+  vars:
+    # Everybody talks to the infrastructure box, to keep in sync with each
+    # other. (If there isn't one, well, rely on there being other servers or
+    # peers configured.)
+    ntp_peers: "{%- if 'infrastructure' not in groups -%}
+                  {{ [] }}
+                {%- elif inventory_hostname in groups['infrastructure'] -%}
+                  {{ groups['all'] }}
+                {%- else -%}
+                  {{ groups['infrastructure'] }}
+                {%- endif -%}"
+    # We want the Permabit servers if we're physically in the Red Hat network.
+    # A Beaker machine is always on it; a Vagrant VM is likely on a developer's
+    # machine, which may be permanently at home and often connected by VPN (not
+    # critical to use Permabit NTP but not harmful either), may be in the
+    # office (needs Permabit or Red Hat NTP), or may be carried around (needs
+    # Permabit/RH NTP when in the office).
+    #
+    # Some developer machines may not need the Permabit NTP servers, because
+    # they'll never be carried into the Red Hat offices, but we don't have a
+    # way of identifying those yet.
+    ntp_servers: "{{ permabit_ntp_servers }}"
+
+# We should probably switch to the system default of chronyd instead of
+# insisting on ntpd.
+- block:
+  - name: Disabling chronyd service
+    systemd:
+      name: chronyd.service
+      state: stopped
+      enabled: False
+
+  - name: Disabling chrony-wait service
+    systemd:
+      name: chrony-wait.service
+      state: stopped
+      enabled: False
+
+  - name: Enabling ntpd service
+    systemd:
+      name: ntpd.service
+      state: started
+      enabled: True
+
+  # This just reflects the cases where checkServer cares that ntpd is
+  # running. Other cases may come up where we lose sync and really do
+  # want ntpd or chronyd or something running.
+  #
+  # XXX Otherwise, we're ignoring running services.
+  when: (is_beaker | bool) and (not (is_rhel8_family | bool))
+        and (ansible_virtualization_role != 'guest') 
+        and (system_has_ntpd | bool)

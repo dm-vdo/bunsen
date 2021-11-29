@@ -1,0 +1,12 @@
+---
+- block:
+  - name: Install required resource packages.
+    package:
+      name: "{{ resource_base_packages }}"
+      state: present
+
+  - name: Install perforce command line package.
+    package:
+      name: "{{ resource_perforce_packages }}"
+      state: present
+    when: is_family_x86 | bool

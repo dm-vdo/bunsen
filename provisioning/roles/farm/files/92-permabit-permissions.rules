@@ -1,0 +1,11 @@
+ACTION!="add", GOTO="permissions_end"
+
+# Make disk dev nodes have required permissions for server-team tests.
+SUBSYSTEM=="block", SUBSYSTEMS=="scsi", DRIVERS=="sd", MODE="0666"
+SUBSYSTEM=="block", SUBSYSTEMS=="ide", DRIVERS=="ide-disk", MODE="0666"
+
+KERNEL=="kvm", MODE="0666"
+
+KERNEL=="dsp", SUBSYSTEM=="sound", MODE="0666"
+
+LABEL="permissions_end"

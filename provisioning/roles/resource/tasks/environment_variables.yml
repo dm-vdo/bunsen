@@ -1,0 +1,13 @@
+---
+- block:
+  - name: Add P4CONFIG to environment (csh)
+    copy:
+      content: "setenv P4CONFIG .p4config\n"
+      dest: /etc/profile.d/p4config.csh
+      mode: 0644
+
+  - name: Add P4CONFIG to environment (sh)
+    copy:
+      content: "P4CONFIG=.p4config ; export P4CONFIG\n"
+      dest: /etc/profile.d/p4config.sh
+      mode: 0644

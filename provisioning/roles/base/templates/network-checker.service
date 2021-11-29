@@ -1,0 +1,6 @@
+[Unit]
+Description=Log network status info
+
+[Service]
+Type=oneshot
+ExecStart={{ script_name }}

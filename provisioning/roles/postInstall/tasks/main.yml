@@ -1,0 +1,3 @@
+---
+- include: renameIscsi.yml
+- include: copyssh.yml

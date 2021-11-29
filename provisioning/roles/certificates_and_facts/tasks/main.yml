@@ -1,0 +1,50 @@
+---
+- block:
+  - include: "{{ playbook_dir }}/library/getRHCert.yml"
+
+  - name: Checking for Vagrant account
+    getent: database=passwd key=vagrant
+    failed_when: False
+    register: getpwent_result
+
+  - block:
+    # These are currently the only priority configurations.
+    # devvm is anything that is not beaker nor a pfarm.
+    # There will probably be others to distinguish eventually.
+    - name: Setting vagrant/beaker facts
+      set_fact:
+        is_vagrant: '{{ ("ansible_facts" in getpwent_result.keys() | list)
+                      and (not (is_pfarm | bool)) }}'
+        is_beaker: '{{ ("ansible_facts" not in getpwent_result.keys() | list)
+                      and (not (is_pfarm | bool)) }}'
+
+    - name: Setting devvm fact
+      # Can't reference is_beaker in the same set_fact where it is set even
+      # if it's set previous to its use.
+      set_fact:
+        is_devvm: '{{ (not (is_beaker | bool)) and (not (is_pfarm | bool)) }}'
+
+  - name: Get controller ip address
+    # TODO: The availability of SSH_CLIENT is apparently dependent on how
+    #       ansible-playbook is invoked.  For our current usages the following
+    #       covers all cases.
+    set_fact:
+      ansible_controller_ip: '
+        {%- if (is_vagrant | bool) -%}
+          {{ ansible_default_ipv4.gateway }}
+        {%- else -%}
+          {{ ansible_env.SSH_CLIENT.split()[0] }}
+        {%- endif -%}'
+
+  - name: Setting default alternative package facts
+    # If the machine is being used as the storage server it needs to use
+    # python3 as its default python as the storage software used for iSCSI
+    # assumes that plain python resolves to python3.
+    set_fact:
+      python_alternative: '
+        {%- if is_fedora32_or_later or is_rhel8_or_later_family
+              or is_storage_server -%}
+          python3
+        {%- else -%}
+          python2
+        {%- endif -%}'

@@ -1,0 +1,55 @@
+---
+# Move the contents of /home to the root, unmount /home, and remove its logical
+# volume.
+
+# TODO: Robustness against interruption & replay. If interrupted at various
+# points, currently there's no automatic recovery possible; you must reinstall
+# the machine and start over, or patch things up manually.
+
+- name: Checking volume groups
+  assert:
+    that: (existing_vgs | length) == 1
+    msg: "Expected exactly one volume group (found {{ existing_vgs }})"
+
+- name: Ensuring rsync is available
+  package:
+    name: rsync
+    state: present
+  become: yes
+
+- name: Copy /home to /home2
+  # --acls --xattrs ?
+  shell: "mkdir /home2 && rsync -aHS /home/. /home2/. && sync"
+  args:
+    warn: False
+  become: yes
+
+- name: Unmount /home
+  mount:
+    path: /home
+    state: absent
+  become: yes
+
+- name: Deleting old /home logical volume
+  lvol:
+    vg: "{{ existing_vgs[0] }}"
+    lv: home
+    state: absent
+    force: yes
+  become: yes
+
+- name: Rescan mount points
+  setup:
+    filter: ansible_mounts
+  become: yes
+
+- name: Move /home2 to /home
+  shell: "rm -rf /home && mv -f /home2 /home"
+  args:
+    warn: False
+  become: yes
+
+- name: Retrieve LVM configuration
+  setup:
+    filter: ansible_lvm
+  become: yes

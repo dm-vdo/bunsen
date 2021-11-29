@@ -1,0 +1,33 @@
+---
+- block:
+  # Add the account's remote side public key to the local account's
+  # authorized_keys file.
+  - include: local_ssh_helper.yml account="{{ item }}"
+    with_items: "{{ sshfs_user }}"
+
+  - name: Allow sshfs fuse 'allow_other/allow_root'
+    lineinfile:
+      dest: /etc/fuse.conf
+      regexp: "^user_allow_other$"
+      line: "user_allow_other"
+    become: yes
+
+  - name: Install mounter script
+    template:
+      src: sshfs_mounter
+      dest: /sbin/do_sshfs_mounts
+      mode: 0755
+
+  - name: Do mounts
+    command: /sbin/do_sshfs_mounts
+    become: yes
+    become_user: "{{ sshfs_user }}"
+
+  when: (sshfs_user != "") and ((sshfs_mounts | length) > 0)
+
+- name: Remove mounter script
+  file:
+    path: /sbin/do_sshfs_mounts
+    state: absent
+  become: yes
+  when: (sshfs_user == "") or ((sshfs_mounts | length) == 0)

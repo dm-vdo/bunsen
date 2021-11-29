@@ -1,0 +1,116 @@
+---
+# This file specifies the defaults that distributions will utilize.
+defaults:
+  # The default distribution to use.
+  # Note that for Fedora the minor version is not used.
+  #
+  # If the specified version is earlier than the minimum version specified in
+  # the matching OS family or is otherwise unavailable ((based on web search)
+  # distributions will utilize the most recent available family version.  If no
+  # such version is available (again, based on web search) distributions will
+  # utilize the most recent available Fedora version at least as recent as the
+  # Fedora minimum.
+  #
+  # Due to current requirements that the bunsen infrastructure machine may be
+  # required to function as an iscsi server and the default distribution is
+  # used for the infrastructure machine this must be specified as Fedora 30.
+  # It is the only currently tested distribution for which the bunsen
+  # configuration of an iscsi server is verified to work.
+  distribution:
+    family: fedora
+    major: 30
+    minor:
+
+  # For all OSes the first level labels under "uds" and "vdo" (and,
+  # for CentOS & RHEL, "specialRepos") are treated as regular expressions
+  # simplifying the processing code's disambiguation of distributions with
+  # common prefixes; e.g., fedora32 and fedora320.
+  #
+  # The "minimum" in each OS family specifies the earliest version of the OS
+  # family that is supported.  Note that for Fedora there is no minor version.
+
+  # CentOS defaults
+  # "specialRepos" are used to specify repositories for packages that are not
+  # provided by CentOS but are required for development/testing.
+  centos:
+    minimum:
+      major: 8
+      minor: 3
+    specialRepos:
+      default: fedora34
+      centos8\d$:
+        default: fedora28
+    uds:
+      default: //eng/uds-releases/jasper
+      centos8\d$:
+        default: //eng/uds-releases/jasper
+        centos83: //eng/uds-releases/jasper-rhel8.3
+    vdo:
+      default: //eng/vdo-releases/aluminum
+      centos8\d$:
+        default: //eng/vdo-releases/aluminum
+        centos83: //eng/vdo-releases/aluminum-rhel8.3
+
+  # Fedora defaults
+  fedora:
+    minimum:
+      major: 28
+    uds:
+      default: //eng/uds-releases/lisa
+      fedora3\d$:
+        default: //eng/uds-releases/lisa
+        fedora32: //eng/uds-releases/krusty
+        fedora31: //eng/uds-releases/krusty
+        fedora30: //eng/uds-releases/krusty
+      fedora2\d$:
+        default: //eng/uds-releases/krusty
+        fedora29: //eng/uds-releases/krusty
+        fedora28: //eng/uds-releases/jasper
+    vdo:
+      default: //eng/linux-vdo
+
+  # RHEL defaults
+  # "specialRepos" are used to specify repositories for packages that are not
+  # provided by RHEL but are required for development/testing.
+  rhel:
+    minimum:
+      major: 7
+      minor: 5
+    specialRepos:
+      default: fedora34
+      rhel8\d$:
+        default: fedora28
+      rhel7\d$:
+        default: fedora28
+    uds:
+      default: //eng/uds-releases/lisa
+      rhel9\d$:
+        default: //eng/uds-releases/krusty
+      rhel8\d$:
+        default: //eng/uds-releases/jasper
+        rhel84: //eng/uds-releases/jasper-rhel8.4
+        rhel83: //eng/uds-releases/jasper-rhel8.3
+        rhel82: //eng/uds-releases/jasper-rhel8.2
+        rhel81: //eng/uds-releases/homer-rhel8.1
+        rhel80: //eng/uds-releases/gloria
+      rhel7\d$:
+        default: //eng/uds-releases/gloria
+        rhel77: //eng/uds-releases/gloria
+        rhel76: //eng/uds-releases/flanders
+        rhel75: //eng/uds-releases/flanders-rhel7.5
+    vdo:
+      default: //eng/vdo-releases/sulfur
+      rhel9\d$:
+        default: //eng/vdo-releases/sulfur
+      rhel8\d$:
+        default: //eng/vdo-releases/sulfur
+        rhel84: //eng/vdo-releases/aluminum-rhel8.4
+        rhel83: //eng/vdo-releases/aluminum-rhel8.3
+        rhel82: //eng/vdo-releases/aluminum-rhel8.2
+        rhel81: //eng/vdo-releases/aluminum-rhel8.1
+        rhel80: //eng/vdo-releases/aluminum-rhel8.0
+      rhel7\d$:
+        default: //eng/vdo-releases/magnesium
+        rhel77: //eng/vdo-releases/magnesium-rhel7.7
+        rhel76: //eng/vdo-releases/magnesium-rhel7.6
+        rhel75: //eng/vdo-releases/magnesium-rhel7.5

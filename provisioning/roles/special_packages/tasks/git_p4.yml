@@ -1,0 +1,13 @@
+---
+- name: Install git-p4 to /usr/local/bin.
+  become: yes
+  shell: (curl \
+    "https://git.kernel.org/pub/scm/git/git.git/plain/git-p4.py?id=master" \
+      >> git-p4.tmp && chmod +x git-p4.tmp && mv -f git-p4.tmp git-p4)
+  args:
+    chdir: /usr/local/bin
+    creates: git-p4
+  register: result
+  until: result is success
+  retries: "{{ default_retry_count }}"
+  delay: "{{ default_retry_delay }}"

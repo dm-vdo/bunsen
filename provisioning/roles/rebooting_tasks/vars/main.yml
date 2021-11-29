@@ -1,0 +1,48 @@
+---
+_kernel_selection:
+  distribution: "{{ ansible_distribution + ansible_distribution_version }}"
+  architecture: "{{ ansible_machine }}"
+  environment:
+
+_kernel_packages:
+  # Common to all distributions.
+  - common:
+    - kernel
+    - kernel-devel
+    - kernel-headers
+    - kernel-tools
+
+  ##########################################################################
+  # Fedora
+  ##########################################################################
+  # grubby isn't a kernel package per se, but we need it for the processing
+  # the kernel_packages role performs.
+
+  # Common to all Fedora starting with Fedora28.
+  - Fedora([1-9][0-9]{2,}|2[8-9]|[3-9][0-9]):
+    - grubby
+    - kernel-core
+    - kernel-modules
+
+  ##########################################################################
+  # Architecture-specific.
+  ##########################################################################
+  - architecture:
+    - aarch64:
+      - common:
+        - kernel-tools-libs
+    - ppc64le:
+      - common:
+        - kernel-tools-libs
+    - s390x:
+    - x86_64:
+      - common:
+        - kernel-debug
+        - kernel-debug-devel
+        - kernel-tools-libs
+
+      # Common to all Fedora starting with Fedora28.
+      - Fedora([1-9][0-9]{2,}|2[8-9]|[3-9][0-9]):
+        - kernel-debug-core
+
+kernel_packages: "{{ _kernel_packages | select_install(_kernel_selection) }}"

@@ -1,0 +1,71 @@
+---
+- block:
+  - name: Dummy SCAM directory
+    file:
+      path: /etc/scam
+      mode: 0755
+      state: directory
+
+  - name: SCAM data - Ansible
+    copy:
+      content: ANSIBLE=yes
+      dest: /etc/scam/ansible.conf
+      mode: 0644
+
+  - name: SCAM data - Beaker
+    lineinfile:
+      line: BEAKER=yes
+      path: /etc/scam/beaker.conf
+      create: yes
+      mode: 0644
+      owner: root
+      group: root
+      state: "{%- if (is_beaker | bool) -%}
+                present
+              {%- else -%}
+                absent
+              {%- endif -%}"
+
+  - name: SCAM data - DevVM
+    lineinfile:
+      line: DEVVM=yes
+      path: /etc/scam/devvm.conf
+      create: yes
+      mode: 0644
+      owner: root
+      group: root
+      state: "{%- if (is_devvm | bool) -%}
+                present
+              {%- else -%}
+                absent
+              {%- endif -%}"
+
+  - name: SCAM data - Vagrant
+    lineinfile:
+      line: VAGRANT=yes
+      path: /etc/scam/vagrant.conf
+      create: yes
+      mode: 0644
+      owner: root
+      group: root
+      state: "{%- if (is_vagrant | bool) -%}
+                present
+              {%- else -%}
+                absent
+              {%- endif -%}"
+
+  - name: SCAM data - farm
+    # pfarms are not (at present) considered farms for purposes of testing.
+    copy:
+      # If we put FARM outside the evaluation either the quoted no/yes results
+      # in the quotes in the file or unquoted no/yes is treated as undefined
+      # variables.
+      content: "FARM={{ (is_pfarm | bool) | ternary('no', 'yes') }}"
+      dest: /etc/scam/farm.conf
+      mode: 0644
+
+  - name: SCAM data - Albireo
+    copy:
+      content: ALBIREO=yes
+      dest: /etc/scam/albireo.conf
+      mode: 0644

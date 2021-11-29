@@ -1,0 +1,6 @@
+---
+- name: Install perforce tools
+  package:
+    name: permabit-perforce-tools
+    state: present
+  when: (is_pfarm | bool) and (is_family_x86 | bool)

@@ -1,0 +1,28 @@
+---
+# This is a dummy Ansible configuration.
+#
+# It's used only to get Vagrant to update the Ansible inventory file, and to
+# verify that we can actually contact the VM as configured (e.g., we have the
+# right Python interpreter, and the network setup isn't wonky).
+#
+# The real host configuration will be done with a separate Ansible pass, not
+# driven by Vagrant, with all the VMs configured in parallel (but synchronized,
+# so for example we don't start the NFS client before the NFS server is ready).
+
+- hosts: all
+  tasks:
+    - name: test reachability
+      debug: msg="Hello from '{{ ansible_hostname }}'
+                  running {{ target_distribution_name }}
+                  {{ target_distribution_major_number }}
+                  on {{ ansible_machine }}."
+    - name: display install message
+      debug:
+        msg:
+          - " Remember to use vagrant-ansible-playbook to configure this host. "
+          - " Usage:                                                           "
+          - "   ./vagrant-run-ansible                                          "
+          - " to configure all Vagrant VMs, or to specify hostnames, group     "
+          - " names, or wildcard patterns to provision only certain VMs:       "
+          - "   ./vagrant-run-ansible -l 'resources,farm-rhel80*'              "
+          - " (Quoting may be needed for shell special characters.)            "

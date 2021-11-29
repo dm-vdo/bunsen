@@ -1,0 +1,38 @@
+---
+- block:
+  - name: Get remote account authorized_keys
+    slurp:
+      src: "{{ remote_key_file }}"
+    register: key_file_result
+
+  - name: Create local authorized_keys file
+    local_action: file name="{{ local_keys_file }}" mode=0600 \
+      owner="{{ account }}" state=touch
+    become: yes
+    become_user: "{{ account }}"
+
+  - name: Get local authorized_keys without key to add
+    vars:
+      key: "{{ key_file_result.content | b64decode | trim }}"
+    local_action: command bash -c "grep -v '{{ key }}' {{ local_keys_file }}"
+    become: yes
+    become_user: "{{ account }}"
+    register: result
+    failed_when: result.rc == 2
+
+  - name: Replace local authorized_keys
+    local_action: command \
+      bash -c "echo '{{ result.stdout }}' > {{ local_keys_file }}"
+    become: yes
+    become_user: "{{ account }}"
+
+  - name: Add key to local authorized_keys
+    vars:
+      key: "{{ key_file_result.content | b64decode | trim }}"
+    local_action: command bash -c "echo '{{ key }}' >> {{ local_keys_file }}"
+    become: yes
+    become_user: "{{ account }}"
+
+  vars:
+    remote_key_file: "{{ user_accounts[account]['home'] }}/.ssh/id_rsa.pub"
+    local_keys_file: "~{{ account }}/.ssh/authorized_keys"

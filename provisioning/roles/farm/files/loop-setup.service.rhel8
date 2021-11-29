@@ -1,0 +1,15 @@
+[Unit]
+Description=Activate VDO scratch loop device
+Requires=home.mount
+Before=u1.mount
+After=home.mount
+#Wants=...
+
+[Service]
+ExecStart=/sbin/losetup -f /home/big_file
+ExecStop=/sbin/losetup -D
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=local-fs.target

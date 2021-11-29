@@ -1,0 +1,8 @@
+---
+# This file is used to set variables that control packages that are installed.
+# The actual alternatives are established in alternatives.yml after package
+# installation.
+- name: Setting using python2 alternative
+  set_fact:
+    python_alternative: "python2"
+  when: is_rhel8_family | bool

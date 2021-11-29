@@ -1,0 +1,11 @@
+---
+# We use autofs to mount the local users' home directories as a way to work
+# around an issue in vagrant deployments (at least involving VirtualBox) with
+# configuring the network interfaces when starting a halted box.  As such, we
+# exclude directly mounting the NFS server export of the containing directory.
+- include_tasks: "{{ playbook_dir }}/library/mount_nfs.yml"
+  vars:
+    name: "{{ item }}"
+    src: "{{ nfs_server }}:{{ item }}"
+  with_items: "
+    {{ hostvars[nfs_server].nfs_exports | difference([user_homes_local]) }}"

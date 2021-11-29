@@ -1,0 +1,37 @@
+# This is the playbook for upgrading a Fedora system to rawhide.
+
+- hosts: all
+  pre_tasks:
+    - name: Enable rawhide repo and update packages to rawhide version
+      yum:
+        name: '*'
+        enablerepo: rawhide
+        validate_certs: no
+        disable_gpg_check: yes
+        state: latest
+
+    - name: Reboot System
+      include_tasks: "{{ playbook_dir }}/library/restart_system.yml"
+
+- hosts: all
+  roles:
+    - update_packages
+
+- hosts: all
+  post_tasks:
+    - name: required
+      include_role:
+        name: farm
+        tasks_from: required_packages_file.yml
+
+    # permatest needs to be remove and reinstall in order to
+    # be rebuilt against the new rawhide kernel.
+    - name: Remove permatest
+      yum:
+        name: permatest
+        state: absent
+
+    - name: Install permatest
+      yum:
+        name: permatest
+        state: present
