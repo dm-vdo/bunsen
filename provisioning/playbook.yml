@@ -58,10 +58,6 @@
     # Base setup.
     - base
 
-- hosts: pfarms
-  roles:
-    - pfarm
-
 - hosts: farms performance_farms
   roles:
     # Move /home to the root if it was a separate logical volume, on farms
