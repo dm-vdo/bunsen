@@ -21,4 +21,4 @@ class TargetdSpec(Spec):
 
   ####################################################################
   def _distributionRequest(self, distribution):
-    return "jshimkus-bits/bunsen/third-party/targetd.git"
+    return "vdo/open-sourcing/tools/third/targetd.git"

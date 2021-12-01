@@ -21,4 +21,4 @@ class RtslibSpec(Spec):
 
   ####################################################################
   def _distributionRequest(self, distribution):
-    return "jshimkus-bits/bunsen/third-party/rtslib-fb.git"
+    return "vdo/open-sourcing/tools/third/rtslib-fb.git"
