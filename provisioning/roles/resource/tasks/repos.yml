@@ -1,0 +1,17 @@
+---
+- block:
+  - name: Import repo keys
+    rpm_key:
+      state: present
+      key: "{{ item }}"
+    become: yes
+    register: result
+    until: result is success
+    retries: "{{ default_retry_count }}"
+    delay: "{{ default_retry_delay }}"
+    with_items: "{{ resource_repository_keys }}"
+
+  - include_role:
+      name: repos
+    vars:
+      repositories: "{{ resource_repositories }}"

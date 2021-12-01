@@ -1,0 +1,65 @@
+---
+- block:
+  - name: Generate SSH directory inside homedir
+    file:
+      path: "{{ user_accounts[item]['home'] }}/.ssh"
+      state: directory
+    become: yes
+    become_user: "{{ item }}"
+    with_items:
+      - "{{ user_accounts.keys() | list }}"
+
+  - name: Create SSH key
+    command: "ssh-keygen -t rsa
+                -f {{ user_accounts[item]['home'] }}/.ssh/id_rsa -N ''"
+    args:
+      creates: "{{ user_accounts[item]['home'] }}/.ssh/id_rsa"
+    become: yes
+    become_user: "{{ item }}"
+    with_items:
+      - "{{ user_accounts.keys() | list }}"
+
+  - name: Fetch account's SSH public key
+    command: "cat {{ user_accounts[item]['home'] }}/.ssh/id_rsa.pub"
+    become: yes
+    become_user: "{{ item }}"
+    changed_when: False
+    with_items:
+      - "{{ user_accounts.keys() | list }}"
+    register: ssh_keys_result
+
+  - name: Postprocess SSH public key reports
+    set_fact:
+      ssh_pubkeys: "
+        {%- set tmp = {} -%}
+        {%- for result in ssh_keys_result.results -%}
+          {%- set x = tmp.update({ result.item: result.stdout }) -%}
+        {%- endfor -%}
+        {{ tmp }}"
+
+  - name: "Add account's own SSH key to authorized_keys"
+    authorized_key:
+      user: "{{ item }}"
+      key: "{{ ssh_pubkeys[item] }}"
+      comment: self
+      state: present
+    become: yes
+    become_user: "{{ item }}"
+    with_items:
+      - "{{ user_accounts.keys() | list }}"
+
+  - name: Add user's SSH keys to authorized_keys
+    authorized_key:
+      user: "{{ item[0] }}"
+      key: "{{ lookup('file', item[1]) }}"
+      comment: "{{ item[1] }}"
+      state: present
+    become: yes
+    become_user: "{{ item[0] }}"
+    with_nested:
+      - "{{ user_accounts.keys() | list }}"
+      - "{%- set results = lookup('fileglob', '~/.ssh/id*.pub') -%}
+         {%- if results is string -%}
+           {%- set results = results.split(',') -%}
+         {%- endif -%}
+         {{ results }}"

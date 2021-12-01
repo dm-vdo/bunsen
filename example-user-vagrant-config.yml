@@ -1,0 +1,100 @@
+---
+# The user may specify a user-global config file as
+# ~/.bunsen/vagrant-config.yml. The user may also specify a local config,
+# vagrant-config.yml, file in the bunsen working directory.
+#
+# The three configuration files (lowest-to-highest precedence):
+#   - vagrant-bunsen.yml (global config)
+#   - ~/.bunsen/vagrant-config.yml
+#   - vagrant-config.yml
+# will be merged to create the final vagrant configuration to be deployed.
+#
+
+# See vagrant-bunsen.yml for a detailed explanation of all the parameters
+# which may be configured here.
+
+# Environment establishes the mounts and machines (infrastructure, resources
+# and farms) to be created.
+environment:
+  # A possibly-empty prefix to attach to all hostnames, to simplify development
+  # with/of bunsen so VM configurations in two directories can more easily be
+  # given distinct sets of names.
+  name_prefix:
+
+  # An optional domain name for the deployed hosts.
+  domain:
+
+  # User account to create on the vagrant machines.  By default an account for
+  # the executing user is created.  This account is in addition to that.
+  user_account:
+
+  # This mounts attribute is for defining common mounts which may be included
+  # across multiple machines.  Specify a label (&<name>), source (on the host
+  # machine) and mount (on the guest machine) and place a label reference
+  # (*<name>) in the per-distro mounts specification.
+  #
+  # Per-distro mounts may be specified in the individual distro mounts
+  # attribute.  These use source and mount (with the same meaning as above).
+  #
+  # The mount value must be a full path.
+  #
+  # Simply uncommenting the three lines below will, under the assumption you
+  # are operating in <workspace>/main/src/tools/bunsen, make your workspace
+  # available as /workspace in the vagrant machines.  You may modify these
+  # values as desired.
+  #
+  # Specified mounts are accessed using sshfs.
+  mounts:
+    #- &workspace
+    #  source: "../../../.."
+    #  mount: "/workspace"
+
+  user-mounts:
+
+# These are the actual machine groups. Each group must have a distinct name,
+# a distro and a role. Other parameters must be specified only to override the
+# defaults. Overriding the precedence parameter will have no effect.
+ 
+# The count parameter specifies the number of machines to create in the group.
+ 
+# With the exception of the infrastructure role, which must have
+# precisely one host, machines in a group will have a number appended to
+# their name to differentiate the individual machines in the group.
+# For example, in a group called "foo" with a count of 2, the 2 VMs will be
+# named foo-1 and foo-2. Since there must be precisely one machine in the
+# infrastructure role, no number is appended to the name of the single
+# infrastructure machine group.
+
+# If multiple config files specify groups with the same name, the
+# configurations for those groups will be merged with values in higher
+# precedence config files overriding those in lower precedence config
+# files.
+
+# For values which are lists (currently 'mounts' and 'disks'), specifying
+# those keys with a prefix of 'user-' (note the dash rather than
+# underscore) will append the supplied list to any lists configured in
+# the lower precedence config files.
+
+# A machine group may have a "parent:" parameter whose value is the name of
+# some other group. In this case, any parameters unspecified in the group will
+# be inherited from the parent rather than from the role defaults.
+
+# The examples below are chosen merely to demonstrate the syntax, they are
+# not intended as suggestions for actual configurations.
+machines:
+  # Change the server memory to 2 gig.
+  server:
+    memory: 2
+
+  # Disable creation of the default RHEL81 resource and create one RHEL80
+  # resource machine with name prefix 'superfly', two gigs of memory and an
+  # additional 200G disk.
+  builder-rhel81:
+    count: 0
+
+  superfly:
+    distro: rhel80
+    role: resources
+    count: 1
+    memory: 2
+    user-disks:

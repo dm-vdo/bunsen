@@ -1,0 +1,21 @@
+---
+- block:
+  # If we've re-run ansible and triggered another kernel update since
+  # installing the permatest package, we may need to rebuild the module again.
+  - name: Build permatest module
+    command: dkms install permatest/1
+    register: result
+    changed_when: '"already installed" not in result.stdout'
+
+  - name: Load permatest module
+    modprobe:
+      name: permatest
+
+  - name: Load permatest module at boot
+    lineinfile:
+      path: /etc/modules-load.d/permatest.conf
+      line: permatest
+      create: yes
+      mode: 0644
+      owner: root
+      group: root

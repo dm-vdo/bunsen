@@ -1,0 +1,12 @@
+[Unit]
+Description=Athinfod Application
+
+[Service]
+User=root
+Group=root
+ExecStart={% if python_alternative == "python2" -%}
+            /bin/athinfod
+          {% else -%}
+            /usr/local/bin/athinfod
+          {% endif %}
+StandardInput=socket

@@ -1,0 +1,70 @@
+---
+# This is really the job of the RPM to create the user.
+- name: Create RSVP User
+  user:
+    name: rsvp
+    password: rsvp
+
+# This is really the job of script to actually create the directory
+- name: Create RSVP directories
+  file:
+    name: "{{ item }}"
+    mode: 0755
+    owner: rsvp
+    group: root
+    state: directory
+  with_items:
+    - /var/log/rsvpd
+    - /var/lib/rsvpd
+    - /var/run/rsvpd
+
+# Touch the hosts.state file
+- name: Create the RSVP hosts.state file
+  file:
+    name: /var/lib/rsvpd/hosts.state
+    mode: 0755
+    owner: rsvp
+    group: root
+    state: touch
+
+# Install the package
+- name: Install the RSVPD package
+  package:
+    name: permabit-rsvpd
+    state: present
+
+- name: Start the RSVPD Service
+  systemd:
+    name: permabit-rsvpd
+    state: started
+
+- name: Wait for RSVPD service to be active
+  wait_for:
+    port: 1752  # The rsvp server we deploy listens on 1752.
+
+# Add the RSVP classes
+# For RHEL families we register only the major version of the distribution.
+- name: Add the RSVP classes
+  command: "/permabit/build/perl/lastrun/bin/rsvpclient.pl  \
+            --dhost localhost add_class {{ item }}"
+  register: result
+  changed_when: "result.rc == 0"
+  failed_when: "(result.rc != 0) and ('already exists' not in result.stderr)"
+  with_items:
+    - 64BITOK
+    - ALBIREO
+    - ALL
+    - BIGMEM
+    - FARM
+    - VFARM
+    - KVM
+    - NTP
+    - LINUX-UDS
+    - LINUX-VDO
+    - VDO
+    - VDO-PMI
+    - FEDORA
+    - "{{ query('available_distributions')
+          | map('regex_replace', '^((CENTOS|RHEL)\\d).*', '\\1')
+          | unique
+          | list }}"

@@ -1,0 +1,19 @@
+---
+- name: Check out {{ item.src }}
+  git:
+    repo: "{{ item.url }}"
+    dest: /home/root/{{ item.src }}
+    version: master
+    depth: 1
+
+- name: Build {{ item.src }}
+  command: python setup.py build
+  args:
+    chdir: /home/root/{{ item.src }}
+  become: yes
+
+- name: Install {{ item.src }}
+  command: python setup.py install
+  args:
+    chdir: /home/root/{{ item.src }}
+  become: yes

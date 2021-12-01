@@ -1,0 +1,3 @@
+# Turn off all inotify watching of VDO devices, insofar as we can identify
+# them.
+ENV{DM_NAME}=="*vdo*", OPTIONS:="nowatch"

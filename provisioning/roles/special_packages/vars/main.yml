@@ -1,0 +1,17 @@
+---
+_special_selection:
+  distribution: "{{ ansible_distribution + ansible_distribution_version }}"
+  architecture: "{{ ansible_machine }}"
+  environment:
+
+# Require enabling special case repositories that have been installed.
+_packages:
+  # Common to all distributions.
+  - common:
+    - unifdef
+
+  # N.B.: Some distributions get these packages via their standard
+  # repositories, any package that requires special handling for any distro is
+  # handled in the single special_packages role.
+
+special_case_packages: "{{ _packages | select_install(_special_selection) }}"

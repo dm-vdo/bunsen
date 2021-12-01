@@ -1,0 +1,15 @@
+#!/bin/sh
+
+try_mount() {
+    if test ! -d $1 ; then
+	sudo mkdir -p $1
+	sudo chmod 0777 $1
+    fi
+    if ! mountpoint -q $1; then
+	sshfs -o allow_root,idmap=user,reconnect {{ sshfs_host }}:$2 $1
+    fi
+}
+
+{% for item in sshfs_mounts %}
+try_mount {{ item.mount }} {{ item.source }}
+{% endfor %}

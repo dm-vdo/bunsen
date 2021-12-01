@@ -1,0 +1,18 @@
+---
+- block:
+  - include_role:
+      name: repos
+    vars:
+      repositories: "{{ farm_repositories }}"
+
+  - name: Install required packages
+    package:
+      name: "{{ farm_packages }}"
+      state: present
+
+  - name: Ensure distro VDO packages are not installed
+    package:
+      name:
+        - kmod-kvdo
+        - vdo
+      state: absent

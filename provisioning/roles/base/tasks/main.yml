@@ -1,0 +1,62 @@
+---
+# First thing, set pre-determined values for pre-determined network
+# configuration parameters.  These are parameters that we don't have access to
+# via ansible.
+- name: Set non-ansible accessible pre-determined network configuration
+  predetermined_network_configuration:
+
+- include: create_permabuild.yml
+
+- name: Set time zone
+  timezone:
+    name: US/Eastern
+    hwclock: UTC
+
+- include: domain.yml
+
+- name: Create /u1 directory
+  file:
+    path: /u1
+    state: directory
+    mode: 01777
+
+- include: pre_alternatives.yml
+- include: packages.yml
+
+# package_availability.yml has to run after packages.yml since it is
+# checking if certain packages are available in order to determine
+# what need to be done later during the build process.
+- include: package_availability.yml
+
+- include: alternatives.yml
+- include: perl_libraries.yml
+- include: git_repos.yml
+
+# Do this before the first reboot.
+- include: persistent_journal.yml
+
+- include: ntp.yml
+
+- name: Enabling smartd service
+  systemd:
+    name: smartd.service
+    state: started
+    enabled: True
+
+# If there are any Permabit accounts in use, we mount the entire lab
+# home-directory file system.
+- include_tasks: "{{ playbook_dir }}/library/mount_nfs.yml"
+  vars:
+    name: /permabit/user
+    src: ntap-bos-c01-eng01-nfs01a.storage.bos.redhat.com:/vdo_permabit_user_nfs
+    extra_opts: nfsvers=3
+  when: user_names_pbit | length > 0
+
+- include: athinfo.yml
+- include: search_path.yml
+- include: ssh.yml
+
+# Add aliases to /etc/hosts.
+- include: host_aliases.yml
+
+- include: net-monitor.yml

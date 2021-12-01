@@ -1,0 +1,13 @@
+---
+#
+existing_lvs: "{%- if ansible_lvm is defined -%}
+                 {{ ansible_lvm.lvs.keys() | list }}
+               {%- else -%}
+                 {{ [] }}
+               {%- endif -%}"
+existing_vgs: "{%- if ansible_lvm is defined -%}
+                 {{ ansible_lvm.vgs.keys() | list }}
+               {%- else -%}
+                 {{ [] }}
+               {%- endif -%}"
+mount_points: "{{ ansible_mounts | map(attribute='mount') | list }}"

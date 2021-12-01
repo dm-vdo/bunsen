@@ -1,0 +1,62 @@
+---
+- include: scam_data.yml
+- include: release_config_dir.yml
+
+# Do this after the reboot that ensures that crashkernel memory has been
+# reserved.
+- name: Enabling kdump service
+  systemd:
+    name: kdump.service
+    state: started
+    enabled: True
+  # See above re: zipl boot loader.
+  when: is_fedora and (not is_arch_s390x)
+
+- name: Enable use of /proc/sysrq-trigger
+  sysctl:
+    name: kernel.sysrq
+    value: "1"
+    sysctl_set: yes
+
+- name: Enable crash dump on NMI
+  sysctl:
+    name: "{{ item }}"
+    value: "1"
+    sysctl_set: yes
+  with_items:
+    - kernel.panic_on_unrecovered_nmi
+    - kernel.unknown_nmi_panic
+  when: is_vagrant | bool
+
+- name: Enable core dump generation
+  lineinfile:
+    path: /etc/systemd/system.conf
+    regexp: "^DefaultLimitCORE="
+    state: present
+    line: "DefaultLimitCORE=0:infinity"
+  register: systemd_config
+
+- name: Restart systemd and sshd to use new core dump setting
+  systemd:
+    name: sshd
+    daemon_reexec: yes
+    state: restarted
+  when: systemd_config is changed
+
+- name: Enable sysstat monitoring
+  systemd:
+    name: sysstat
+    state: started
+    enabled: yes
+
+- name: Ensure distro VDO package lock directory is not present
+  file:
+    path: /var/lock/vdo
+    state: absent
+
+- include_tasks: "{{ playbook_dir }}/library/mount_nfs.yml"
+  vars:
+    name: "{{ permabit_datasets['path'] }}"
+    src: "{{ permabit_datasets['src'] }}"
+    extra_opts: ro
+  when: is_beaker | bool
