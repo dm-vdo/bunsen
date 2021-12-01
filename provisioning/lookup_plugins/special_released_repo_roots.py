@@ -14,8 +14,12 @@ DOCUMENTATION = """
     - none
 """
 import os
+import platform
 import sys
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+
+(major, minor, _) = map(lambda x: int(x), platform.python_version_tuple())
+sys.path.append("/usr/local/lib/python{0}.{1}/site-packages".format(major,
+                                                                    minor))
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
