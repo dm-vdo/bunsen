@@ -1,0 +1,3 @@
+---
+- include: install_pip.yml
+- include: install_python_packages.yml

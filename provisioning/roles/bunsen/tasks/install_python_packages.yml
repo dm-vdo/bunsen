@@ -1,0 +1,10 @@
+---
+- name: Install the host required bunsen python packages
+  shell: pip{{ pip_version }} install
+            --upgrade --trusted-host {{extra_host}}
+            --extra-index-url http://{{extra_host}}/repository/open-sourcing/python-pip-repo
+            {{ packages | join(" ") }}
+  vars:
+    extra_host: vdo-image-store.permabit.lab.eng.bos.redhat.com
+    pip_version: "{{ ((ansible_python_major | int) == 2) | ternary('', ansible_python_major) }}"
+    packages: ["python-distributions"]

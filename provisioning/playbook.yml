@@ -24,6 +24,11 @@
 
 - hosts: all
   roles:
+    # Install necessary bunsen support.
+    - bunsen
+
+- hosts: all
+  roles:
     # Install any required certificates and establish environment facts.
     # This is performed regardless of tag specification as some tagged roles
     # depend on these being established.

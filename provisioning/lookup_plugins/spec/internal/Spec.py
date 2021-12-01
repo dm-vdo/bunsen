@@ -1,5 +1,10 @@
 import os
+import platform
 import sys
+
+(major, minor, _) = map(lambda x: int(x), platform.python_version_tuple())
+sys.path.append("/usr/local/lib/python{0}.{1}/site-packages".format(major,
+                                                                    minor))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 from ansible.errors import AnsibleError
