@@ -9,7 +9,7 @@
 
 - name: Retrieve get-pip.py
   uri:
-    url: "{{pip['schema']}}{{pip['name']}}{{pip['path']}}"
+    url: "{{[pip['schema'], pip['name'], pip['path']] | join}}"
     dest: /tmp/get-pip.py
     creates: /tmp/get-pip.py
     mode: 0755
