@@ -5,14 +5,21 @@ _base_selection:
   environment:
     - "{{ python_alternative }}"
 
+_athinfo: "{{ externals['third-party']['athinfo']['host'] }}"
+_athinfod: "{{ externals['third-party']['athinfod']['host'] }}"
 _git_repos:
   - common:
     - name: athinfo
-      url: "https://gitlab.cee.redhat.com/vdo/open-sourcing/tools/third/athinfo.git"
+      url: "{{ [_athinfo['schema'],
+                _athinfo['name'],
+                _athinfo['path']] | join }}"
       dest_dir: "/tmp"
       install: "python setup.py install"
+
     - name: athinfod
-      url: "https://gitlab.cee.redhat.com/vdo/open-sourcing/tools/third/athinfod.git"
+      url: "{{ [_athinfod['schema'],
+                _athinfod['name'],
+                _athinfod['path']] | join }}"
       dest_dir: "/tmp"
       install: "python setup.py install"
 
