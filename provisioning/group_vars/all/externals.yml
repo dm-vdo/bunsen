@@ -150,7 +150,7 @@ externals:
           schema: https://
           name: package.perforce.com
           path: /yum/rhel/7/x86_64
-          keypath: /perforce.pubke
+          keypath: /perforce.pubkey
 
       rhel8:
         schema: rpm
