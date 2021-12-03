@@ -19,11 +19,13 @@ class UdsSpec(Spec):
   ####################################################################
   @property
   def _urlPrefix(self):
-    return "p4://pbitperforce01.permabit.lab.eng.bos.redhat.com:1666/"
+    external = self._variables["externals"]["first-party"]["uds-uri"]
+    return "{0}{1}".format(external["host"]["schema"],
+                           external["host"]["name"])
 
   ####################################################################
   def _distributionRequest(self, distribution):
-    return distribution.defaultUdsUri.replace("//", "", 1)
+    return distribution.defaultUdsUri.replace("//", "/", 1)
 
   ####################################################################
   def _makeSpec(self, scm):

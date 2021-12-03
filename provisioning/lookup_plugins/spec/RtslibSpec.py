@@ -17,8 +17,11 @@ class RtslibSpec(Spec):
   ####################################################################
   @property
   def _urlPrefix(self):
-    return "https://gitlab.cee.redhat.com/"
+    external = self._variables["externals"]["third-party"]["rtslib"]
+    return "{0}{1}".format(external["host"]["schema"],
+                           external["host"]["name"])
 
   ####################################################################
   def _distributionRequest(self, distribution):
-    return "vdo/open-sourcing/tools/third/rtslib-fb.git"
+    external = self._variables["externals"]["third-party"]["rtslib"]
+    return external["host"]["path"]
