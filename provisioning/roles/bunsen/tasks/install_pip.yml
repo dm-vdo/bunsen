@@ -7,21 +7,15 @@
   set_fact:
     ansible_python_major: "{{result.stdout.split()[1].split('.')[0]}}"
 
-- name: Retrieve python2 get-pip.py
+- name: Retrieve get-pip.py
   uri:
-    url: https://bootstrap.pypa.io/pip/2.7/get-pip.py
+    url: "{{pip['schema']}}{{pip['name']}}{{pip['path']}}"
     dest: /tmp/get-pip.py
     creates: /tmp/get-pip.py
     mode: 0755
-  when: (ansible_python_major | int) == 2
-
-- name: Retrieve python3 get-pip.py
-  uri:
-    url: https://bootstrap.pypa.io/get-pip.py
-    dest: /tmp/get-pip.py
-    creates: /tmp/get-pip.py
-    mode: 0755
-  when: (ansible_python_major | int) == 3
+  vars:
+    pip_key: "{{['pip', ansible_python_major] | join}}"
+    pip: "{{externals['bunsen'][pip_key]['host']}}"
 
 - name: Install pip using the host ansible_python_interpreter
   command: "{{ansible_python_interpreter}} /tmp/get-pip.py"
