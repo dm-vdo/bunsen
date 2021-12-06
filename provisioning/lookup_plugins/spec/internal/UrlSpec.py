@@ -4,6 +4,6 @@ class UrlSpec(Spec):
   ####################################################################
   # Overridden methods
   ####################################################################
-  def _run(self, terms, variables = None, **kwargs):
+  def _run(self, terms, **kwargs):
     return [self._makeSpec(scm)
-            for scm in [self._makeScm(url, variables) for url in terms]]
+            for scm in [self._makeScm(url) for url in terms]]

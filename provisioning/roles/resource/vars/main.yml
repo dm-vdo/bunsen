@@ -5,16 +5,26 @@ _resource_selection:
   environment:
 
 # Resource repository keys.
+_perforce: "{{ externals['third-party']['perforce'] }}"
 _resource_repository_keys:
   - architecture:
     - x86_64:
       - common:
-        - "https://package.perforce.com/perforce.pubkey"
+        - "{%- if is_rhel8_or_later_family -%}
+              {{ [_perforce['rhel8']['host']['schema'],
+                  _perforce['rhel8']['host']['name'],
+                  _perforce['rhel8']['host']['keypath']] | join }}
+            {%- else -%}
+              {{ [_perforce['common']['host']['schema'],
+                  _perforce['common']['host']['name'],
+                  _perforce['common']['host']['keypath']] | join }}
+            {%- endif -%}"
 
 resource_repository_keys: "\
   {{ _resource_repository_keys | select_install(_resource_selection) }}"
 
 # Resource repositories.
+_uds_devel: "{{ externals['first-party']['uds-devel']['host'] }}"
 _resource_repositories:
   - common:
     - name: pbit-uds-devel
@@ -22,15 +32,13 @@ _resource_repositories:
       enabled: yes
       gpgcheck: no
       sslverify: no
-      baseurl: "http://vdo-image-store.permabit.lab.eng.bos.redhat.com/uds-devel-repo/SRPMs"
+      baseurl: "{{ [_uds_devel['schema'],
+                    _uds_devel['name'],
+                    _uds_devel['path']] | join }}"
 
   - architecture:
     - x86_64:
       - common:
-        # N.B.: The perforce.com instructions for RHEL families say to use
-        # http:// for this, but their web server rejects connections with a
-        # User-Agent of "dnf", which will be an issue for Fedora support. Using
-        # https:// gets the data, and bypasses the problem on their end.
         - name: perforce
           description: Perforce
           enabled: yes
@@ -38,9 +46,13 @@ _resource_repositories:
           sslverify: no
           baseurl: "
             {%- if is_rhel8_or_later_family -%}
-              https://package.perforce.com/yum/rhel/8/x86_64/
+              {{ [_perforce['rhel8']['host']['schema'],
+                  _perforce['rhel8']['host']['name'],
+                  _perforce['rhel8']['host']['path']] | join }}
             {%- else -%}
-              https://package.perforce.com/yum/rhel/7/x86_64/
+              {{ [_perforce['common']['host']['schema'],
+                  _perforce['common']['host']['name'],
+                  _perforce['common']['host']['path']] | join }}
             {%- endif -%}"
 
 resource_repositories: "\

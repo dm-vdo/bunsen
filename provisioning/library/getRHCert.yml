@@ -2,9 +2,13 @@
 - block:
   - name: Get Cert
     uri:
-      url: https://password.corp.redhat.com/RH-IT-Root-CA.crt
+      url: "{{ [cert['schema'],
+                cert['name'],
+                cert['path']] | join }}"
       dest:  /etc/pki/ca-trust/source/anchors
       creates: /etc/pki/ca-trust/source/anchors/RH-IT-Root-CA.crt
+    vars:
+      cert: "{{ externals['first-party']['rh-cert']['host'] }}"
 
   - name: Update CA
     shell: /usr/bin/update-ca-trust extract

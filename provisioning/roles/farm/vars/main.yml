@@ -9,6 +9,7 @@ _farm_selection:
     - permatest
 
 # Farm repositories.
+_permatest: "{{ externals['first-party']['permatest']['host'] }}"
 _farm_repositories:
   - environment:
     - permatest:
@@ -18,7 +19,9 @@ _farm_repositories:
           enabled: yes
           gpgcheck: no
           sslverify: no
-          baseurl: "http://vdo-image-store.permabit.lab.eng.bos.redhat.com/repository/permatest-repo"
+          baseurl: "{{ [_permatest['schema'],
+                        _permatest['name'],
+                        _permatest['path']] | join }}"
 
 farm_repositories: "{{ _farm_repositories | select_install(_farm_selection) }}"
 

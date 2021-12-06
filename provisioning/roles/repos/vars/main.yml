@@ -5,6 +5,10 @@ _repos_selection:
   architecture: "{{ ansible_machine }}"
   environment:
 
+_file_server: "{{ externals['first-party']['file-server']['host'] }}"
+_main_tools: "{{ externals['first-party']['main-tools']['host'] }}"
+_vdo_infrastructure: "{{ externals['first-party']['vdo-infrastructure'] }}"
+_permabit: "{{ externals['first-party']['permabit'] }}"
 _repositories:
   # Common to all distributions.
   - common:
@@ -13,14 +17,18 @@ _repositories:
       enabled: yes
       gpgcheck: no
       sslverify: no
-      baseurl: "http://file.rdu.redhat.com/~awalsh/rpm_repo/lastrun"
+      baseurl: "{{ [_file_server['schema'],
+                    _file_server['name'],
+                    _file_server['path']] | join }}"
 
     - name: pbit-eng-main-tools
       description: "Permabit tools from //eng/main"
       enabled: yes
       gpgcheck: no
       sslverify: no
-      baseurl: http://vdo-image-store.permabit.lab.eng.bos.redhat.com/eng-main-repo/RPMs
+      baseurl: "{{ [_main_tools['schema'],
+                    _main_tools['name'],
+                    _main_tools['path']] | join }}"
 
   # Common to all Fedora starting with Fedora28.
   - Fedora([1-9][0-9]{2,}|2[8-9]|[3-9][0-9]):
@@ -44,10 +52,14 @@ _repositories:
     # built. The packages themselves are all noarch though.
     - name: raeburn-vdo-infrastructure
       description: Copr repo for vdo-infrastructure owned by raeburn
-      baseurl: http://coprbe.devel.redhat.com/results/raeburn/vdo-infrastructure/fedora-$releasever-x86_64/
+      baseurl: "{{ [_vdo_infrastructure['fedora']['host']['schema'],
+                    _vdo_infrastructure['fedora']['host']['name'],
+                    _vdo_infrastructure['fedora']['host']['path']] | join }}"
       skip_if_unavailable: yes
       gpgcheck: no
-      gpgkey: http://coprbe.devel.redhat.com/results/raeburn/vdo-infrastructure/pubkey.gpg
+      gpgkey: "{{ [_vdo_infrastructure['fedora']['host']['schema'],
+                   _vdo_infrastructure['fedora']['host']['name'],
+                   _vdo_infrastructure['fedora']['host']['keypath']] | join }}"
       repo_gpgcheck: 0
       enabled: yes
       sslverify: yes
@@ -61,7 +73,10 @@ _repositories:
       description: "Permabit Package {{ target_distribution_major_number }}"
       enabled: yes
       gpgcheck: no
-      baseurl: "http://rpm.permabit.lab.eng.bos.redhat.com/rpm-fc{{ target_distribution_major_number }}"
+      baseurl: "{{ [_permabit['fedora']['host']['schema'],
+                    _permabit['fedora']['host']['name'],
+                    _permabit['fedora']['host']['path'],
+                    target_distribution_major_number] | join }}"
 
   # Common to all RHEL 7 family starting with RHEL 7.5 family.
   # There are no pre-built epel repos for s390 family.
@@ -129,10 +144,14 @@ _repositories:
     # built. The packages themselves are all noarch though.
     - name: raeburn-vdo-infrastructure
       description: Copr repo for vdo-infrastructure owned by raeburn
-      baseurl: http://coprbe.devel.redhat.com/results/raeburn/vdo-infrastructure/rhel-7-x86_64/
+      baseurl: "{{ [_vdo_infrastructure['rhel7']['host']['schema'],
+                    _vdo_infrastructure['rhel7']['host']['name'],
+                    _vdo_infrastructure['rhel7']['host']['path']] | join }}"
       skip_if_unavailable: yes
       gpgcheck: no
-      gpgkey: http://coprbe.devel.redhat.com/results/raeburn/vdo-infrastructure/pubkey.gpg
+      gpgkey: "{{ [_vdo_infrastructure['rhel7']['host']['schema'],
+                   _vdo_infrastructure['rhel7']['host']['name'],
+                   _vdo_infrastructure['rhel7']['host']['keypath']] | join }}"
       repo_gpgcheck: 0
       enabled: yes
       sslverify: yes
@@ -143,7 +162,10 @@ _repositories:
       description: Permabit Package
       enabled: yes
       gpgcheck: no
-      baseurl: "http://rpm.permabit.lab.eng.bos.redhat.com/rpm-7"
+      baseurl: "{{ [_permabit['rhel']['host']['schema'],
+                    _permabit['rhel']['host']['name'],
+                    _permabit['rhel']['host']['path'],
+                    '7'] | join }}"
 
   # Common to all RHEL 8 family only.
   - (CentOS|RedHat)8\.([1-9][0-9]+|[0-9]):
@@ -151,10 +173,14 @@ _repositories:
     # built. The packages themselves are all noarch though.
     - name: raeburn-vdo-infrastructure
       description: Copr repo for vdo-infrastructure owned by raeburn
-      baseurl: http://coprbe.devel.redhat.com/results/raeburn/vdo-infrastructure/rhel-8.dev-x86_64/
+      baseurl: "{{ [_vdo_infrastructure['rhel8']['host']['schema'],
+                    _vdo_infrastructure['rhel8']['host']['name'],
+                    _vdo_infrastructure['rhel8']['host']['path']] | join }}"
       skip_if_unavailable: yes
       gpgcheck: no
-      gpgkey: http://coprbe.devel.redhat.com/results/raeburn/vdo-infrastructure/pubkey.gpg
+      gpgkey: "{{ [_vdo_infrastructure['rhel8']['host']['schema'],
+                   _vdo_infrastructure['rhel8']['host']['name'],
+                   _vdo_infrastructure['rhel8']['host']['keypath']] | join }}"
       repo_gpgcheck: 0
       enabled: yes
       sslverify: yes
@@ -268,7 +294,10 @@ _repositories:
       description: "Permabit Package {{ target_distribution_major_number }}"
       enabled: yes
       gpgcheck: no
-      baseurl: "http://rpm.permabit.lab.eng.bos.redhat.com/rpm-{{ target_distribution_major_number }}"
+      baseurl: "{{ [_permabit['rhel']['host']['schema'],
+                    _permabit['rhel']['host']['name'],
+                    _permabit['rhel']['host']['path'],
+                    target_distribution_major_number] | join }}"
 
 # Special repository variables for packages such as 'unifdef' which are not
 # otherwise provided.  These are not enabled by default and must be

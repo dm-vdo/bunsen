@@ -1,0 +1,187 @@
+---
+# The externals file is generally organized as a dictionary of dictionaries of
+# arbitrary depth.
+
+# The various software required for bunsen's internal functionality as well as
+# those bunsen will install on target machines during provisioning.
+externals:
+  # Resources for bunsen functionality.
+  bunsen:
+    python-packages:
+      schema: pip
+      host:
+        schema: http://
+        name: vdo-image-store.permabit.lab.eng.bos.redhat.com
+        path: /repository/open-sourcing/python-pip-repo
+        keypath: None
+
+    pip2:
+      schema: uri
+      host:
+        schema: https://
+        name: bootstrap.pypa.io
+        path: /pip/2.7/get-pip.py
+        keypath: None
+
+    pip3:
+      schema: uri
+      host:
+        schema: https://
+        name: bootstrap.pypa.io
+        path: /get-pip.py
+        keypath: None
+
+  # Resources provided by the group.
+  first-party:
+    file-server:
+      schema: rpm
+      host:
+        schema: http://
+        name: file.rdu.redhat.com
+        path: /~awalsh/rpm_repo/lastrun
+        keypath: None
+
+    main-tools:
+      schema: rpm
+      host:
+        schema: http://
+        name: vdo-image-store.permabit.lab.eng.bos.redhat.com
+        path: /eng-main-repo/RPMs
+        keypath: None
+
+    permabit:
+      fedora:
+        schema: rpm
+        host:
+          schema: http://
+          name: rpm.permabit.lab.eng.bos.redhat.com
+          # path has distribution major number appended to it
+          path: /rpm-fc
+          keypath: None
+
+      rhel:
+        schema: rpm
+        host:
+          schema: http://
+          name: rpm.permabit.lab.eng.bos.redhat.com
+          # path has distribution major number appended to it
+          path: /rpm-
+          keypath: None
+
+    permatest:
+      schema: rpm
+      host:
+        schema: http://
+        name: vdo-image-store.permabit.lab.eng.bos.redhat.com
+        path: /repository/permatest-repo
+        keypath: None
+
+    rh-cert:
+      # To be removed (or nulled out) in published version.
+      # Rely on a runtime determination to not attempt to access these.
+      schema: uri
+      host:
+        schema: https://
+        name: password.corp.redhat.com
+        path: /RH-IT-Root-CA.crt
+        keypath: None
+
+    uds-devel:
+      schema: rpm
+      host:
+        schema: http://
+        name: vdo-image-store.permabit.lab.eng.bos.redhat.com
+        path: /uds-devel-repo/SRPMs
+        keypath: None
+
+    uds-uri:
+      schema: uri
+      host:
+        schema: p4://
+        name: pbitperforce01.permabit.lab.eng.bos.redhat.com:1666
+        path: None
+        keypath: None
+
+    vdo-infrastructure:
+      fedora:
+        schema: rpm
+        host:
+          schema: http://
+          name: coprbe.devel.redhat.com
+          path: /results/raeburn/vdo-infrastructure/fedora-$releasever-x86_64
+          keypath: /results/raeburn/vdo-infrastructure/pubkey.gpg
+
+      rhel7:
+        schema: rpm
+        host:
+          schema: http://
+          name: coprbe.devel.redhat.com
+          path: /results/raeburn/vdo-infrastructure/rhel-7-x86_64/
+          keypath: /results/raeburn/vdo-infrastructure/pubkey.gpg
+
+      rhel8:
+        schema: rpm
+        host:
+          schema: http://
+          name: coprbe.devel.redhat.com
+          path: /results/raeburn/vdo-infrastructure/rhel-8.dev-x86_64
+          keypath: /results/raeburn/vdo-infrastructure/pubkey.gpg
+
+  # Third party resources utilized.
+  third-party:
+    athinfo:
+      schema: git
+      host:
+        schema: https://
+        name: gitlab.cee.redhat.com
+        path: /vdo/open-sourcing/tools/third/athinfo.git
+        keypath: None
+
+    athinfod:
+      schema: git
+      host:
+        schema: https://
+        name: gitlab.cee.redhat.com
+        path: /vdo/open-sourcing/tools/third/athinfod.git
+        keypath: None
+
+    git-p4:
+      schema: uri
+      host:
+        schema: https://
+        name: git.kernel.org
+        path: /pub/scm/git/git.git/plain/git-p4.py?id=master
+        keypath: None
+
+    perforce:
+      common:
+        schema: rpm
+        host:
+          schema: https://
+          name: package.perforce.com
+          path: /yum/rhel/7/x86_64
+          keypath: /perforce.pubkey
+
+      rhel8:
+        schema: rpm
+        host:
+          schema: https://
+          name: package.perforce.com
+          path: /yum/rhel/8/x86_64
+          keypath: /perforce.pubkey
+
+    rtslib:
+      schema: git
+      host:
+        schema: https://
+        name: gitlab.cee.redhat.com
+        path: /vdo/open-sourcing/tools/third/rtslib-fb.git
+        keypath: None
+
+    targetd:
+      schema: git
+      host:
+        schema: https://
+        name: gitlab.cee.redhat.com
+        path: /vdo/open-sourcing/tools/third/targetd.git
+        keypath: None
