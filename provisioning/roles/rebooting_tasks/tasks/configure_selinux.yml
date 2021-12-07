@@ -11,5 +11,4 @@
     include_tasks: "{{ playbook_dir }}/library/restart_system.yml"
     when: selinux_result.reboot_required
   when: (inventory_hostname not in groups['infrastructure']
-         or use_permabit_accounts
          or is_pfarm)

@@ -53,10 +53,3 @@
   file:
     path: /var/lock/vdo
     state: absent
-
-- include_tasks: "{{ playbook_dir }}/library/mount_nfs.yml"
-  vars:
-    name: "{{ permabit_datasets['path'] }}"
-    src: "{{ permabit_datasets['src'] }}"
-    extra_opts: ro
-  when: is_beaker | bool

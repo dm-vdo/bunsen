@@ -1,8 +1,8 @@
 ---
 # XXX Should we use the user's .ssh/config file, which could be shared across
-# machines via use_permabit_accounts, or /etc/ssh/ssh_config, which would be
-# specific to the machine hosting the VMs but shared by all users on that host,
-# including users who wouldn't have accounts on the VMs?
+# machines via net mounting of home dirs, or /etc/ssh/ssh_config, which would
+# be specific to the machine hosting the VMs but shared by all users on that
+# host, including users who wouldn't have accounts on the VMs?
 
 - block:
   - name: Touch the user's .ssh config file

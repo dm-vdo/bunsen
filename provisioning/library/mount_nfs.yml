@@ -6,7 +6,7 @@
 # don't want that behavior, so we verify each mount.
 #
 # Input vars: name, src, extra_opts (optional)
-#   extra_opts gets nfs_mount_opts added
+#   extra_opts gets workaround_nfs_mount_opts added
 #
 # Modifies:
 #   ansible_mounts
@@ -23,7 +23,7 @@
         state: mounted
         opts: "{{ opts }}"
       vars:
-        opts: "{{ [extra_opts, nfs_mount_opts]
+        opts: "{{ [extra_opts, workaround_nfs_mount_opts]
                    | select('defined')
                    | reject('match', omit)
                    | join(',') }}"
