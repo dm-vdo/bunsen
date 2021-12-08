@@ -75,8 +75,7 @@ _repositories:
       gpgcheck: no
       baseurl: "{{ [_permabit['fedora']['host']['schema'],
                     _permabit['fedora']['host']['name'],
-                    _permabit['fedora']['host']['path'],
-                    target_distribution_major_number] | join }}"
+                    _permabit['fedora']['host']['path']] | join }}"
 
   # Common to all RHEL 7 family starting with RHEL 7.5 family.
   # There are no pre-built epel repos for s390 family.
@@ -157,15 +156,14 @@ _repositories:
       sslverify: yes
 
     # Repo for Permabit specific packages like p4perl
-    - name: Permabit-7
-      file: Permabit-7
-      description: Permabit Package
+    - name: "Permabit-{{ target_distribution_major_number }}"
+      file: "Permabit-{{ target_distribution_major_number }}"
+      description: "Permabit Package {{ target_distribution_major_number }}"
       enabled: yes
       gpgcheck: no
       baseurl: "{{ [_permabit['rhel']['host']['schema'],
                     _permabit['rhel']['host']['name'],
-                    _permabit['rhel']['host']['path'],
-                    '7'] | join }}"
+                    _permabit['rhel']['host']['path']] | join }}"
 
   # Common to all RHEL 8 family only.
   - (CentOS|RedHat)8\.([1-9][0-9]+|[0-9]):
@@ -296,8 +294,7 @@ _repositories:
       gpgcheck: no
       baseurl: "{{ [_permabit['rhel']['host']['schema'],
                     _permabit['rhel']['host']['name'],
-                    _permabit['rhel']['host']['path'],
-                    target_distribution_major_number] | join }}"
+                    _permabit['rhel']['host']['path']] | join }}"
 
 # Special repository variables for packages such as 'unifdef' which are not
 # otherwise provided.  These are not enabled by default and must be

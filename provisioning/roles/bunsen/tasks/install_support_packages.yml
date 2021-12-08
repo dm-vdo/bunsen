@@ -1,0 +1,9 @@
+---
+- name: Install bunsen support packages.
+  package:
+    name: "{{ bunsen_support_packages }}"
+    state: latest
+  register: result
+  until: result is success
+  retries: "{{ default_retry_count }}"
+  delay: 30
