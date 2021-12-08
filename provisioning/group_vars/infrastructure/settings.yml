@@ -15,27 +15,10 @@ nfs_exports: "{{ nfs_directories + [user_homes_local] }}"
 ###############################################################################
 # Permabit build server variables.
 ###############################################################################
-# The UDS distributions the infrastructure box needs to make available.
-# We include permabuild_uds_spec when the optional 'uds_url' variable was
-# specified as that variable captures the 'uds_url' particulars.
-#
-# Each uds_distributions entry is either simply the distribution (e.g., rhel82)
-# specification or, for perforce, optionally followed by "/<revision-spec>"
-# where <revision-spec> is one of the perforce @-prefixed types (without the
-# @).
-permabuild_uds_specs: "
-  {%- set specs = [] -%}
-  {%- if uds_url is defined -%}
-    {%- set x = specs.append(permabuild_uds_spec) -%}
-  {%- endif -%}
-  {%- for dist in (uds_distributions | default([])) -%}
-    {%- set x = specs.append(query('uds_spec', dist)[0]) -%}
-  {%- endfor -%}
-  {{ specs }}"
 
-# The build-related software the permabuild server will install by default.
+# Software the permabuild server will install by default.
 # permabuild_targetd_spec comes from ../all/settings.yml.
-permabuild_installs: "{{ permabuild_uds_specs + [permabuild_targetd_spec] }}"
+permabuild_installs: "{{ [permabuild_targetd_spec] }}"
 
 # We provide common links only for targetd.
 permabuild_common_link_installs:

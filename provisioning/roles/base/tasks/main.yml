@@ -43,15 +43,6 @@
     state: started
     enabled: True
 
-# If there are any Permabit accounts in use, we mount the entire lab
-# home-directory file system.
-- include_tasks: "{{ playbook_dir }}/library/mount_nfs.yml"
-  vars:
-    name: /permabit/user
-    src: ntap-bos-c01-eng01-nfs01a.storage.bos.redhat.com:/vdo_permabit_user_nfs
-    extra_opts: nfsvers=3
-  when: user_names_pbit | length > 0
-
 - include: athinfo.yml
 - include: search_path.yml
 - include: ssh.yml

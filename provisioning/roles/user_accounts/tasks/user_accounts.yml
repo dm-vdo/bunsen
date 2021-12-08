@@ -22,7 +22,7 @@
       state: directory
     when: inventory_hostname == nfs_server
 
-  # The password_hash filter (run on the controller) uses facilities not 
+  # The password_hash filter (run on the controller) uses facilities not
   # present on macOS.  We get the controller's OS and use that to either
   # invoke the filter or use a pre-generated hash in the case of macOS.
   # The pre-generated hash is created by providing the password as input to
@@ -32,7 +32,7 @@
     become: no
     changed_when: False
     register: os_result
-      
+
   - block:
     # These two blocks must create the same list of accounts, in the same
     # order, in order to ensure matching UID allocations!
@@ -87,18 +87,6 @@
         state: restarted
         enabled: true
     when: inventory_hostname != nfs_server
-
-  # N.B.: user_accounts_pbit may be empty.
-  - name: Add Permabit user account
-    user:
-      name: "{{ item }}"
-      home: "{{ user_accounts[item].home }}"
-      password: !
-      uid: "{{ user_accounts[item].uid }}"
-      group: staff
-      append: yes
-      create_home: no
-    with_items: "{{ user_names_pbit }}"
 
   - name: Create the user's sudoers file for passwordless sudo
     lineinfile:

@@ -60,39 +60,6 @@ distribution_repo_root_url: "
   {%- endif -%}
   {{ root_url }}"
 
-# List of Permabit user accounts, taken from the Hesiod data.
-# This is used to create accounts on Beaker systems that will be compatible
-# over NFSv3 with /permabit/user.
-#
-# TODO: Fetch this info at run time, if it's needed, BUT make sure to exclude
-# low-numbered ids. We don't want to blindly use all the Permabit ids, because
-# that includes system accounts we shouldn't be mapping. Also be sure to only
-# fetch any datum once, not every time it's referenced (due to Ansible/Jinja
-# lazy evaluation).
-permabit_uid_table:
-  #jered:     1002  ### CONFLICTS with auto-assigned uids for local accounts
-  nightly:    1030
-  corwin:     1039
-  #corwinsh:  1039
-  sclafani:   1051
-  raeburn:    1065
-  continuous: 1073
-  joe:        1117
-  tomj:       1122
-  dkeefe:     1128
-  msakai:     1138
-  bjohnston:  1142
-  awalsh:     1145
-  cchung:     1151
-  jwiele:     1166
-  jshimkus:   1183
-  sweettea:   1187
-  bgurney:    1213
-  slegendr:   1218
-  rsvp:       3005
-
-all_permabit_user_names: "{{ permabit_uid_table.keys() | list }}"
-
 # User accounts to create.
 master_user_account: master
 
@@ -104,26 +71,6 @@ target_user_accounts: "{{ _target_user_accounts | unique | list }}"
 _user_accounts: "{{
   [master_user_account, deploying_user_account] + target_user_accounts }}"
 
-# In Beaker, we have the option of using Permabit NFS home directories.
-#
-# In Vagrant on possibly-disconnected laptops, we cannot do so.
-#
-# In an lfarm-type setup, we will probably want to use Permabit accounts.
-#
-# For jug.py submitting batch jobs, it's less clear, but for now we opt for
-# consistent environments rather than making each person's VDO test batch jobs
-# subject to the whims of their interactive environment.
-#
-# Just make it configurable now, while we figure out the right course.
-#
-# XXX Might we want to decouple UID handling and home directory handling, so we
-# can use a local home directory, but have /permabit/user mounted and have
-# matching UIDs in case the user wants to copy files or do
-# "HOME=/permabit/user/$USER ; cd ; . .bashrc" to load their more usual
-# environment?
-use_permabit_accounts: "{{ use_permabit_account | default(false) | bool }}"
-
-
 # Where we place local user account's home directories.
 # We do this to avoid, in a vagrant environment, the obscuring of the vagrant
 # user that would result if we just used /home.
@@ -131,33 +78,16 @@ user_homes_local: /home/bunsen-home
 
 # We unique the list to cover the possibility of redundancies in account
 # specification then we remove 'root' from the list of users as if we treat it
-# as we do any other account we create it messes up provisioning in Beaker
-# (which runs as root).
+# as we do any other account we create it messes up provisioning.
 user_accounts: "
   {%- set tmp = {} -%}
   {%- for user in (_user_accounts | unique | difference(['root'])) -%}
-    {%- if use_permabit_accounts and (user in all_permabit_user_names) -%}
-      {%- set x = tmp.update({user: {'home' : '/permabit/user/' + user,
-                                     'uid'  : permabit_uid_table[user],
-                                     'type' : 'Permabit'}}) -%}
-    {%- else -%}
-      {%- set x = tmp.update({user: {'home' : user_homes_local + '/' + user,
-                                     'type' : 'local'}}) -%}
-    {%- endif -%}
+    {%- set x = tmp.update({user: {'home' : user_homes_local + '/' + user,
+                                   'type' : 'local'}}) -%}
   {%- endfor -%}
   {{ tmp }}"
 
-# Divide the non-root user names into two lists, Permabit accounts (using
-# matching UIDs and NFS home directories from the lab server on the Red Hat
-# network) and local accounts (with home directories on the infrastructure box,
-# exported by NFS).
-#
-# The Permabit list may be empty in some configurations.
-user_names_pbit: "\
-  {{ use_permabit_accounts
-     | ternary(user_accounts.keys() | intersect(all_permabit_user_names), []) }}"
-user_names_local: "\
-  {{ user_accounts.keys() | difference(user_names_pbit) }}"
+user_names_local: "{{ user_accounts.keys() }}"
 
 # Deploying user sshfs mounts to mount.
 deploying_user_sshfs_mounts: "{{ deploying_user_mounts | default([]) }}"
@@ -176,49 +106,17 @@ permabuild_directories_links:
 # SCMs.
 
 permabuild_git_directory: "{{ permabuild_directory }}/git"
-# We accept two classes of url for the uds to use.
-# If it begins with a 'p4' scheme it is treated as a perforce url.
-# Any other scheme is assumed to be git-related.
-permabuild_uds_directory: "{{ permabuild_git_directory }}"
-
-# If uds_url is defined all machine's will use the specified UDS.
-#
-# If uds_url is not defined we query for the uds spec defaults for the
-# machine's distribution.  In this case the machine will clone UDS itself, if
-# capable.  If not capable the machine will check the infrastructure machine
-# for the appropriate UDS source.  If the infrastructure machine is not
-# providing the appropriate source provisioning for the machine will fail.
-#
-# If uds_url is specified the operation is similar to above except that it
-# cannot fail (all else being equal) as the infrastructure machine will be
-# providing the requisite UDS source.
-permabuild_uds_spec: "
-  {%- set spec = None -%}
-  {%- if uds_url is defined -%}
-    {%- set spec =  query('uds_url_spec', uds_url)[0] -%}
-  {%- else -%}
-    {%- set spec = query('uds_spec', target_distribution)[0] -%}
-  {%- endif -%}
-  {{ spec }}"
-
 permabuild_targetd_directory: "{{ permabuild_directory }}/targetd"
 permabuild_targetd_spec: "{{ query('targetd_spec', 'none')[0] }}"
 permabuild_rtslib_directory: "{{ permabuild_directory }}/rtslib"
 permabuild_rtslib_spec: "{{ query('rtslib_spec', 'none')[0] }}"
 
-# The mount point and src of permabit data sets.
-permabit_datasets:
-  path: /permabit/datasets
-  src: ntap-bos-c01-eng01-nfs01a.storage.bos.redhat.com:/vdo_permabit_datasets_nfs
+common_ntp_servers: []
 
-permabit_ntp_servers:
- # time-1.permabit.com
- - book-two.permabit.lab.eng.bos.redhat.com
- # time-2.permabit.com
- - act-of-spaghetti.permabit.lab.eng.bos.redhat.com
-
-# In Beaker environments, sometimes IPv6 doesn't work between hosts.
-nfs_mount_opts: proto=tcp
+# Common nfs mount options.  Primarily for use in an environment that has some
+# problematic behavior that should be avoided for all mounts and can be done
+# so via nfs mount optiopns; e.g., IPv6 issues.
+workaround_nfs_mount_opts: proto=tcp
 
 # Provide a default performance farms list to handle the case where the
 # inventory does not have such a group.
