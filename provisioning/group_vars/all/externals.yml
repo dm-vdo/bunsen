@@ -44,8 +44,7 @@ externals:
         host:
           schema: http://
           name: rpm.permabit.lab.eng.bos.redhat.com
-          # path has distribution major number appended to it
-          path: /rpm-fc
+          path: "/rpm-fc{{target_distribution_major_number}}"
           keypath: None
 
       rhel:
@@ -53,8 +52,7 @@ externals:
         host:
           schema: http://
           name: rpm.permabit.lab.eng.bos.redhat.com
-          # path has distribution major number appended to it
-          path: /rpm-
+          path: "/rpm-{{target_distribution_major_number}}"
           keypath: None
 
     permatest:
