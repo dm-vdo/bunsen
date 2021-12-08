@@ -76,14 +76,6 @@ externals:
         path: /uds-devel-repo/SRPMs
         keypath: None
 
-    uds-uri:
-      schema: uri
-      host:
-        schema: p4://
-        name: pbitperforce01.permabit.lab.eng.bos.redhat.com:1666
-        path: None
-        keypath: None
-
     vdo-infrastructure:
       fedora:
         schema: rpm
