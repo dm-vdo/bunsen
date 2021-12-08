@@ -7,29 +7,13 @@
 externals:
   # Resources for bunsen functionality.
   bunsen:
-    python-packages:
-      schema: pip
+    python-support:
+      schema: rpm
       host:
         schema: http://
-        name: vdo-image-store.permabit.lab.eng.bos.redhat.com
-        path: /repository/open-sourcing/python-pip-repo
-        keypath: None
-
-    pip2:
-      schema: uri
-      host:
-        schema: https://
-        name: bootstrap.pypa.io
-        path: /pip/2.7/get-pip.py
-        keypath: None
-
-    pip3:
-      schema: uri
-      host:
-        schema: https://
-        name: bootstrap.pypa.io
-        path: /get-pip.py
-        keypath: None
+        name: coprbe.devel.redhat.com
+        path: /results/jshimkus/python-support/fedora-$releasever-$basearch
+        keypath: /results/jshimkus/python-support/pubkey.gpg
 
   # Resources provided by the group.
   first-party:
