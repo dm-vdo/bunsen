@@ -1,5 +1,0 @@
----
-- name: reinitialize iscsi name
-  shell: echo "InitiatorName=`/usr/sbin/iscsi-iname`" >
-         /etc/iscsi/initiatorname.iscsi
-  tags: iscsi
