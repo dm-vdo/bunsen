@@ -4,11 +4,8 @@ infrastructure: true
 ###############################################################################
 # NFS server variables.
 ###############################################################################
-# Currently, permabuild_builder will mount the git directory whether or not
-# it's needed.
 nfs_directories:
   - /permabit/not-backed-up
-  - "{{ permabuild_git_directory }}"
 
 nfs_exports: "{{ nfs_directories + [user_homes_local] }}"
 
