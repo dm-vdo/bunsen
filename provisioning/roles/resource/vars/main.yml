@@ -4,22 +4,6 @@ _resource_selection:
   architecture: "{{ ansible_machine }}"
   environment:
 
-# Resource repositories.
-_uds_devel: "{{ externals['first-party']['uds-devel']['host'] }}"
-_resource_repositories:
-  - common:
-    - name: pbit-uds-devel
-      description: Permabit UDS development packages
-      enabled: yes
-      gpgcheck: no
-      sslverify: no
-      baseurl: "{{ [_uds_devel['schema'],
-                    _uds_devel['name'],
-                    _uds_devel['path']] | join }}"
-
-resource_repositories: "\
-  {{ _resource_repositories | select_install(_resource_selection) }}"
-
 # Resource packages.
 _packages:
   # Common to all distributions.

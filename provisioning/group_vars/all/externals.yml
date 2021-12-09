@@ -33,23 +33,6 @@ externals:
         path: /eng-main-repo/RPMs
         keypath: None
 
-    permabit:
-      fedora:
-        schema: rpm
-        host:
-          schema: http://
-          name: rpm.permabit.lab.eng.bos.redhat.com
-          path: "/rpm-fc{{target_distribution_major_number}}"
-          keypath: None
-
-      rhel:
-        schema: rpm
-        host:
-          schema: http://
-          name: rpm.permabit.lab.eng.bos.redhat.com
-          path: "/rpm-{{target_distribution_major_number}}"
-          keypath: None
-
     permatest:
       schema: rpm
       host:
@@ -66,14 +49,6 @@ externals:
         schema: https://
         name: password.corp.redhat.com
         path: /RH-IT-Root-CA.crt
-        keypath: None
-
-    uds-devel:
-      schema: rpm
-      host:
-        schema: http://
-        name: vdo-image-store.permabit.lab.eng.bos.redhat.com
-        path: /uds-devel-repo/SRPMs
         keypath: None
 
     vdo-infrastructure:

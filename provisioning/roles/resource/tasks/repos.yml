@@ -1,5 +1,0 @@
----
-- include_role:
-    name: repos
-  vars:
-    repositories: "{{ resource_repositories }}"

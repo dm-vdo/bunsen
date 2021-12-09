@@ -1,5 +1,4 @@
 ---
-- include: repos.yml
 - include: packages.yml
 - include: perl_libraries.yml
 

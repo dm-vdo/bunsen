@@ -8,7 +8,6 @@ _repos_selection:
 _file_server: "{{ externals['first-party']['file-server']['host'] }}"
 _main_tools: "{{ externals['first-party']['main-tools']['host'] }}"
 _vdo_infrastructure: "{{ externals['first-party']['vdo-infrastructure'] }}"
-_permabit: "{{ externals['first-party']['permabit'] }}"
 _repositories:
   # Common to all distributions.
   - common:
