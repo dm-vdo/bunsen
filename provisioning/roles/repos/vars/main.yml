@@ -29,6 +29,20 @@ _repositories:
                     _main_tools['name'],
                     _main_tools['path']] | join }}"
 
+    - name: raeburn-vdo-infrastructure
+      description: Copr repo for vdo-infrastructure owned by raeburn
+      baseurl: "{{ [_vdo_infrastructure['host']['schema'],
+                    _vdo_infrastructure['host']['name'],
+                    _vdo_infrastructure['host']['path']] | join }}"
+      skip_if_unavailable: yes
+      gpgcheck: no
+      gpgkey: "{{ [_vdo_infrastructure['host']['schema'],
+                   _vdo_infrastructure['host']['name'],
+                   _vdo_infrastructure['host']['keypath']] | join }}"
+      repo_gpgcheck: 0
+      enabled: yes
+      sslverify: yes
+
   # Common to all Fedora starting with Fedora28.
   - Fedora([1-9][0-9]{2,}|2[8-9]|[3-9][0-9]):
     # fedora-debuginfo is preinstalled; we just need to enable it, but we
@@ -46,22 +60,6 @@ _repositories:
       metalink: "https://mirrors.fedoraproject.org/metalink?\
                   repo=fedora-debug-$releasever&arch=$basearch"
       failovermethod: priority
-
-    # Yes, the baseurl should say x86_64, where the packages are
-    # built. The packages themselves are all noarch though.
-    - name: raeburn-vdo-infrastructure
-      description: Copr repo for vdo-infrastructure owned by raeburn
-      baseurl: "{{ [_vdo_infrastructure['fedora']['host']['schema'],
-                    _vdo_infrastructure['fedora']['host']['name'],
-                    _vdo_infrastructure['fedora']['host']['path']] | join }}"
-      skip_if_unavailable: yes
-      gpgcheck: no
-      gpgkey: "{{ [_vdo_infrastructure['fedora']['host']['schema'],
-                   _vdo_infrastructure['fedora']['host']['name'],
-                   _vdo_infrastructure['fedora']['host']['keypath']] | join }}"
-      repo_gpgcheck: 0
-      enabled: yes
-      sslverify: yes
 
   # Common to all RHEL 7 family starting with RHEL 7.5 family.
   # There are no pre-built epel repos for s390 family.
@@ -125,40 +123,8 @@ _repositories:
       baseurl: "{{ distribution_repo_root_url }}/\
                   Server-optional/$basearch/debug/tree"
 
-    # Yes, the baseurl should say x86_64, where the packages are
-    # built. The packages themselves are all noarch though.
-    - name: raeburn-vdo-infrastructure
-      description: Copr repo for vdo-infrastructure owned by raeburn
-      baseurl: "{{ [_vdo_infrastructure['rhel7']['host']['schema'],
-                    _vdo_infrastructure['rhel7']['host']['name'],
-                    _vdo_infrastructure['rhel7']['host']['path']] | join }}"
-      skip_if_unavailable: yes
-      gpgcheck: no
-      gpgkey: "{{ [_vdo_infrastructure['rhel7']['host']['schema'],
-                   _vdo_infrastructure['rhel7']['host']['name'],
-                   _vdo_infrastructure['rhel7']['host']['keypath']] | join }}"
-      repo_gpgcheck: 0
-      enabled: yes
-      sslverify: yes
-
   # Common to all RHEL 8 family only.
   - (CentOS|RedHat)8\.([1-9][0-9]+|[0-9]):
-    # Yes, the baseurl should say x86_64, where the packages are
-    # built. The packages themselves are all noarch though.
-    - name: raeburn-vdo-infrastructure
-      description: Copr repo for vdo-infrastructure owned by raeburn
-      baseurl: "{{ [_vdo_infrastructure['rhel8']['host']['schema'],
-                    _vdo_infrastructure['rhel8']['host']['name'],
-                    _vdo_infrastructure['rhel8']['host']['path']] | join }}"
-      skip_if_unavailable: yes
-      gpgcheck: no
-      gpgkey: "{{ [_vdo_infrastructure['rhel8']['host']['schema'],
-                   _vdo_infrastructure['rhel8']['host']['name'],
-                   _vdo_infrastructure['rhel8']['host']['keypath']] | join }}"
-      repo_gpgcheck: 0
-      enabled: yes
-      sslverify: yes
-
     - name: epel
       description: "Extra Packages for Enterprise Linux 8 - $basearch"
       enabled: yes
