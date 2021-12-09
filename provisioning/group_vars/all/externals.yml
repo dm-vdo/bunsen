@@ -12,7 +12,7 @@ externals:
       host:
         schema: http://
         name: coprbe.devel.redhat.com
-        path: "/results/jshimkus/python-support/{{ansible_distribution | lower | replace('redhat', 'rhel', 1)}}-$releasever-$basearch"
+        path: "/results/jshimkus/python-support/{{ansible_distribution | lower | replace('redhat', 'rhel', 1)}}-{{is_fedora | ternary('$releasever', target_distribution_major_number)}}-$basearch"
         keypath: /results/jshimkus/python-support/pubkey.gpg
 
   # Resources provided by the group.
