@@ -119,31 +119,6 @@ externals:
         path: /vdo/open-sourcing/tools/third/athinfod.git
         keypath: None
 
-    git-p4:
-      schema: uri
-      host:
-        schema: https://
-        name: git.kernel.org
-        path: /pub/scm/git/git.git/plain/git-p4.py?id=master
-        keypath: None
-
-    perforce:
-      common:
-        schema: rpm
-        host:
-          schema: https://
-          name: package.perforce.com
-          path: /yum/rhel/7/x86_64
-          keypath: /perforce.pubkey
-
-      rhel8:
-        schema: rpm
-        host:
-          schema: https://
-          name: package.perforce.com
-          path: /yum/rhel/8/x86_64
-          keypath: /perforce.pubkey
-
     rtslib:
       schema: git
       host:

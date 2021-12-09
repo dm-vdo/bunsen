@@ -82,20 +82,13 @@ class Spec(LookupBase):
   def _run(self, terms, **kwargs):
     scms = []
     terms = [x.lower().replace("redhat", "rhel", 1) for x in terms]
-    # Split any existing perforce version spec.
-    terms = [x.split(os.path.sep, 1) for x in terms]
-    for term in terms:
-      distribution = term[0]
+    for distribution in terms:
       if distribution == "none":
         url = "{0}{1}".format(self._urlPrefix, self._distributionRequest(None))
-        if len(term) > 1:
-          url = "{0}/...@{1}".format(url, term[1])
         scms.append(self._makeScm(url))
       else:
         dist = Distribution.makeItem(distribution)
         url = "{0}{1}".format(self._urlPrefix, self._distributionRequest(dist))
-        if len(term) > 1:
-          url = "{0}/...@{1}".format(url, term[1])
         scms.append(self._makeScm(url, dist))
 
     return [self._makeSpec(scm) for scm in scms]

@@ -13,8 +13,7 @@ def scm_request(uri):
   return Scm(uri).request
 
 # Output is the name of the SCM, which may differ from the scheme contained
-# in the URI.  For example, p4://x/y specifies the scheme 'p4' which represents
-# the perforce SCM.  If the scheme-to-scm mapping does not contain an entry
+# in the URI.  If the scheme-to-scm mapping does not contain an entry
 # for the scheme the result will be "git".
 def scm_type(uri):
   return Scm(uri).type

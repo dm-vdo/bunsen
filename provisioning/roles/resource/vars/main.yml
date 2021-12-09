@@ -4,25 +4,6 @@ _resource_selection:
   architecture: "{{ ansible_machine }}"
   environment:
 
-# Resource repository keys.
-_perforce: "{{ externals['third-party']['perforce'] }}"
-_resource_repository_keys:
-  - architecture:
-    - x86_64:
-      - common:
-        - "{%- if is_rhel8_or_later_family -%}
-              {{ [_perforce['rhel8']['host']['schema'],
-                  _perforce['rhel8']['host']['name'],
-                  _perforce['rhel8']['host']['keypath']] | join }}
-            {%- else -%}
-              {{ [_perforce['common']['host']['schema'],
-                  _perforce['common']['host']['name'],
-                  _perforce['common']['host']['keypath']] | join }}
-            {%- endif -%}"
-
-resource_repository_keys: "\
-  {{ _resource_repository_keys | select_install(_resource_selection) }}"
-
 # Resource repositories.
 _uds_devel: "{{ externals['first-party']['uds-devel']['host'] }}"
 _resource_repositories:
@@ -35,25 +16,6 @@ _resource_repositories:
       baseurl: "{{ [_uds_devel['schema'],
                     _uds_devel['name'],
                     _uds_devel['path']] | join }}"
-
-  - architecture:
-    - x86_64:
-      - common:
-        - name: perforce
-          description: Perforce
-          enabled: yes
-          gpgcheck: yes
-          sslverify: no
-          baseurl: "
-            {%- if is_rhel8_or_later_family -%}
-              {{ [_perforce['rhel8']['host']['schema'],
-                  _perforce['rhel8']['host']['name'],
-                  _perforce['rhel8']['host']['path']] | join }}
-            {%- else -%}
-              {{ [_perforce['common']['host']['schema'],
-                  _perforce['common']['host']['name'],
-                  _perforce['common']['host']['path']] | join }}
-            {%- endif -%}"
 
 resource_repositories: "\
   {{ _resource_repositories | select_install(_resource_selection) }}"
@@ -141,20 +103,12 @@ _packages:
       - Fedora([1-9][0-9]{2,}|2[8-9]|[3-9][0-9]):
         - coccinelle
         - ctags
-        - p4perl
 
       - (CentOS|RedHat)(7|8)\.[0-9]+:
         - coccinelle
         - ctags
-        - p4perl
-
-      - common:
-        - id-utils
 
 resource_base_packages: "{{ _packages | select_install(_resource_selection) }}"
-
-resource_perforce_packages:
-  - helix-cli
 
 # Perl modules to install, either as RPMs or from CPAN.
 #

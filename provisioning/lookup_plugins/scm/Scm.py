@@ -55,28 +55,20 @@ class Scm(object):
   def request(self):
     """Returns the url's path together with any parameters and fragments.
     """
-    request = self.url.split(
-                          "{0}://{1}".format(self.scheme, self.netloc), 1)[1]
-
-    # Perforce requests begin with a '//'.
-    if self.type == "perforce":
-      request = "/{0}".format(request)
-    return request
+    return self.url.split("{0}://{1}".format(self.scheme, self.netloc), 1)[1]
 
   ####################################################################
   @property
   def type(self):
     """Returns the name of the SCM, which may differ from the scheme contained
-    in the url.  For example, p4://x/y specifies the scheme 'p4' which
-    represents the perforce SCM.
+    in the url.
 
     If the scheme-to-scm mapping does not contain an entry for the scheme the
     result will be "git".
     """
     git = "git"
     schemeToScm = { "git"   : git,
-                    "http"  : git,
-                    "p4"    : "perforce" }
+                    "http"  : git }
     try:
       return schemeToScm[self.scheme]
     except KeyError:
