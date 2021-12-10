@@ -110,12 +110,6 @@
     # packaging if possible), but it needs to happen before the build of UDS.
     - special_packages
 
-- hosts: resources
-  roles:
-    # Mount the build NFS share.
-    - permabuild_builder
-  tags: uds-update
-
 - hosts: infrastructure resources farms performance_farms
   serial: 1   # Serialized as this changes shared files.
   roles:

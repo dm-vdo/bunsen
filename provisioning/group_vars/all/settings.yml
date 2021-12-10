@@ -105,7 +105,6 @@ permabuild_directories_links:
 # the sources regardless of their origins, but are named based on their source
 # SCMs.
 
-permabuild_git_directory: "{{ permabuild_directory }}/git"
 permabuild_targetd_directory: "{{ permabuild_directory }}/targetd"
 permabuild_targetd_spec: "{{ query('targetd_spec', 'none')[0] }}"
 permabuild_rtslib_directory: "{{ permabuild_directory }}/rtslib"

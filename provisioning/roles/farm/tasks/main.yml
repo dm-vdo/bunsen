@@ -27,7 +27,6 @@
 - include: config.yml
 - include: services.yml
 - include: storage.yml
-- include: p4tools.yml
 - include: required_packages_file.yml
 - include: udev.yml
 # This must be last, as a test could start using the machine afterwards.

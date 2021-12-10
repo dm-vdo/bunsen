@@ -47,7 +47,4 @@
 - include: search_path.yml
 - include: ssh.yml
 
-# Add aliases to /etc/hosts.
-- include: host_aliases.yml
-
 - include: net-monitor.yml

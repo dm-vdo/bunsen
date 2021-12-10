@@ -12,7 +12,7 @@ externals:
       host:
         schema: http://
         name: coprbe.devel.redhat.com
-        path: "/results/jshimkus/python-support/{{ansible_distribution | lower | replace('redhat', 'rhel', 1)}}-$releasever-$basearch"
+        path: "/results/jshimkus/python-support/{{ansible_distribution | lower | replace('redhat', 'rhel', 1)}}-{{is_fedora | ternary('$releasever', target_distribution_major_number)}}-$basearch"
         keypath: /results/jshimkus/python-support/pubkey.gpg
 
   # Resources provided by the group.
@@ -33,23 +33,6 @@ externals:
         path: /eng-main-repo/RPMs
         keypath: None
 
-    permabit:
-      fedora:
-        schema: rpm
-        host:
-          schema: http://
-          name: rpm.permabit.lab.eng.bos.redhat.com
-          path: "/rpm-fc{{target_distribution_major_number}}"
-          keypath: None
-
-      rhel:
-        schema: rpm
-        host:
-          schema: http://
-          name: rpm.permabit.lab.eng.bos.redhat.com
-          path: "/rpm-{{target_distribution_major_number}}"
-          keypath: None
-
     permatest:
       schema: rpm
       host:
@@ -68,46 +51,13 @@ externals:
         path: /RH-IT-Root-CA.crt
         keypath: None
 
-    uds-devel:
+    vdo-infrastructure:
       schema: rpm
       host:
         schema: http://
-        name: vdo-image-store.permabit.lab.eng.bos.redhat.com
-        path: /uds-devel-repo/SRPMs
-        keypath: None
-
-    uds-uri:
-      schema: uri
-      host:
-        schema: p4://
-        name: pbitperforce01.permabit.lab.eng.bos.redhat.com:1666
-        path: None
-        keypath: None
-
-    vdo-infrastructure:
-      fedora:
-        schema: rpm
-        host:
-          schema: http://
-          name: coprbe.devel.redhat.com
-          path: /results/raeburn/vdo-infrastructure/fedora-$releasever-x86_64
-          keypath: /results/raeburn/vdo-infrastructure/pubkey.gpg
-
-      rhel7:
-        schema: rpm
-        host:
-          schema: http://
-          name: coprbe.devel.redhat.com
-          path: /results/raeburn/vdo-infrastructure/rhel-7-x86_64/
-          keypath: /results/raeburn/vdo-infrastructure/pubkey.gpg
-
-      rhel8:
-        schema: rpm
-        host:
-          schema: http://
-          name: coprbe.devel.redhat.com
-          path: /results/raeburn/vdo-infrastructure/rhel-8.dev-x86_64
-          keypath: /results/raeburn/vdo-infrastructure/pubkey.gpg
+        name: coprbe.devel.redhat.com
+        path: "/results/raeburn/vdo-infrastructure/{{ansible_distribution | lower | replace('redhat', 'rhel', 1)}}-{{is_fedora | ternary('$releasever', target_distribution_major_number)}}-$basearch"
+        keypath: /results/raeburn/vdo-infrastructure/pubkey.gpg
 
   # Third party resources utilized.
   third-party:
@@ -126,31 +76,6 @@ externals:
         name: gitlab.cee.redhat.com
         path: /vdo/open-sourcing/tools/third/athinfod.git
         keypath: None
-
-    git-p4:
-      schema: uri
-      host:
-        schema: https://
-        name: git.kernel.org
-        path: /pub/scm/git/git.git/plain/git-p4.py?id=master
-        keypath: None
-
-    perforce:
-      common:
-        schema: rpm
-        host:
-          schema: https://
-          name: package.perforce.com
-          path: /yum/rhel/7/x86_64
-          keypath: /perforce.pubkey
-
-      rhel8:
-        schema: rpm
-        host:
-          schema: https://
-          name: package.perforce.com
-          path: /yum/rhel/8/x86_64
-          keypath: /perforce.pubkey
 
     rtslib:
       schema: git

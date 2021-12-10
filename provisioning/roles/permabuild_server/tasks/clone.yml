@@ -17,20 +17,7 @@
     become_user: "{{ master_user }}"
     become: yes
     with_items:
-      - "{{ permabuild_installs
-          | selectattr('type', 'match', '^git$') | list }}"
-
-  - include_tasks: git_p4_clone.yml
-    vars:
-      p4server: "{{ item['url'] | urlsplit('netloc') }}"
-      depot_path: "{{ item['url'] | scm_request }}"
-      git_repo_path: "{{ item['dest'] }}"
-    args:
-      apply:
-        become: yes
-        become_user: "{{ master_user }}"
-    with_items: "{{ permabuild_installs
-                    | selectattr('type', 'match', '^perforce$') | list }}"
+      - "{{ permabuild_installs }}"
 
   - block:
     - name: Stat common Repository base directories
