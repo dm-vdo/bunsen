@@ -1,10 +1,6 @@
 ---
 # This assumes the one and only volume group on the system will be where you
-# allocate all your storage from. A simple Beaker reservation of a system with
-# a lot of disk space will give you a large /home file system on its own
-# logical volume. Nuke that file system and delete the volume, and now you've
-# got a lot of free space in the volume group. This script will let you export
-# that storage.
+# allocate all your storage from.
 
 - block:
   - name: Install needed packages

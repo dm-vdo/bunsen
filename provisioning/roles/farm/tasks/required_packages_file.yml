@@ -14,7 +14,7 @@
         {%- set x = [] -%}
         {%- for pkgname in ansible_facts.packages.keys()|sort(case_sensitive=True) -%}
           {%- set pkg = ansible_facts.packages[pkgname] -%}
-          {%- if (pkgname in excludes) or pkgname.startswith('beaker-') -%}
+          {%- if pkgname in excludes -%}
             {# do nothing - checkServer explicitly ignores these #}
           {%- elif pkg|length > 1 -%}
             {%- set dummy = x.append(pkgname) -%}

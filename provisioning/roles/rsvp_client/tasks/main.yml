@@ -7,7 +7,7 @@
 
 # XX These are only helpful for interactive shells, but not inetd/cron
 # jobs like "athinfo...checkserver".  Additional heuristics could work
-# with our vagrant VM config, but not Beaker.
+# with a vagrant config.
 # RSVP needs to grow a config file.
 - name: RSVP server selection (csh)
   template:

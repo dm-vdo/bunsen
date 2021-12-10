@@ -193,7 +193,7 @@ _repositories:
     - name: ga-appstream-latest
       file: ga
       description: "GA Appstream Repo latest"
-      enabled: "{{ is_pfarm | bool }}"
+      enabled: no
       gpgcheck: no
       sslverify: no
       baseurl: "{{ query('latest_repo_roots',
@@ -212,7 +212,7 @@ _repositories:
     - name: ga-latest
       file: ga
       description: "GA Repo latest"
-      enabled: "{{ is_pfarm | bool }}"
+      enabled: no
       gpgcheck: no
       sslverify: no
       baseurl: "{{ query('latest_repo_roots',

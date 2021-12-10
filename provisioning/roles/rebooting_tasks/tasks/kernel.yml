@@ -29,5 +29,4 @@
   - name: Restart system to run new kernel
     include_tasks: "{{ playbook_dir }}/library/restart_system.yml"
     when: result is changed
-  when: (inventory_hostname not in groups['infrastructure']
-         or is_pfarm or is_vagrant)
+  when: (inventory_hostname not in groups['infrastructure'] or is_vagrant)

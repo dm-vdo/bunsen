@@ -12,20 +12,6 @@
       dest: /etc/scam/ansible.conf
       mode: 0644
 
-  - name: SCAM data - Beaker
-    lineinfile:
-      line: BEAKER=yes
-      path: /etc/scam/beaker.conf
-      create: yes
-      mode: 0644
-      owner: root
-      group: root
-      state: "{%- if (is_beaker | bool) -%}
-                present
-              {%- else -%}
-                absent
-              {%- endif -%}"
-
   - name: SCAM data - DevVM
     lineinfile:
       line: DEVVM=yes
@@ -55,12 +41,8 @@
               {%- endif -%}"
 
   - name: SCAM data - farm
-    # pfarms are not (at present) considered farms for purposes of testing.
     copy:
-      # If we put FARM outside the evaluation either the quoted no/yes results
-      # in the quotes in the file or unquoted no/yes is treated as undefined
-      # variables.
-      content: "FARM={{ (is_pfarm | bool) | ternary('no', 'yes') }}"
+      content: FARM=yes
       dest: /etc/scam/farm.conf
       mode: 0644
 

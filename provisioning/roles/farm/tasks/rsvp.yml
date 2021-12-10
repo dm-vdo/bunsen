@@ -13,12 +13,8 @@
       - 64BITOK
       - ALBIREO
       - ALL
-      # pfarms are not (at present) considered farms for purposes of testing.
-      - "{{ (is_pfarm | bool) | ternary(omit, 'FARM') }}"
+      - FARM
       - VDO
-      # According to checkServer.pl, only virtual machines should be in class
-      # VFARM, but basically all our tests require VFARM, so we need all Beaker
-      # systems to wind up in VFARM until that gets fixed.
       - VFARM
       - "{{ (ansible_memtotal_mb > bigmem_mb) | ternary('BIGMEM', omit) }}"
       - "{{ os_class }}"
@@ -50,7 +46,6 @@
     - not (result.stderr is search(inventory_hostname ~ '.* already exists'))
     - not (result.stderr is search(hostvars[inventory_hostname].ansible_fqdn ~ '.* already exists'))
   changed_when: result.rc == 0
-  when: not is_pfarm
 
   # TODO: get the classes from the server.
   #       The list_classes --csv output is as:
