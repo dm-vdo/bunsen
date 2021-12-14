@@ -21,7 +21,7 @@ _repositories:
                     _file_server['path']] | join }}"
 
     - name: pbit-eng-main-tools
-      description: "Permabit tools from //eng/main"
+      description: "Permabit tools"
       enabled: yes
       gpgcheck: no
       sslverify: no

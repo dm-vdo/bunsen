@@ -5,14 +5,7 @@
       name: staff
       state: present
 
-  # In the laptop dev case, we add all accounts locally.
-  #
-  # Account creation seems to pick a UID one greater than the highest in use,
-  # so unless we're going to create a very high one above all the Permabit user
-  # accounts, to force the local accounts to be above the Permabit range, we
-  # should instead create the local accounts first so they'll be below the
-  # Permabit range.
-
+  # Add all accounts locally.
   - name: Create local user homes directory
     file:
       dest: "{{ user_homes_local }}"

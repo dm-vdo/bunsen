@@ -87,8 +87,7 @@
   # a simple farm configuration, it's not likely to take long, but
   # we're gambling on that. Better would be to wait for the machine to
   # be reachable *and* for its reported uptime to indicate that it has
-  # rebooted. See some of the Permabit Perl test and infrastructure
-  # modules for that.
+  # rebooted.
 
   - name: Wait for system to become available
     wait_for_connection:
