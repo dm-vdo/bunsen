@@ -1,4 +1,18 @@
 ---
+# Default passwords and storage server account name.
+# The root and user passwords must be encrypted.
+# See https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-encrypted-passwords-for-the-user-module
+# for guidance on generating encrypted passwords.
+#
+# The user password will be used for all user account creation.
+# The storage server password, if provisioning a storage server, must be
+# cleartext.
+root_password: $6$lr2pKxpIvVfQuSrI$7OJ1ldLqVMkQk2xDfZZ6B4hQaswWTfQA89HDRyRr6PV.MwK8bNa2dcBeG5/PUYRXT/8DEqxRp6Ye4/INMvrEy1
+user_password: $6$lr2pKxpIvVfQuSrI$7OJ1ldLqVMkQk2xDfZZ6B4hQaswWTfQA89HDRyRr6PV.MwK8bNa2dcBeG5/PUYRXT/8DEqxRp6Ye4/INMvrEy1
+
+storage_server_account: admin
+storage_server_password: bunsen-storage-server
+
 # Default retry values; used when specifying retries on a task, block or
 # anything else to which it applies.
 default_retry_count: 3
