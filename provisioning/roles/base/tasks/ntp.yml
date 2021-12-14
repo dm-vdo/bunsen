@@ -31,33 +31,3 @@
                   {{ groups['infrastructure'] }}
                 {%- endif -%}"
     ntp_servers: "{{ common_ntp_servers }}"
-
-# We should probably switch to the system default of chronyd instead of
-# insisting on ntpd.
-- block:
-  - name: Disabling chronyd service
-    systemd:
-      name: chronyd.service
-      state: stopped
-      enabled: False
-
-  - name: Disabling chrony-wait service
-    systemd:
-      name: chrony-wait.service
-      state: stopped
-      enabled: False
-
-  - name: Enabling ntpd service
-    systemd:
-      name: ntpd.service
-      state: started
-      enabled: True
-
-  # This just reflects the cases where checkServer cares that ntpd is
-  # running. Other cases may come up where we lose sync and really do
-  # want ntpd or chronyd or something running.
-  #
-  # XXX Otherwise, we're ignoring running services.
-  when: (is_beaker | bool) and (not (is_rhel8_family | bool))
-        and (ansible_virtualization_role != 'guest')
-        and (system_has_ntpd | bool)

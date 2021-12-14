@@ -53,11 +53,6 @@ _packages:
     - tcsh
     - tmux
     - traceroute
-    # Even if you don't want to use vim, Beaker's "reservesys" task will
-    # install the vim-enhanced package, _after_ we've generated our
-    # required_packages file, and mess things up if we don't list it or put a
-    # bunch of exceptions in checkServer.pl.
-    - vim-enhanced
     - xauth
 
   ##########################################################################

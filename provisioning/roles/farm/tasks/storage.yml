@@ -3,9 +3,9 @@
 # There are several cases to consider.
 #
 # - The machine has sufficient local disk space for testing.
-#    - The space is free in the system volume group. (Beaker, Fedora)
+#    - The space is free in the system volume group. (Fedora)
 #    - The space is on a disk not part of a volume group. (Vagrant)
-#    - The space is tied up in the /home file system/LV. (Beaker, RHEL family)
+#    - The space is tied up in the /home file system/LV. (RHEL family)
 #      We could move /home onto the root and free up the space into the
 #      volume group, but that should be done before NFS-mounting various
 #      directories under /home in the nfs_client role.
@@ -26,58 +26,6 @@
       state: directory
       mode: 0755
     when: "'/u1' not in mount_points"
-
-  # Beaker system with a /home logical volume: Create a big file and use it via
-  # a loop device as a physical volume.
-  - block:
-    - block:
-
-      - include_tasks: storage-loop.yml
-        vars:
-          path: /home/big_file
-          min_size: "{{ required }}"
-          max_size: "{{ (vdo_scratch_max_gb * 1024 * 1024) | int }}"
-          disk_var: test_disk
-
-      - name: Picking scratch volume group name
-        set_fact:
-          scratch_vg: "{{ ansible_default_ipv4.macaddress.split(':') | join }}"
-
-      when: ('home' in (ansible_lvm.lvs.keys() | list)
-             and '/home' in mount_points)
-
-    # Beaker system without a /home logical volume: Assume any free space lives
-    # within the system volume group.
-    - name: Using system volume group name for scratch storage
-      set_fact:
-        scratch_vg: "{{ ansible_lvm.lvs['root'].vg }}"
-        test_disk: ""
-      when: ('home' not in (ansible_lvm.lvs.keys() | list)
-             and '/home' not in mount_points)
-
-    when: ((is_beaker | bool)
-           and (ansible_lvm is defined)
-           and (not use_storage_server))
-
-  # Beaker system with an external storage server specified: Use it.
-  - block:
-
-      - include_tasks: storage-targetd.yml
-        vars:
-          disk_fact: test_disk
-          ipaddr: "{{ lookup('dig', storage_server) }}"
-          size: "{{ (required|int) * 1024 }}"
-          targetd_user: admin
-          targetd_password: permabit0
-          targetd_args: "--host {{ storage_server }} \
-                         --user {{ targetd_user }} \
-                         --password {{ targetd_password }}"
-
-      - name: Setting scratch volume group name
-        set_fact:
-          scratch_vg: "{{ ansible_default_ipv4.macaddress.split(':') | join }}"
-
-    when: (is_beaker | bool) and use_storage_server
 
   # Development VM. Use the second disk.
   - name: Setting scratch volume group and test disk names
@@ -123,11 +71,7 @@
       src: "/dev/{{ u1_lv_full }}"
       fstype: xfs
       state: mounted
-      opts: "{%- if (is_beaker | bool) and use_storage_server -%}
-               _netdev
-             {%- else -%}
-               defaults
-             {%- endif -%}"
+      opts: defaults
     become: yes
 
   - name: Adjust mounted /u1 permissions
@@ -212,7 +156,7 @@
       free_gb: "{{ ansible_lvm.vgs[scratch_vg].free_g }}"
 
   vars:
-    u1_size_gb: "{%- if is_beaker | bool -%} 56 {%- else -%} 48 {%- endif -%}"
+    u1_size_gb: 48
     vdo_scratch_min_gb: 100
     # Cap test storage at around 150 GB based on test configs.
     vdo_scratch_max_gb: 150
@@ -233,6 +177,4 @@
     required: "{{ ((u1_size_gb | int) + vdo_scratch_min_gb + 1) * 1024 * 1024 }}"
     # mount point directory names
     mount_points: "{{ ansible_mounts | map(attribute='mount') | list }}"
-
-  when: not is_pfarm
 

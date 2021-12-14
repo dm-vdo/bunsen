@@ -7,9 +7,6 @@
 
   # In the laptop dev case, we add all accounts locally.
   #
-  # In the Beaker/lfarm case, known Permabit accounts might use the Permabit
-  # home directories and then must copy UIDs and so on.
-  #
   # Account creation seems to pick a UID one greater than the highest in use,
   # so unless we're going to create a very high one above all the Permabit user
   # accounts, to force the local accounts to be above the Permabit range, we

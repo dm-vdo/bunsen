@@ -46,5 +46,3 @@
 - include: athinfo.yml
 - include: search_path.yml
 - include: ssh.yml
-
-- include: net-monitor.yml

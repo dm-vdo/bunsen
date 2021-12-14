@@ -45,5 +45,4 @@
       recurse: yes
     become: yes
   when: ((inventory_hostname in (groups['farms'] | default([])))
-        or (inventory_hostname in (groups['performance_farms'] | default([])))
-        or is_pfarm)
+        or (inventory_hostname in (groups['performance_farms'] | default([]))))

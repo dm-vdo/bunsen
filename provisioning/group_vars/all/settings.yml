@@ -134,6 +134,3 @@ is_storage_server: "\
   {{ inventory_hostname in (groups['storage_server'] | default([])) }}"
 storage_server: "{{ groups['storage_server'][0] | default('') }}"
 use_storage_server: "{{ storage_server != '' }}"
-
-# Set pfarm to false
-is_pfarm: false

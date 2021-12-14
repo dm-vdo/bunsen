@@ -10,8 +10,8 @@
 
 # internally maintained var: perl_rpms
 
-# Hack! We disable scanning of repos "beaker-tasks" and "*-debuginfo"
-# everywhere as the Perl packages are not necessarily binary compatible.
+# Hack! We disable scanning of repos "*-debuginfo" everywhere as the Perl
+# packages are not necessarily binary compatible.
 
 # ?? We might want to rebuild perl_rpms if the system repo list has
 # changed. Is there a trivial way to check that? For now just assume
@@ -32,7 +32,6 @@
     shell: |
       {{ ansible_pkg_mgr }} search \
                  --disablerepo '*-debuginfo' \
-                 --disablerepo 'beaker-tasks*' \
                  perl- 2>/dev/null
     args:
       warn: False
