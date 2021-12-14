@@ -50,7 +50,7 @@
         name: "{{ item }}"
         home: "{{ user_accounts[item].home }}"
         create_home: False
-        password: "{{ password }}"
+        password: "{{ user_password }}"
         group: staff
         append: yes
       with_items: "{{ local_account_list }}"
@@ -59,11 +59,6 @@
     vars:
       # Sorted for consistent UID assignment.
       local_account_list: "{{ user_names_local | sort }}"
-      password: "{%- if os_result.stdout != 'Darwin' -%}
-                     {{ 'permabit0' | password_hash('sha512') }}
-                   {%- else -%}
-                     $6$gcPQxHZPIU2gYlGs$xQQXnELbic9nDqGZD6sNJ2gjP3pGWsY9gmM.uwOT8ALmlB3ym9B47vr8c/IOf5uwappY2rCPmyNVJozbOlnGa1
-                   {%- endif -%}"
 
   - block:
     - name: Create /etc/auto.bunsen-home autofs map file

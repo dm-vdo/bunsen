@@ -45,8 +45,8 @@
       regexp: "{{ item.regexp }}"
       line: "{{ item.line }}"
     with_items:
-      - { regexp: "^user:",     line: "user:     {{ admin_account }}" }
-      - { regexp: "^password:", line: "password: {{ admin_password }}" }
+      - { regexp: "^user:",     line: "user:     {{ storage_server_account }}" }
+      - { regexp: "^password:", line: "password: {{ storage_server_password }}" }
       - { regexp: "^block_pools:",
           line:   "block_pools:   [ {{ system_vg_name }} ]" }
       - { regexp: "^filesys_pools:",
@@ -71,7 +71,5 @@
       - targetd
 
   vars:
-    admin_account: admin
-    admin_password: permabit0
     filesys_root: /mnt/filesys_root
   become: yes
