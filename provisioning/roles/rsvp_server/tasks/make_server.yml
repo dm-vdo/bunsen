@@ -2,8 +2,8 @@
 # This is really the job of the RPM to create the user.
 - name: Create RSVP User
   user:
-    name: rsvp
-    password: rsvp
+    name: "{{ rsvp_server_account }}"
+    password: "{{ rsvp_server_password }}"
 
 # This is really the job of script to actually create the directory
 - name: Create RSVP directories
