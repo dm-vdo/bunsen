@@ -43,18 +43,17 @@ _repositories:
                     _main_tools['name'],
                     _main_tools['path']] | join }}"
 
-    - name: raeburn-vdo-infrastructure
-      description: Copr repo for vdo-infrastructure owned by raeburn
-      baseurl: "{{ [_vdo_infrastructure['host']['schema'],
-                    _vdo_infrastructure['host']['name'],
-                    _vdo_infrastructure['host']['path']] | join }}"
-      skip_if_unavailable: yes
-      gpgcheck: no
-      gpgkey: "{{ [_vdo_infrastructure['host']['schema'],
-                   _vdo_infrastructure['host']['name'],
-                   _vdo_infrastructure['host']['keypath']] | join }}"
-      repo_gpgcheck: 0
+    - name: scam
+      description: Third-party scam package
       enabled: yes
+      baseurl: "{{ [_third_party['scam']['host']['schema'],
+                    _third_party['scam']['host']['name'],
+                    _third_party['scam']['host']['path']] | join }}"
+      gpgcheck: no
+      gpgkey: "{{ [_third_party['scam']['host']['schema'],
+                   _third_party['scam']['host']['name'],
+                   _third_party['scam']['host']['keypath']] | join }}"
+      repo_gpgcheck: 0
       sslverify: yes
 
   # Common to all Fedora starting with Fedora28.

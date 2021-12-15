@@ -52,14 +52,6 @@ externals:
         path: /RH-IT-Root-CA.crt
         keypath: None
 
-    vdo-infrastructure:
-      schema: rpm
-      host:
-        schema: http://
-        name: coprbe.devel.redhat.com
-        path: "/results/raeburn/vdo-infrastructure/{{_distro_releasever}}-$basearch"
-        keypath: /results/raeburn/vdo-infrastructure/pubkey.gpg
-
   # Third party resources utilized.
   third-party:
     athinfo:
@@ -77,6 +69,14 @@ externals:
         name: gitlab.cee.redhat.com
         path: /vdo/open-sourcing/tools/third/rtslib-fb.git
         keypath: None
+
+    scam:
+      schema: rpm
+      host:
+        schema: http://
+        name: coprbe.devel.redhat.com
+        path: "/results/VDO-team/StagingBunsenPackages/{{_distro_releasever}}-$basearch"
+        keypath: results/VDO-team/StagingBunsenPackages/pubkey.gpg
 
     targetd:
       schema: git
