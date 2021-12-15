@@ -4,6 +4,7 @@
 
 # The various software required for bunsen's internal functionality as well as
 # those bunsen will install on target machines during provisioning.
+_distro_releasever: "{{ansible_distribution | lower | replace('redhat', 'rhel', 1)}}-{{is_fedora | ternary('$releasever', target_distribution_major_number)}}"
 externals:
   # Resources for bunsen functionality.
   bunsen:
@@ -12,7 +13,7 @@ externals:
       host:
         schema: http://
         name: coprbe.devel.redhat.com
-        path: "/results/jshimkus/python-support/{{ansible_distribution | lower | replace('redhat', 'rhel', 1)}}-{{is_fedora | ternary('$releasever', target_distribution_major_number)}}-$basearch"
+        path: "/results/jshimkus/python-support/{{_distro_releasever}}-$basearch"
         keypath: /results/jshimkus/python-support/pubkey.gpg
 
   # Resources provided by the group.
@@ -56,26 +57,18 @@ externals:
       host:
         schema: http://
         name: coprbe.devel.redhat.com
-        path: "/results/raeburn/vdo-infrastructure/{{ansible_distribution | lower | replace('redhat', 'rhel', 1)}}-{{is_fedora | ternary('$releasever', target_distribution_major_number)}}-$basearch"
+        path: "/results/raeburn/vdo-infrastructure/{{_distro_releasever}}-$basearch"
         keypath: /results/raeburn/vdo-infrastructure/pubkey.gpg
 
   # Third party resources utilized.
   third-party:
     athinfo:
-      schema: git
+      schema: rpm
       host:
-        schema: https://
-        name: gitlab.cee.redhat.com
-        path: /vdo/open-sourcing/tools/third/athinfo.git
-        keypath: None
-
-    athinfod:
-      schema: git
-      host:
-        schema: https://
-        name: gitlab.cee.redhat.com
-        path: /vdo/open-sourcing/tools/third/athinfod.git
-        keypath: None
+        schema: http://
+        name: coprbe.devel.redhat.com
+        path: "/results/awalsh/TestVDOStaging/{{_distro_releasever}}-$basearch"
+        keypath: /results/awalsh/TestVDOStaging/pubkey.gpg
 
     rtslib:
       schema: git

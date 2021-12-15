@@ -30,7 +30,6 @@
 
 - include: alternatives.yml
 - include: perl_libraries.yml
-- include: git_repos.yml
 
 # Do this before the first reboot.
 - include: persistent_journal.yml
