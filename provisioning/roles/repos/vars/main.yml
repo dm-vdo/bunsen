@@ -8,9 +8,19 @@ _repos_selection:
 _file_server: "{{ externals['first-party']['file-server']['host'] }}"
 _main_tools: "{{ externals['first-party']['main-tools']['host'] }}"
 _vdo_infrastructure: "{{ externals['first-party']['vdo-infrastructure'] }}"
+_third_party: "{{ externals['third-party'] }}"
 _repositories:
   # Common to all distributions.
   - common:
+    - name: athinfo
+      description: "Third-party athinfo packages"
+      enabled: yes
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ [_third_party['athinfo']['host']['schema'],
+                    _third_party['athinfo']['host']['name'],
+                    _third_party['athinfo']['host']['path']] | join }}"
+
     - name: file-server
       description: "Custom repository at ~awalsh"
       enabled: yes
