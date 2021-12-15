@@ -31,7 +31,7 @@
         name: "{{ item }}"
         home: "{{ user_accounts[item].home }}"
         create_home: True
-        password: "{{ password }}"
+        password: "{{ user_password }}"
         group: staff
         append: yes
       with_items: "{{ local_account_list }}"
