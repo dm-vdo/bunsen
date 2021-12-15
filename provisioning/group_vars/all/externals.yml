@@ -76,7 +76,7 @@ externals:
         schema: http://
         name: coprbe.devel.redhat.com
         path: "/results/VDO-team/StagingBunsenPackages/{{_distro_releasever}}-$basearch"
-        keypath: results/VDO-team/StagingBunsenPackages/pubkey.gpg
+        keypath: /results/VDO-team/StagingBunsenPackages/pubkey.gpg
 
     targetd:
       schema: git
