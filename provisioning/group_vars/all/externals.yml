@@ -68,7 +68,7 @@ externals:
         schema: http://
         name: coprbe.devel.redhat.com
         path: "/results/awalsh/TestVDOStaging/{{_distro_releasever}}-$basearch"
-        keypath: None
+        keypath: /results/awalsh/TestVDOStaging/pubkey.gpg
 
     rtslib:
       schema: git

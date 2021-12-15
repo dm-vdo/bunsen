@@ -15,11 +15,15 @@ _repositories:
     - name: athinfo
       description: "Third-party athinfo packages"
       enabled: yes
-      gpgcheck: no
-      sslverify: no
       baseurl: "{{ [_third_party['athinfo']['host']['schema'],
                     _third_party['athinfo']['host']['name'],
                     _third_party['athinfo']['host']['path']] | join }}"
+      gpgcheck: no
+      gpgkey: "{{ [_third_party['athinfo']['host']['schema'],
+                   _third_party['athinfo']['host']['name'],
+                   _third_party['athinfo']['host']['keypath']] | join }}"
+      repo_gpgcheck: 0
+      sslverify: yes
 
     - name: file-server
       description: "Custom repository at ~awalsh"
