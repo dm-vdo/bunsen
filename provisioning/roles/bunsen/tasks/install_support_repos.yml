@@ -1,6 +1,9 @@
 ---
+# Applies only to ansible controller (localhost).
 - name: Install bunsen support repositories.
-  yum_repository:
+  become: yes
+  local_action:
+    module: yum_repository
     file: "{{ item['file'] | default(item['name']) }}"
     name: "{{ item['name'] }}"
     description: "{{ item['description'] }}"
