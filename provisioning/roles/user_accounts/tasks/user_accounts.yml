@@ -50,8 +50,7 @@
       when: inventory_hostname != nfs_server
 
     vars:
-      # Sorted for consistent UID assignment.
-      local_account_list: "{{ user_names_local | sort }}"
+      local_account_list: "{{ user_names_local }}"
 
   - block:
     - name: Create /etc/auto.bunsen-home autofs map file
