@@ -1,41 +1,13 @@
 ---
-# This is really the job of the RPM to create the user.
-- name: Create RSVP User
-  user:
-    name: "{{ rsvp_server_account }}"
-    password: "{{ rsvp_server_password }}"
-
-# This is really the job of script to actually create the directory
-- name: Create RSVP directories
-  file:
-    name: "{{ item }}"
-    mode: 0755
-    owner: rsvp
-    group: root
-    state: directory
-  with_items:
-    - /var/log/rsvpd
-    - /var/lib/rsvpd
-    - /var/run/rsvpd
-
-# Touch the hosts.state file
-- name: Create the RSVP hosts.state file
-  file:
-    name: /var/lib/rsvpd/hosts.state
-    mode: 0755
-    owner: rsvp
-    group: root
-    state: touch
-
 # Install the package
 - name: Install the RSVPD package
   package:
-    name: permabit-rsvpd
+    name: perl-rsvpd
     state: present
 
 - name: Start the RSVPD Service
   systemd:
-    name: permabit-rsvpd
+    name: rsvpd
     state: started
 
 - name: Wait for RSVPD service to be active
