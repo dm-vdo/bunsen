@@ -5,25 +5,6 @@ _server_selection:
   architecture: "{{ ansible_machine }}"
   environment:
 
-# Server repositories.
-_targetd: "{{ externals['third-party']['targetd']['host'] }}"
-_server_repositories:
-  - common:
-    - name: targetd
-      description: "Third-party targetd package"
-      enabled: yes
-      baseurl: "{{ [_targetd['schema'],
-                    _targetd['name'],
-                    _targetd['path']] | join }}"
-      gpgcheck: no
-      gpgkey: "{{ [_targetd['schema'],
-                   _targetd['name'],
-                   _targetd['keypath']] | join }}"
-      repo_gpgcheck: 0
-      sslverify: yes
-
-server_repositories: "{{ _server_repositories | select_install(_server_selection) }}"
-
 # Server packages.
 _server_packages:
   # Common to all distributions.
