@@ -62,14 +62,6 @@ externals:
         path: "/results/VDO-team/StagingBunsenPackages/{{_distro_releasever}}-$basearch"
         keypath: /results/VDO-team/StagingBunsenPackages/pubkey.gpg
 
-    rtslib:
-      schema: git
-      host:
-        schema: https://
-        name: gitlab.cee.redhat.com
-        path: /vdo/open-sourcing/tools/third/rtslib-fb.git
-        keypath: None
-
     scam:
       schema: rpm
       host:
@@ -79,9 +71,9 @@ externals:
         keypath: /results/VDO-team/StagingBunsenPackages/pubkey.gpg
 
     targetd:
-      schema: git
+      schema: rpm
       host:
         schema: https://
-        name: gitlab.cee.redhat.com
-        path: /vdo/open-sourcing/tools/third/targetd.git
-        keypath: None
+        name: coprbe.devel.redhat.com
+        path: "/results/VDO-team/StagingBunsenPackages/{{_distro_releasever}}-$basearch"
+        keypath: /results/VDO-team/StagingBunsenPackages/pubkey.gpg

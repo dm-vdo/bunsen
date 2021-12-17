@@ -1,5 +1,2 @@
 ---
-- include_tasks: "{{ playbook_dir }}/library/mount_nfs.yml"
-  vars:
-    name: "{{ permabuild_targetd_directory }}"
-    src: "{{ permabuild_server }}:{{ permabuild_targetd_directory }}"
+- include: packages.yml

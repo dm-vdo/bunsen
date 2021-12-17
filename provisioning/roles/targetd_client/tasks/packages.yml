@@ -1,0 +1,10 @@
+---
+- block:
+  - include_role:
+      name: storage_server
+      tasks_from: targetd-repo
+
+  - name: Install required packages
+    package:
+      name: "{{ client_packages }}"
+      state: present

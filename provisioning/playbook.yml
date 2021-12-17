@@ -92,8 +92,7 @@
 
 - hosts: farms performance_farms
   roles:
-    # Mount the targetd NFS share; required if the farms get their storage
-    # space from a server.
+    # Make certain any targetd client has the necessary packages.
     - targetd_client
 
 - hosts: resources farms performance_farms

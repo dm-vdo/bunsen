@@ -24,28 +24,22 @@
 # operations to ensure the existence (or nonexistence) of a target LUN.
 
 - name: Fetch current LUN exports
-  command: "./export_list.py {{ targetd_args }} --all"
-  args:
-    chdir: "{{ permabuild_targetd_spec['dest'] }}/utils"
+  command: "export_list.py {{ targetd_args }} --all"
   register: lun_exports
   changed_when: False
 
 - block:
 
    - name: Fetch pool names
-     command: "./pool_list.py {{ targetd_args }}"
-     args:
-       chdir: "{{ permabuild_targetd_spec['dest'] }}/utils"
+     command: "pool_list.py {{ targetd_args }}"
      register: pool_output
      changed_when: False
 
    - name: Create LUN export to host
-     command: "./createLun.py {{ targetd_args }} \
-                       --pool {{ pool_name }} \
-                       --name scratch_{{ macaddress }} \
-                       --size {{ size }} --lun 0"
-     args:
-       chdir: "{{ permabuild_targetd_spec['dest'] }}/utils"
+     command: "createLun.py {{ targetd_args }} \
+                     --pool {{ pool_name }} \
+                     --name scratch_{{ macaddress }} \
+                     --size {{ size }} --lun 0"
      vars:
        macaddress: "{{ ansible_default_ipv4.macaddress.split(':') | join }}"
        pool_labels: "{{ pool_output.stdout_lines[0].split() }}"
