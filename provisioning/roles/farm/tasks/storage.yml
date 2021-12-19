@@ -27,16 +27,68 @@
       mode: 0755
     when: "'/u1' not in mount_points"
 
-  # Development VM. Use the second disk.
-  - name: Setting scratch volume group and test disk names
-    set_fact:
-      scratch_vg: scratch
-      test_disk: "{%- if ansible_virtualization_type == 'kvm' -%}
-                    /dev/vdb
-                  {%- else -%}
-                    /dev/sdb
-                  {%- endif -%}"
-    when: is_devvm | bool
+  # Not using a storage server.
+  - block:
+    - block:
+      # Development VM. Use the second disk.
+      - name: Setting scratch volume group and test disk names
+        set_fact:
+          scratch_vg: scratch
+          test_disk: "{%- if ansible_virtualization_type == 'kvm' -%}
+                        /dev/vdb
+                      {%- else -%}
+                        /dev/sdb
+                      {%- endif -%}"
+        when: is_devvm | bool
+      when: ansible_lvm is not defined
+
+    - block:
+      - block:
+        # System with a /home logical volume: Create a big file and use it via
+        # a loop device as a physical volume.
+        - include_tasks: storage-loop.yml
+          vars:
+            path: /home/big_file
+            min_size: "{{ required }}"
+            max_size: "{{ (vdo_scratch_max_gb * 1024 * 1024) | int }}"
+            disk_var: test_disk
+
+        - name: Picking scratch volume group name
+          set_fact:
+            scratch_vg: "{{ ansible_default_ipv4.macaddress.split(':') | join }}"
+        when: ('home' in (ansible_lvm.lvs.keys() | list)
+               and '/home' in mount_points)
+
+      - block:
+          # System without a /home logical volume: Assume any free space lives
+          # within the system volume group.
+        - name: Using system volume group name for scratch storage
+          set_fact:
+            scratch_vg: "{{ ansible_lvm.lvs['root'].vg }}"
+            test_disk: ""
+        when: ('home' not in (ansible_lvm.lvs.keys() | list)
+               and '/home' not in mount_points)
+      when: ansible_lvm is defined
+    when: not use_storage_server
+
+  # System with an external storage server specified: Use it.
+  - block:
+    - include_tasks: storage-targetd.yml
+      vars:
+        disk_fact: test_disk
+        ipaddr: "{{ lookup('dig', storage_server) }}"
+        size: "{{ (required|int) * 1024 }}"
+        targetd_user: "{{ storage_server_account }}"
+        targetd_password: "{{ storage_server_password }}"
+        targetd_args: "--host {{ storage_server }} \
+                       --user {{ targetd_user }} \
+                       --password {{ targetd_password }}"
+
+    - name: Setting scratch volume group name
+      set_fact:
+        scratch_vg: "{{ ansible_default_ipv4.macaddress.split(':') | join }}"
+
+    when: use_storage_server
 
   # If we ran across something unexpected, we won't get the results we want.
   - name: Verifying storage variables have been set
@@ -71,7 +123,11 @@
       src: "/dev/{{ u1_lv_full }}"
       fstype: xfs
       state: mounted
-      opts: defaults
+      opts: "{%- if use_storage_server -%}
+               _netdev
+             {%- else -%}
+               defaults
+             {%- endif -%}"
     become: yes
 
   - name: Adjust mounted /u1 permissions
