@@ -24,19 +24,19 @@
 # operations to ensure the existence (or nonexistence) of a target LUN.
 
 - name: Fetch current LUN exports
-  command: "export_list.py {{ targetd_args }} --all"
+  command: "export_list {{ targetd_args }} --all"
   register: lun_exports
   changed_when: False
 
 - block:
 
    - name: Fetch pool names
-     command: "pool_list.py {{ targetd_args }}"
+     command: "pool_list {{ targetd_args }}"
      register: pool_output
      changed_when: False
 
    - name: Create LUN export to host
-     command: "createLun.py {{ targetd_args }} \
+     command: "createLun {{ targetd_args }} \
                      --pool {{ pool_name }} \
                      --name scratch_{{ macaddress }} \
                      --size {{ size }} --lun 0"
