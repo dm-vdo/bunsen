@@ -7,7 +7,7 @@ _repos_selection:
 
 _file_server: "{{ externals['first-party']['file-server']['host'] }}"
 _main_tools: "{{ externals['first-party']['main-tools']['host'] }}"
-_vdo_infrastructure: "{{ externals['first-party']['vdo-infrastructure'] }}"
+_rsvpd: "{{ externals['first-party']['rsvpd']['host'] }}"
 _third_party: "{{ externals['third-party'] }}"
 _repositories:
   # Common to all distributions.
@@ -42,6 +42,19 @@ _repositories:
       baseurl: "{{ [_main_tools['schema'],
                     _main_tools['name'],
                     _main_tools['path']] | join }}"
+
+    - name: rsvpd
+      description: "rsvp packages"
+      enabled: yes
+      baseurl: "{{ [_rsvpd['schema'],
+                    _rsvpd['name'],
+                    _rsvpd['path']] | join }}"
+      gpgcheck: no
+      gpgkey: "{{ [_rsvpd['schema'],
+                   _rsvpd['name'],
+                   _rsvpd['keypath']] | join }}"
+      repo_gpgcheck: 0
+      sslverify: yes
 
     - name: scam
       description: Third-party scam package

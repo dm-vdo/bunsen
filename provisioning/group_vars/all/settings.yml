@@ -1,6 +1,6 @@
 ---
-# Default passwords and rsvp and storage server account names.
-# The root, user and rsvp passwords must be encrypted.
+# Default passwords and storage server account name.
+# The root and user passwords must be encrypted.
 # See https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-encrypted-passwords-for-the-user-module
 # for guidance on generating encrypted passwords.
 #
@@ -9,9 +9,6 @@
 # cleartext.
 root_password: $6$lr2pKxpIvVfQuSrI$7OJ1ldLqVMkQk2xDfZZ6B4hQaswWTfQA89HDRyRr6PV.MwK8bNa2dcBeG5/PUYRXT/8DEqxRp6Ye4/INMvrEy1
 user_password: $6$lr2pKxpIvVfQuSrI$7OJ1ldLqVMkQk2xDfZZ6B4hQaswWTfQA89HDRyRr6PV.MwK8bNa2dcBeG5/PUYRXT/8DEqxRp6Ye4/INMvrEy1
-
-rsvp_server_account: rsvp
-rsvp_server_password: $6$lr2pKxpIvVfQuSrI$7OJ1ldLqVMkQk2xDfZZ6B4hQaswWTfQA89HDRyRr6PV.MwK8bNa2dcBeG5/PUYRXT/8DEqxRp6Ye4/INMvrEy1
 
 storage_server_account: admin
 storage_server_password: bunsen-storage-server

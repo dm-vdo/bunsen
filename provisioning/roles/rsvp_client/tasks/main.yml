@@ -1,9 +1,9 @@
 ---
-- name: Create 'rsvpclient' symlink
-  file:
-    src: /permabit/build/perl/lastrun/bin/rsvpclient.pl
-    dest: /usr/bin/rsvpclient
-    state: link
+# Install the package
+- name: Install the RSVP client package
+  package:
+    name: perl-rsvpclient
+    state: present
 
 # XX These are only helpful for interactive shells, but not inetd/cron
 # jobs like "athinfo...checkserver".  Additional heuristics could work

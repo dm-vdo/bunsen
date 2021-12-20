@@ -52,6 +52,14 @@ externals:
         path: /RH-IT-Root-CA.crt
         keypath: None
 
+    rsvpd:
+      schema: rpm
+      host:
+        schema: http://
+        name: coprbe.devel.redhat.com
+        path: "/results/awalsh/TestVDOStaging/{{_distro_releasever}}-$basearch"
+        keypath: /results/awalsh/TestVDOStaging/pubkey.gpg
+
   # Third party resources utilized.
   third-party:
     athinfo:
