@@ -1,0 +1,13 @@
+---
+- block:
+  - name: Ensure upstream targetd is not installed
+    package:
+      name: targetd
+      state: absent
+
+  - include: targetd-repo.yml
+
+  - name: Install required packages
+    package:
+      name: "{{ server_packages }}"
+      state: present

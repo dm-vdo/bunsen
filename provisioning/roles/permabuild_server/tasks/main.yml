@@ -4,5 +4,3 @@
   vars:
     nfs_directories: "{{ permabuild_directories }}"
     nfs_exports: "{{ permabuild_exports }}"
-
-- include: clone.yml

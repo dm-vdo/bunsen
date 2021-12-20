@@ -6,4 +6,5 @@
     omit_link: no
 
 - include: repartition.yml
+- include: packages.yml
 - include: targetd-server.yml

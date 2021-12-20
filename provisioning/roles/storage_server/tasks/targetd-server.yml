@@ -3,34 +3,6 @@
 # allocate all your storage from.
 
 - block:
-  - name: Install needed packages
-    package:
-      name: "{{ item }}"
-      state: present
-    with_items:
-      # This will need tweaking per distro.
-      # The following works for Fedora 30.
-      - git
-      - libblockdev
-      - libblockdev-lvm-dbus
-      - lvm2-dbusd
-      - nfs-utils
-      - python3-blockdev
-      - python3-dns
-      - python3-pyyaml
-      - python3-setproctitle
-      - targetcli
-
-  - name: Ensure upstream targetd is not installed
-    package:
-      name: targetd
-      state: absent
-
-  - include_tasks: "install_python_module.yml"
-    with_items:
-      - "{{ permabuild_rtslib_spec }}"
-      - "{{ permabuild_targetd_spec }}"
-
   - name: Create exported filesystem root dir
     file:
       path: "{{ filesys_root }}"

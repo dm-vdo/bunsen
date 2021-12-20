@@ -118,16 +118,6 @@ permabuild_directories:
 permabuild_directories_links:
   - { dest: /permabit/build,  src: builds/build }
 
-# These pertain to the checking out and building of support tools
-# and libraries.  The subdirectories are git clones as git is used to clone
-# the sources regardless of their origins, but are named based on their source
-# SCMs.
-
-permabuild_targetd_directory: "{{ permabuild_directory }}/targetd"
-permabuild_targetd_spec: "{{ query('targetd_spec', 'none')[0] }}"
-permabuild_rtslib_directory: "{{ permabuild_directory }}/rtslib"
-permabuild_rtslib_spec: "{{ query('rtslib_spec', 'none')[0] }}"
-
 common_ntp_servers: []
 
 # Common nfs mount options.  Primarily for use in an environment that has some

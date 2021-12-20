@@ -1,0 +1,14 @@
+# Targetd client variables.
+---
+_client_selection:
+  distribution: "{{ ansible_distribution + ansible_distribution_version }}"
+  architecture: "{{ ansible_machine }}"
+  environment:
+
+# Client packages.
+_client_packages:
+  # Common to all distributions.
+  - common:
+    - targetd-bunsen-utils
+
+client_packages: "{{ _client_packages | select_install(_client_selection) }}"

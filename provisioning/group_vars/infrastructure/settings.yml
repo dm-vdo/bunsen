@@ -13,14 +13,6 @@ nfs_exports: "{{ nfs_directories + [user_homes_local] }}"
 # Permabit build server variables.
 ###############################################################################
 
-# Software the permabuild server will install by default.
-# permabuild_targetd_spec comes from ../all/settings.yml.
-permabuild_installs: "{{ [permabuild_targetd_spec] }}"
-
-# We provide common links only for targetd.
-permabuild_common_link_installs:
-  - "{{ permabuild_targetd_spec }}"
-
 # The permabuild exports.
 permabuild_exports:
   - "{{ permabuild_directories }}"
