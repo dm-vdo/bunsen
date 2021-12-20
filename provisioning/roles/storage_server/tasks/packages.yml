@@ -5,8 +5,6 @@
       name: targetd
       state: absent
 
-  - include: targetd-repo.yml
-
   - name: Install required packages
     package:
       name: "{{ server_packages }}"

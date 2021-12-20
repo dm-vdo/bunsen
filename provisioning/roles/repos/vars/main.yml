@@ -8,20 +8,20 @@ _repos_selection:
 _file_server: "{{ externals['first-party']['file-server']['host'] }}"
 _main_tools: "{{ externals['first-party']['main-tools']['host'] }}"
 _rsvpd: "{{ externals['first-party']['rsvpd']['host'] }}"
-_third_party: "{{ externals['third-party'] }}"
+_third_party_common: "{{ externals['third-party']['third-party-common']['host'] }}"
 _repositories:
   # Common to all distributions.
   - common:
-    - name: athinfo
-      description: "Third-party athinfo packages"
+    - name: third-party-common
+      description: "Common repo for third-party packages"
       enabled: yes
-      baseurl: "{{ [_third_party['athinfo']['host']['schema'],
-                    _third_party['athinfo']['host']['name'],
-                    _third_party['athinfo']['host']['path']] | join }}"
+      baseurl: "{{ [_third_party_common['schema'],
+                    _third_party_common['name'],
+                    _third_party_common['path']] | join }}"
       gpgcheck: no
-      gpgkey: "{{ [_third_party['athinfo']['host']['schema'],
-                   _third_party['athinfo']['host']['name'],
-                   _third_party['athinfo']['host']['keypath']] | join }}"
+      gpgkey: "{{ [_third_party_common['schema'],
+                   _third_party_common['name'],
+                   _third_party_common['keypath']] | join }}"
       repo_gpgcheck: 0
       sslverify: yes
 
@@ -53,19 +53,6 @@ _repositories:
       gpgkey: "{{ [_rsvpd['schema'],
                    _rsvpd['name'],
                    _rsvpd['keypath']] | join }}"
-      repo_gpgcheck: 0
-      sslverify: yes
-
-    - name: scam
-      description: Third-party scam package
-      enabled: yes
-      baseurl: "{{ [_third_party['scam']['host']['schema'],
-                    _third_party['scam']['host']['name'],
-                    _third_party['scam']['host']['path']] | join }}"
-      gpgcheck: no
-      gpgkey: "{{ [_third_party['scam']['host']['schema'],
-                   _third_party['scam']['host']['name'],
-                   _third_party['scam']['host']['keypath']] | join }}"
       repo_gpgcheck: 0
       sslverify: yes
 

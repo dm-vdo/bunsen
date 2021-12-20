@@ -52,26 +52,10 @@ externals:
 
   # Third party resources utilized.
   third-party:
-    athinfo:
+    third-party-common:
       schema: rpm
       host:
         schema: http://
-        name: coprbe.devel.redhat.com
-        path: "/results/VDO-team/StagingBunsenPackages/{{_distro_releasever}}-$basearch"
-        keypath: /results/VDO-team/StagingBunsenPackages/pubkey.gpg
-
-    scam:
-      schema: rpm
-      host:
-        schema: http://
-        name: coprbe.devel.redhat.com
-        path: "/results/VDO-team/StagingBunsenPackages/{{_distro_releasever}}-$basearch"
-        keypath: /results/VDO-team/StagingBunsenPackages/pubkey.gpg
-
-    targetd:
-      schema: rpm
-      host:
-        schema: https://
         name: coprbe.devel.redhat.com
         path: "/results/VDO-team/StagingBunsenPackages/{{_distro_releasever}}-$basearch"
         keypath: /results/VDO-team/StagingBunsenPackages/pubkey.gpg
