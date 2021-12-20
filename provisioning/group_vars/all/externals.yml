@@ -42,16 +42,6 @@ externals:
         path: /repository/permatest-repo
         keypath: None
 
-    rh-cert:
-      # To be removed (or nulled out) in published version.
-      # Rely on a runtime determination to not attempt to access these.
-      schema: uri
-      host:
-        schema: https://
-        name: password.corp.redhat.com
-        path: /RH-IT-Root-CA.crt
-        keypath: None
-
     rsvpd:
       schema: rpm
       host:

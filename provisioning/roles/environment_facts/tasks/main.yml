@@ -1,7 +1,5 @@
 ---
 - block:
-  - include: "{{ playbook_dir }}/library/getRHCert.yml"
-
   - name: Checking for Vagrant account
     getent: database=passwd key=vagrant
     failed_when: False
