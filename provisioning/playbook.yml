@@ -29,10 +29,10 @@
 
 - hosts: all
   roles:
-    # Install any required certificates and establish environment facts.
+    # Establish environment facts.
     # This is performed regardless of tag specification as some tagged roles
     # depend on these being established.
-    - certificates_and_facts
+    - environment_facts
   tags: always
 
 - hosts: all
