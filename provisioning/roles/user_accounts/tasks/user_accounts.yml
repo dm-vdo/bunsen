@@ -80,4 +80,4 @@
       mode: 0600
       owner: root
       group: root
-    with_items: "{{ user_accounts.keys() | list }}"
+    with_items: "{{ user_names_local }}"
