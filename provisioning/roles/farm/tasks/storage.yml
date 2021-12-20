@@ -30,7 +30,7 @@
   # Not using a storage server.
   - block:
     - block:
-      # Development VM. Use the second disk.
+      # System with no volume groups; use the second disk.
       - name: Setting scratch volume group and test disk names
         set_fact:
           scratch_vg: scratch
@@ -39,10 +39,11 @@
                       {%- else -%}
                         /dev/sdb
                       {%- endif -%}"
-        when: is_devvm | bool
-      when: ansible_lvm is not defined
+      when: (ansible_lvm is not defined)
+              or ((ansible_lvm.vgs.keys() | length) == 0)
 
     - block:
+        # System with at least one volume group.
       - block:
         # System with a /home logical volume: Create a big file and use it via
         # a loop device as a physical volume.
@@ -68,7 +69,8 @@
             test_disk: ""
         when: ('home' not in (ansible_lvm.lvs.keys() | list)
                and '/home' not in mount_points)
-      when: ansible_lvm is defined
+      when: (ansible_lvm is defined)
+              and ((ansible_lvm.vgs.keys() | length) > 0)
     when: not use_storage_server
 
   # System with an external storage server specified: Use it.
