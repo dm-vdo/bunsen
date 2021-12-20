@@ -104,7 +104,8 @@ user_accounts: "
   {%- endfor -%}
   {{ tmp }}"
 
-user_names_local: "{{ user_accounts.keys() }}"
+# Sort the list of usernames for consistent ordering while provisioning.
+user_names_local: "{{ user_accounts.keys() | sort }}"
 
 # Deploying user sshfs mounts to mount.
 deploying_user_sshfs_mounts: "{{ deploying_user_mounts | default([]) }}"

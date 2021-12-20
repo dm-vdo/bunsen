@@ -34,7 +34,7 @@
         password: "{{ user_password }}"
         group: staff
         append: yes
-      with_items: "{{ local_account_list }}"
+      with_items: "{{ user_names_local }}"
       when: inventory_hostname == nfs_server
 
     # Now that the home directories exist, they can be mounted remotely.
@@ -46,12 +46,8 @@
         password: "{{ user_password }}"
         group: staff
         append: yes
-      with_items: "{{ local_account_list }}"
+      with_items: "{{ user_names_local }}"
       when: inventory_hostname != nfs_server
-
-    vars:
-      # Sorted for consistent UID assignment.
-      local_account_list: "{{ user_names_local | sort }}"
 
   - block:
     - name: Create /etc/auto.bunsen-home autofs map file
@@ -84,4 +80,4 @@
       mode: 0600
       owner: root
       group: root
-    with_items: "{{ user_accounts.keys() | list }}"
+    with_items: "{{ user_names_local }}"
