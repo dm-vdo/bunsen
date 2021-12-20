@@ -57,8 +57,8 @@ externals:
       host:
         schema: http://
         name: coprbe.devel.redhat.com
-        path: "/results/VDO-team/StagingBunsenPackages/{{_distro_releasever}}-$basearch"
-        keypath: /results/VDO-team/StagingBunsenPackages/pubkey.gpg
+        path: "/results/awalsh/TestVDOStaging/{{_distro_releasever}}-$basearch"
+        keypath: /results/awalsh/TestVDOStaging/pubkey.gpg
 
   # Third party resources utilized.
   third-party:
