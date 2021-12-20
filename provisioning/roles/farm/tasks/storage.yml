@@ -30,7 +30,8 @@
   # Not using a storage server.
   - block:
     - block:
-      # System with no volume groups; use the second disk.
+      # System with no volume groups or 1 volume group of the name this task
+      # would give it; use the second disk.
       - name: Setting scratch volume group and test disk names
         set_fact:
           scratch_vg: scratch
@@ -41,6 +42,8 @@
                       {%- endif -%}"
       when: (ansible_lvm is not defined)
               or ((ansible_lvm.vgs.keys() | length) == 0)
+              or (((ansible_lvm.vgs.keys() | length) == 1))
+                  and ('scratch' in ansible_lvm.vgs.keys())
 
     - block:
         # System with at least one volume group.
