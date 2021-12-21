@@ -42,6 +42,5 @@
     state: started
     enabled: True
 
-- include: athinfo.yml
 - include: search_path.yml
 - include: ssh.yml
