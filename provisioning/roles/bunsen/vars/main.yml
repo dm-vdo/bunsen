@@ -1,4 +1,8 @@
 ---
+# Default value controlling whether bunsen installs necessary support software
+# on the ansible controller machine.
+install_bunsen_support: false
+
 ##########################################################################
 # Repositories.
 ##########################################################################
