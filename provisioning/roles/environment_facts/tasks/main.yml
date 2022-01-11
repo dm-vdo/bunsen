@@ -5,28 +5,26 @@
     failed_when: False
     register: getpwent_result
 
-  - block:
-    # These are currently the only priority configurations.
-    # There will probably be others to distinguish eventually.
-    - name: Setting vagrant facts
-      set_fact:
-        is_vagrant: '{{ "ansible_facts" in (getpwent_result.keys() | list) }}'
-
-    - name: Setting devvm fact
-      set_fact:
-        is_devvm: true
-
-  - name: Get controller ip address
-    # TODO: The availability of SSH_CLIENT is apparently dependent on how
-    #       ansible-playbook is invoked.  For our current usages the following
-    #       covers all cases.
+  # These are currently the only priority configurations.
+  # There will probably be others to distinguish eventually.
+  - name: Setting vagrant facts
     set_fact:
-      ansible_controller_ip: '
-        {%- if (is_vagrant | bool) -%}
-          {{ ansible_default_ipv4.gateway }}
-        {%- else -%}
-          {{ ansible_env.SSH_CLIENT.split()[0] }}
-        {%- endif -%}'
+      is_vagrant: '{{ "ansible_facts" in (getpwent_result.keys() | list) }}'
+
+  - name: Setting devvm fact
+    set_fact:
+      is_devvm: true
+
+  - name: Get controller IPv4 info
+    local_action:
+      module: setup
+      filter: ansible_default_ipv4
+    delegate_facts: true
+    run_once: true
+
+  - name: Get controller IPv4 address
+    set_fact:
+      ansible_controller_ip: "{{ hostvars['localhost']['ansible_default_ipv4']['address'] }}"
 
   - name: Setting default alternative package facts
     # If the machine is being used as the storage server it needs to use
