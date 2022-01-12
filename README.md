@@ -38,10 +38,9 @@ run the `bunsen` playbook on an `ansible` controller or if you want `bunsen` to
 install available updates to the support software.
 
 The second way to get the `bunsen` support software is to install it yourself.
-For this you will want to download the appropriate repo file for your system
-from [bunsen support] and place it the `/etc/yum.repos.d` directory followed by 
-executing 
-* `dnf install python3-distributions`.
+For this you will want to execute the following commands:
+* `dnf copr enable <name>/<repo>`
+* `dnf install python3-distributions`
 
 Regardless of the method of installation you choose the following software will
 be installed to satisfy dependencies of `python3-distributions`:
@@ -56,7 +55,6 @@ be installed to satisfy dependencies of `python3-distributions`:
 
 <!-- links -->
 [bunsen]: <insert url>
-[bunsen support]: <insert url to repo files>
 
 
 <!-- begin comment
