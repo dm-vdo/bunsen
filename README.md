@@ -1,3 +1,191 @@
+# I. Bunsen
+`bunsen` is a collection of `ansible` entities that will provision a 
+user-provided set of systems (physical and/or virtual) as a simulacrum of the
+official `VDO` development environment.  In this way you the user is able to
+take advantage of the tools, tests, etc. in the same way as the mainstream 
+development team.
+
+The basic environment established by `bunsen` consists of:
+* One "infrastructure" system (server for other systems)
+* One or more "builder" systems (development systems)
+* One or more "farm" systems (testing targets)
+
+# II. Getting `bunsen`
+As you're reading this README you may already have `bunsen`.  Or, perhaps, 
+someone has provided you with this README in which case `bunsen` can be 
+acquired from this location [bunsen].
+
+# III. Setting Up A Controller System
+
+In order to use `bunsen` you will require a system to function as an `ansible`
+controller.  To that end you will need to install `ansible` on some system.
+Additionally you will require `bunsen` runtime support code on that same
+system.
+
+## III.1 ansible
+See your system vendor for `ansible`.
+
+## III.2 bunsen support
+There are two ways get the necessary `bunsen` support software.  The simplest
+is to let `bunsen` install it for you.  This is accomplished by overriding the
+default setting of the `install_bunsen_support` variable when invoking the
+`bunsen` playbook by providing the following additional argument to 
+`ansible-playbook`:
+* `--extra-vars="install_bunsen_support=true"`  
+
+You need only provide this additional argument the first time you
+run the `bunsen` playbook on an `ansible` controller or if you want `bunsen` to
+install available updates to the support software.
+
+The second way to get the `bunsen` support software is to install it yourself.
+For this you will want to execute the following commands:
+* `dnf copr enable <name>/<repo>`
+* `dnf install python3-distributions`
+
+Regardless of the method of installation you choose the following software will
+be installed to satisfy dependencies of `python3-distributions`:
+* bunsen support
+  * `python3-architectures`
+  * `python3-command`
+  * `python3-defaults`
+  * `python3-factory`
+  * `python3-repos`
+* system supplied (if not already installed)
+  * `pyyaml` 
+
+<!-- links -->
+[bunsen]: <insert url>
+
+
+<!-- begin comment
+     Below here is old README content.  This needs to be updated.
+     It is commented out to prevent its rendeering
+
+
+## Things You'll Need Installed
+* ansible
+* bunsen support
+  * python-distributions
+* python modules
+  * requests
+* virtual machine; one or both of:
+  * libvirt and qemu
+  * virtualbox
+* vagrant support
+  * vagrant
+  * vagrant plugins:
+    * vagrant-libvirt (if using libvirt)
+    * vagrant-hosts
+    * vagrant-host-shell
+* HTTP access to file.rdu.redhat.com for the default boxes
+
+## System/user preparation
+  * Linux
+    * CSB (RHEL 7.x)
+      ```
+      sudo yum install ansible git vagrant gcc ruby-devel virt-manager \
+        libvirt{,-devel,-python,-client} qemu{,-kvm,-img} python-virtinst \
+        <python-requests>
+      vagrant plugin install vagrant-libvirt
+      ```
+
+    * CSB (RHEL 8.x)
+      ```
+      sudo yum install ansible git vagrant gcc ruby-devel virt-manager \
+        libvirt{,-devel,-client} qemu{,-kvm,-img} python3-libvirt \
+        virt-install
+      vagrant plugin install vagrant-libvirt
+      ```
+    
+    * stock RHEL 8.x
+      [TBD?]
+
+    * Fedora 28
+      ```
+      sudo dnf install ansible git vagrant{,-libvirt} libvirt{,-libs} \
+        @vagrant @virtualization <python-requests>
+      for service in nfs nfs3 rpc-bind mountd; do
+        sudo firewall-cmd --add-service=${service} --permanent
+      done
+      sudo firewall-cmd --reload
+      ```
+
+    * Fedora 29
+      [TBD?]
+
+    * Fedora 30
+      ```
+      sudo dnf install ansible git ruby-devel libxml2-devel \
+      libvirt{,-libs,-devel} @vagrant @virtualization
+      ```
+	  
+    * Fedora 31, 32
+      There's a version incompatibility between the vagrant-libvirt RPM package
+      and some of the vagrant plugins that we install, where Fedora provides
+      one version of a supporting package, and the plugins require another
+      version of the same supporting package. Thus, we need to install
+      vagrant-libvirt through the vagrant plugin interface, not as an RPM
+      package.
+
+      The package group @vagrant includes the vagrant-libvirt support, which is
+      later removed because of the version incompatibility. We could just
+      install the vagrant package by itself, but it recommends the libvirt
+      support so by default that gets installed anyway unless we explicitly
+      exclude it. Also, if you update from Fedora 30, and had previously
+      installed vagrant and the libvirt support, you'll still need to remove
+      the latter. For simplicity we just show always doing the removal below.
+
+      ```
+      sudo dnf install ansible git gcc make redhat-rpm-config \
+      ruby-devel libxml2-devel libvirt{,-libs,-devel} \
+      @vagrant @virtualization
+      sudo dnf remove vagrant-libvirt
+      vagrant plugin install vagrant-libvirt
+      ```
+
+    * Common
+      Set `SELINUX` in `/etc/selinux/config` to `disabled`
+
+      ```
+      vagrant plugin install vagrant-hosts vagrant-host-shell
+      sudo systemctl enable libvirtd
+      sudo gpasswd -a ${USER} libvirt
+      sudo reboot
+      ```
+
+  * macOS
+    * ansible: macports (`https://www.macports.org`)
+    * python modules:
+      * requests: macports (`https://www.macports.org`)
+      * yaml:
+        * The macports ansible installation automatically installs a version of
+          yaml.  The easiest way to utilize this is to activate the python version
+          that macports also installed;
+          e.g., `sudo port select --set python python27`.
+          To go back to the Apple provided version of python execute the
+          following:
+          `sudo port select --set python none`.
+    * vagrant: `https://www.vagrantup.com/downloads.html`
+    * vagrant plugins: `sudo vagrant plugin install vagrant-hosts vagrant-host-shell`
+    * virtualbox: `https://www.virtualbox.org`
+
+  * Windows
+    * ansible: ?
+    * python modules:
+      * requests: ?
+      * yaml: ?
+    * vagrant: `https://www.vagrantup.com/downloads.html`
+    * virtualbox: `https://www.virtualbox.org`
+
+  &nbsp;&nbsp;
+  Notes
+  1. The virtualbox configuration currently uses a hack to dynamically set
+    specific IP addresses.  A less hacky solution is to be hoped for.
+  2. If you get the error
+       no such name (https://gems.hashicorp.com/specs.4.8.gz)
+    then just wait a minute and try again. This isn't an uncommon occurrence.
+
+
 # I. Using The Vagrant Set Up
 
   1. Prepare your host system as described in "Setting Up Your Host System."
@@ -6,7 +194,7 @@
       `git clone git://git.engineering.redhat.com/users/awalsh/main.git`
   3. `cd <workspace>/main/src/tools/bunsen`.
   4. `vagrant up`
-  5. `./vagrant-run-ansible`
+  5. `./vagrant-run-ansible [--extra-vars="install_bunsen_support=1"]`
 
   &nbsp;&nbsp;
   Notes
@@ -127,133 +315,6 @@
 
       In cases 2. & 3. the mounted image can be found in `/Volumes` and added
       to the config file for sharing.
-
-# II. Setting Up Your Host System
-
-These directions should work with recent distros. Older distros may work, but
-we won't make large efforts to keep them working as they get outdated, reach
-end-of-life, old RHEL versions become incompatible with the latest EPEL, etc.
-
-## Things You'll Need Installed
-* ansible
-* python modules
-  * requests
-* virtual machine; one or both of:
-  * libvirt and qemu
-  * virtualbox
-* vagrant support
-  * vagrant
-  * vagrant plugins:
-    * vagrant-libvirt (if using libvirt)
-    * vagrant-hosts
-    * vagrant-host-shell
-* HTTP access to file.rdu.redhat.com for the default boxes
-
-## System/user preparation
-  * Linux
-    * CSB (RHEL 7.x)
-      ```
-      sudo yum install ansible git vagrant gcc ruby-devel virt-manager \
-        libvirt{,-devel,-python,-client} qemu{,-kvm,-img} python-virtinst \
-        <python-requests>
-      vagrant plugin install vagrant-libvirt
-      ```
-
-    * CSB (RHEL 8.x)
-      ```
-      sudo yum install ansible git vagrant gcc ruby-devel virt-manager \
-        libvirt{,-devel,-client} qemu{,-kvm,-img} python3-libvirt \
-        virt-install
-      vagrant plugin install vagrant-libvirt
-      ```
-    
-    * stock RHEL 8.x
-      [TBD?]
-
-    * Fedora 28
-      ```
-      sudo dnf install ansible git vagrant{,-libvirt} libvirt{,-libs} \
-        @vagrant @virtualization <python-requests>
-      for service in nfs nfs3 rpc-bind mountd; do
-        sudo firewall-cmd --add-service=${service} --permanent
-      done
-      sudo firewall-cmd --reload
-      ```
-
-    * Fedora 29
-      [TBD?]
-
-    * Fedora 30
-      ```
-      sudo dnf install ansible git ruby-devel libxml2-devel \
-      libvirt{,-libs,-devel} @vagrant @virtualization
-      ```
-	  
-    * Fedora 31, 32
-      There's a version incompatibility between the vagrant-libvirt RPM package
-      and some of the vagrant plugins that we install, where Fedora provides
-      one version of a supporting package, and the plugins require another
-      version of the same supporting package. Thus, we need to install
-      vagrant-libvirt through the vagrant plugin interface, not as an RPM
-      package.
-
-      The package group @vagrant includes the vagrant-libvirt support, which is
-      later removed because of the version incompatibility. We could just
-      install the vagrant package by itself, but it recommends the libvirt
-      support so by default that gets installed anyway unless we explicitly
-      exclude it. Also, if you update from Fedora 30, and had previously
-      installed vagrant and the libvirt support, you'll still need to remove
-      the latter. For simplicity we just show always doing the removal below.
-
-      ```
-      sudo dnf install ansible git gcc make redhat-rpm-config \
-      ruby-devel libxml2-devel libvirt{,-libs,-devel} \
-      @vagrant @virtualization
-      sudo dnf remove vagrant-libvirt
-      vagrant plugin install vagrant-libvirt
-      ```
-
-    * Common
-      Set `SELINUX` in `/etc/selinux/config` to `disabled`
-
-      ```
-      vagrant plugin install vagrant-hosts vagrant-host-shell
-      sudo systemctl enable libvirtd
-      sudo gpasswd -a ${USER} libvirt
-      sudo reboot
-      ```
-
-  * macOS
-    * ansible: macports (`https://www.macports.org`)
-    * python modules:
-      * requests: macports (`https://www.macports.org`)
-      * yaml:
-        * The macports ansible installation automatically installs a version of
-          yaml.  The easiest way to utilize this is to activate the python version
-          that macports also installed;
-          e.g., `sudo port select --set python python27`.
-          To go back to the Apple provided version of python execute the
-          following:
-          `sudo port select --set python none`.
-    * vagrant: `https://www.vagrantup.com/downloads.html`
-    * vagrant plugins: `sudo vagrant plugin install vagrant-hosts vagrant-host-shell`
-    * virtualbox: `https://www.virtualbox.org`
-
-  * Windows
-    * ansible: ?
-    * python modules:
-      * requests: ?
-      * yaml: ?
-    * vagrant: `https://www.vagrantup.com/downloads.html`
-    * virtualbox: `https://www.virtualbox.org`
-
-  &nbsp;&nbsp;
-  Notes
-  1. The virtualbox configuration currently uses a hack to dynamically set
-    specific IP addresses.  A less hacky solution is to be hoped for.
-  2. If you get the error
-       no such name (https://gems.hashicorp.com/specs.4.8.gz)
-    then just wait a minute and try again. This isn't an uncommon occurrence.
 
 # III. Using Ansible With Beaker Systems
 
@@ -509,3 +570,4 @@ end-of-life, old RHEL versions become incompatible with the latest EPEL, etc.
      will submit the job regardless of the warning.  The Beaker website will
      require an additional confirmation of job submission.
 
+end comment -->
