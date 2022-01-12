@@ -27,11 +27,13 @@ See your system vendor for `ansible`.
 
 ## III.2 bunsen support
 There are two ways get the necessary `bunsen` support software.  The simplest
-is to let `bunsen` install it for you.  This is accomplished by specifying
-* `--extra-vars="install_bunsen_support=1"`  
+is to let `bunsen` install it for you.  This is accomplished by overriding the
+default setting of the `install_bunsen_support` variable when invoking the
+`bunsen` playbook by providing the following additional argument to 
+`ansible-playbook`:
+* `--extra-vars="install_bunsen_support=true"`  
 
-as an additional argument to `ansible-playbook` when you invoke the `bunsen`
-playbook.  You need only provide this additional argument the first time you
+You need only provide this additional argument the first time you
 run the `bunsen` playbook on an `ansible` controller or if you want `bunsen` to
 install available updates to the support software.
 
@@ -41,17 +43,16 @@ from [bunsen support] and place it the `/etc/yum.repos.d` directory followed by
 executing 
 * `dnf install python3-distributions`.
 
-Regardless of the method of installation you choose the following support
-software will be installed:
-* python3-architectures
-* python3-command
-* python3-defaults
-* python3-distributions
-* python3-factory
-* python3-repos
-
-as well as, if not already installed,
-* pyyaml
+Regardless of the method of installation you choose the following software will
+be installed to satisfy dependencies of `python3-distributions`:
+* bunsen support
+  * `python3-architectures`
+  * `python3-command`
+  * `python3-defaults`
+  * `python3-factory`
+  * `python3-repos`
+* system supplied (if not already installed)
+  * `pyyaml` 
 
 <!-- links -->
 [bunsen]: <insert url>
