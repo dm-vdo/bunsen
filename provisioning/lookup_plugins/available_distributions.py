@@ -10,14 +10,6 @@ DOCUMENTATION = """
   notes:
     - none
 """
-import os
-import platform
-import sys
-
-(major, minor, _) = map(lambda x: int(x), platform.python_version_tuple())
-sys.path.append("/usr/local/lib/python{0}.{1}/site-packages".format(major,
-                                                                    minor))
-
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 from distributions import Distribution
