@@ -10,6 +10,7 @@
     state: present
     path: /etc/lvm/lvm.conf
   when: (is_rhel_family | bool) or (is_fedora31_or_later | bool)
+  become: yes
 
 # lvmetad has been removed from RHEL8 on the grounds that it doesn't provide
 # enough benefit to be worthwhile. It has also been removed from Fedora 31.
@@ -20,6 +21,7 @@
     regexp: "^[\t ]*use_lvmetad[\t ]*="
     line: "\tuse_lvmetad = 0"
   when: (is_fedora | bool) and (not (is_fedora31_or_later | bool))
+  become: yes
 
 - include: perl_libraries.yml
 - include: load_permatest.yml

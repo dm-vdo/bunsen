@@ -21,6 +21,7 @@
         group: root
         mode: 0644
         force: no
+      become: yes
 
 - hosts: all
   roles:
@@ -137,3 +138,4 @@
         path: /var/log/bunsen.log
         regexp: '^Install Date:'
         line: 'Install Date: {{ install_date_time }}'
+      become: yes

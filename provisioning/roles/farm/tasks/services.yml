@@ -5,6 +5,7 @@
       name: crond
       state: restarted
     when: is_fedora
+    become: yes
 
   - name: Start and enable xinetd service
     systemd:
@@ -12,6 +13,7 @@
       state: restarted
       enabled: yes
     when: system_has_xinetd | bool
+    become: yes
 
   - name: Start and enable athinfod.socket
     systemd:
@@ -19,9 +21,11 @@
       state: started
       enabled: True
     when: (not (system_has_xinetd | bool))
+    become: yes
 
   - name: Make sure dkms is enabled
     systemd:
       name: dkms
       state: started
       enabled: True
+    become: yes

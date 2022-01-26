@@ -10,6 +10,7 @@
   retries: "{{ default_retry_count }}"
   delay: 30
   when: is_vagrant
+  become: yes
 
 # Install/update kernel packages.
 - include: kernel.yml
@@ -32,5 +33,5 @@
   command: "dnf remove --assumeyes {{ repoquery.stdout }}"
   args:
     warn: False
-  become: True
+  become: yes
   when: (ansible_pkg_mgr == "dnf") and (repoquery.stdout != "")

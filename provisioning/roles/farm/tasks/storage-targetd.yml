@@ -15,6 +15,7 @@
   package:
     name: iscsi-initiator-utils
     state: present
+  become: yes
 
 - name: Re-retrieving IQN
   setup:

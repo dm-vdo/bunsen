@@ -4,7 +4,7 @@
     src: "{{ item }}"
     dest: /etc/udev/rules.d
     mode: 0644
-  with_items: 
+  with_items:
     - 59-no-vdo-watch.rules
     - 92-permabit-permissions.rules
-
+  become: yes

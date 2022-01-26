@@ -6,10 +6,12 @@
     command: dkms install permatest/1
     register: result
     changed_when: '"already installed" not in result.stdout'
+    become: yes
 
   - name: Load permatest module
     modprobe:
       name: permatest
+    become: yes
 
   - name: Load permatest module at boot
     lineinfile:
@@ -19,3 +21,4 @@
       mode: 0644
       owner: root
       group: root
+    become: yes

@@ -52,17 +52,20 @@
       {%- else -%}
         loop-setup.service
       {%- endif -%}"
+  become: yes
 
 - name: Starting loop device
   systemd:
     name: loop-setup
     state: started
     enabled: True
+  become: yes
 
 - name: Scanning for loop device
   command: "losetup -j {{ path }}"
   changed_when: False
   register: losetup_result
+  become: yes
 
 - name: Identifying loop device
   set_fact:

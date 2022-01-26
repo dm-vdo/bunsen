@@ -27,6 +27,7 @@
                    | select('defined')
                    | reject('match', omit)
                    | join(',') }}"
+      become: yes
 
     - name: Update Ansible mount info
       setup:

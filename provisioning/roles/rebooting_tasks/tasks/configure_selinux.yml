@@ -6,6 +6,7 @@
     selinux:
       state: disabled
     register: selinux_result
+    become: yes
 
   - name: Restart system to apply SELinux changes
     include_tasks: "{{ playbook_dir }}/library/restart_system.yml"
