@@ -4,6 +4,7 @@
   package:
     name: perl-rsvpclient
     state: present
+  become: yes
 
 # XX These are only helpful for interactive shells, but not inetd/cron
 # jobs like "athinfo...checkserver".  Additional heuristics could work
@@ -14,9 +15,11 @@
     src: rsvp.csh
     dest: /etc/profile.d/rsvp.csh
     mode: 0644
+  become: yes
 
 - name: RSVP server selection (sh)
   template:
     src: rsvp.sh
     dest: /etc/profile.d/rsvp.sh
     mode: 0644
+  become: yes

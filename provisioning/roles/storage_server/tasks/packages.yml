@@ -9,3 +9,4 @@
     package:
       name: "{{ server_packages }}"
       state: present
+    become: yes

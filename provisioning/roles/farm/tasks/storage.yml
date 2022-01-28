@@ -26,6 +26,7 @@
       state: directory
       mode: 0755
     when: "'/u1' not in mount_points"
+    become: yes
 
   # Not using a storage server.
   - block:
@@ -140,6 +141,7 @@
       path: /u1
       state: directory
       mode: 01777
+    become: yes
 
   - block:
 

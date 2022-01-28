@@ -24,6 +24,7 @@
         regexp: "^(peer|server) {{ item }}"
         line: "peer {{ item }}"
       with_items: "{{ ntp_peers }}"
+      become: yes
 
     - name: Setting NTP servers in {{ config_file }}
       lineinfile:
@@ -31,6 +32,7 @@
         regexp: "^(peer|server) {{ item }}"
         line: "server {{ item }}"
       with_items: "{{ ntp_servers }}"
+      become: yes
 
     - name: Restart {{ daemon_name }}
       systemd:
@@ -38,5 +40,6 @@
         state: restarted
       when: unit_name in services and services[unit_name].state == 'running'
       # TODO: Don't restart if lineinfile didn't change anything.
+      become: yes
 
   when: conf.stat.exists

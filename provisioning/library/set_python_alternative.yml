@@ -12,3 +12,4 @@
   # chosen alternative for each host.
   with_items:
     - "{{ alternative }}"
+  become: yes

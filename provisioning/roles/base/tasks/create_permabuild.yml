@@ -22,6 +22,7 @@
       state: absent
     register: pbit_build_mount
     with_items: "{{ mounts }}"
+    become: yes
 
   - name: Update Ansible mount info
     setup:
@@ -48,6 +49,7 @@
     path: /etc/exports
     state: absent
   when: inventory_hostname in groups['infrastructure']
+  become: yes
 
 - block:
   - name: Temporary rename /permabit/build directory
@@ -55,6 +57,7 @@
       cmd: mv /permabit/build /permabit/build.tmp
       creates: /permabit/build.tmp
     when: (pbit_build.stat.isdir is defined) and pbit_build.stat.isdir
+    become: yes
 
   - name: Stat temporary /permabit/build directory
     stat:
@@ -68,11 +71,13 @@
         mode: 0755
         owner: "root"
         state: directory
+      become: yes
 
     - name: Move temporary /permabit/build to /permabit/builds/build directory
       command:
         cmd: mv /permabit/build.tmp /permabit/builds/build
         creates: /permabit/builds/build
+      become: yes
     when: (pbit_buildtmp.stat.isdir is defined) and pbit_buildtmp.stat.isdir
 
 - name: Create the permabuild directories.
@@ -82,6 +87,7 @@
     owner: "root"
     state: directory
   with_items: "{{ permabuild_directories }}"
+  become: yes
 
 - name: Create links to the permabuild directories.
   file:
@@ -90,3 +96,4 @@
     follow: no
     state: link
   with_items: "{{ permabuild_directories_links }}"
+  become: yes

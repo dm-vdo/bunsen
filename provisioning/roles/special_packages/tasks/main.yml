@@ -5,3 +5,4 @@
     state: latest
     enablerepo: "{{ special_case_repositories
                   | join(',', attribute='name') }}"
+  become: yes

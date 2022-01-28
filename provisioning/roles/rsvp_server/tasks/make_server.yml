@@ -4,11 +4,13 @@
   package:
     name: perl-rsvpd
     state: present
+  become: yes
 
 - name: Start the RSVPD Service
   systemd:
     name: rsvpd
     state: started
+  become: yes
 
 - name: Wait for RSVPD service to be active
   wait_for:

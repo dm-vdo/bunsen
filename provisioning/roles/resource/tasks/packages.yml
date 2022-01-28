@@ -4,3 +4,4 @@
     package:
       name: "{{ resource_base_packages }}"
       state: present
+    become: yes

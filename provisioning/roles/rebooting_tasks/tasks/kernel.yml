@@ -7,6 +7,7 @@
       name: "{{ kernel_packages }}"
       state: latest
     register: result
+    become: yes
 
   # Sometimes installing/updating the kernel packages, if it includes the debug
   # kernel, results in the debug kernel becoming the default kernel. We don't

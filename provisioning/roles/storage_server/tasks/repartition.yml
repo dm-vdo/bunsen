@@ -37,6 +37,7 @@
        path: /home
        state: absent
      when: must_relocate_home | bool
+     become: yes
 
    - name: Deleting old /home logical volume
      lvol:
@@ -45,6 +46,7 @@
        state: absent
        force: yes
      when: must_relocate_home | bool
+     become: yes
 
    - name: Rescan mount points
      setup:

@@ -11,12 +11,14 @@
     enabled: True
   # See above re: zipl boot loader.
   when: is_fedora and (not is_arch_s390x)
+  become: yes
 
 - name: Enable use of /proc/sysrq-trigger
   sysctl:
     name: kernel.sysrq
     value: "1"
     sysctl_set: yes
+  become: yes
 
 - name: Enable crash dump on NMI
   sysctl:
@@ -27,6 +29,7 @@
     - kernel.panic_on_unrecovered_nmi
     - kernel.unknown_nmi_panic
   when: is_vagrant | bool
+  become: yes
 
 - name: Enable core dump generation
   lineinfile:
@@ -35,6 +38,7 @@
     state: present
     line: "DefaultLimitCORE=0:infinity"
   register: systemd_config
+  become: yes
 
 - name: Restart systemd and sshd to use new core dump setting
   systemd:
@@ -42,14 +46,17 @@
     daemon_reexec: yes
     state: restarted
   when: systemd_config is changed
+  become: yes
 
 - name: Enable sysstat monitoring
   systemd:
     name: sysstat
     state: started
     enabled: yes
+  become: yes
 
 - name: Ensure distro VDO package lock directory is not present
   file:
     path: /var/lock/vdo
     state: absent
+  become: yes

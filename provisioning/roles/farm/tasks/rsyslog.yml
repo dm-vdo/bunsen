@@ -24,6 +24,7 @@
     name: rsyslog
     state: restarted
   when: kernlog_result is changed or ratelimit_result is changed
+  become: yes
 
 - name: Add kern.log to logrotate configuration
   copy:
@@ -42,3 +43,4 @@
     mode: 0644
     owner: root
     group: root
+  become: yes

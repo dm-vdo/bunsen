@@ -79,6 +79,7 @@
     line: 'prefer-family = IPv4'
     path: /etc/wgetrc
     create: yes
+  become: yes
 
 - block:
 

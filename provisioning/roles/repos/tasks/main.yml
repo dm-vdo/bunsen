@@ -17,6 +17,7 @@
     with_items: "{{ repositories }}"
     loop_control:
       label: "{{ [item['name'], item['metalink'] | default(item['baseurl'])] }}"
+    become: yes
 
   - name: Enable Fedora updates repositories
     ini_file:
@@ -29,6 +30,7 @@
       - updates-debuginfo
       - updates-source
     when: is_fedora | bool
+    become: yes
 
   - name: Set special case repositories for use by others.
     set_fact:

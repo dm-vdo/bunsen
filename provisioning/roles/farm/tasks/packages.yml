@@ -9,6 +9,7 @@
     package:
       name: "{{ farm_packages }}"
       state: present
+    become: yes
 
   - name: Ensure distro VDO packages are not installed
     package:
@@ -16,3 +17,4 @@
         - kmod-kvdo
         - vdo
       state: absent
+    become: yes

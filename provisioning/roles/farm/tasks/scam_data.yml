@@ -5,12 +5,14 @@
       path: /etc/scam
       mode: 0755
       state: directory
+    become: yes
 
   - name: SCAM data - Ansible
     copy:
       content: ANSIBLE=yes
       dest: /etc/scam/ansible.conf
       mode: 0644
+    become: yes
 
   - name: SCAM data - DevVM
     lineinfile:
@@ -25,6 +27,7 @@
               {%- else -%}
                 absent
               {%- endif -%}"
+    become: yes
 
   - name: SCAM data - Vagrant
     lineinfile:
@@ -39,15 +42,18 @@
               {%- else -%}
                 absent
               {%- endif -%}"
+    become: yes
 
   - name: SCAM data - farm
     copy:
       content: FARM=yes
       dest: /etc/scam/farm.conf
       mode: 0644
+    become: yes
 
   - name: SCAM data - Albireo
     copy:
       content: ALBIREO=yes
       dest: /etc/scam/albireo.conf
       mode: 0644
+    become: yes

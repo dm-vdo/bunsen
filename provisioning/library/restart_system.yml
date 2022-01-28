@@ -81,6 +81,7 @@
 
   - name: Restart system
     command: "shutdown --no-wall -r +1"
+    become: yes
 
   # After 60 seconds, the above command will *start* the reboot
   # sequence, which involves cleanly shutting down system services. On

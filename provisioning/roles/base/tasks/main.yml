@@ -4,6 +4,7 @@
 # via ansible.
 - name: Set non-ansible accessible pre-determined network configuration
   predetermined_network_configuration:
+  become: yes
 
 - include: create_permabuild.yml
 
@@ -11,6 +12,7 @@
   timezone:
     name: US/Eastern
     hwclock: UTC
+  become: yes
 
 - include: domain.yml
 
@@ -19,6 +21,7 @@
     path: /u1
     state: directory
     mode: 01777
+  become: yes
 
 - include: pre_alternatives.yml
 - include: packages.yml
@@ -41,6 +44,7 @@
     name: smartd.service
     state: started
     enabled: True
+  become: yes
 
 - include: search_path.yml
 - include: ssh.yml
