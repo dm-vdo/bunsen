@@ -27,6 +27,7 @@ _packages:
     - net-tools
     - nfs-utils
     - pbit-build
+    - pbit-common-build
     # OPS-15128: need Data::Compare for all tests
     - rsync
     - scam

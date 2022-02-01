@@ -5,6 +5,7 @@ _repos_selection:
   architecture: "{{ ansible_machine }}"
   environment:
 
+_common_tools: "{{ externals['first-party']['common-tools']['host'] }}"
 _file_server: "{{ externals['first-party']['file-server']['host'] }}"
 _main_tools: "{{ externals['first-party']['main-tools']['host'] }}"
 _rsvpd: "{{ externals['first-party']['rsvpd']['host'] }}"
@@ -33,6 +34,15 @@ _repositories:
       baseurl: "{{ [_file_server['schema'],
                     _file_server['name'],
                     _file_server['path']] | join }}"
+
+    - name: pbit-eng-common-tools
+      description: "Permabit common tools"
+      enabled: yes
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ [_common_tools['schema'],
+                    _common_tools['name'],
+                    _common_tools['path']] | join }}"
 
     - name: pbit-eng-main-tools
       description: "Permabit tools"
