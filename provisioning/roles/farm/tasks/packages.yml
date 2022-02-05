@@ -1,10 +1,5 @@
 ---
 - block:
-  - include_role:
-      name: repos
-    vars:
-      repositories: "{{ farm_repositories }}"
-
   - name: Install required packages
     package:
       name: "{{ farm_packages }}"
