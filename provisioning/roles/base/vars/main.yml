@@ -26,7 +26,6 @@ _packages:
     # Only needed until checkServer is weaned off of ifconfig.
     - net-tools
     - nfs-utils
-    - pbit-build
     # OPS-15128: need Data::Compare for all tests
     - rsync
     - scam

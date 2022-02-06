@@ -6,7 +6,6 @@ _repos_selection:
   environment:
 
 _file_server: "{{ externals['first-party']['file-server']['host'] }}"
-_main_tools: "{{ externals['first-party']['main-tools']['host'] }}"
 _rsvpd: "{{ externals['first-party']['rsvpd']['host'] }}"
 _third_party_common: "{{ externals['third-party']['third-party-common']['host'] }}"
 _repositories:
@@ -33,15 +32,6 @@ _repositories:
       baseurl: "{{ [_file_server['schema'],
                     _file_server['name'],
                     _file_server['path']] | join }}"
-
-    - name: pbit-eng-main-tools
-      description: "Permabit tools"
-      enabled: yes
-      gpgcheck: no
-      sslverify: no
-      baseurl: "{{ [_main_tools['schema'],
-                    _main_tools['name'],
-                    _main_tools['path']] | join }}"
 
     - name: rsvpd
       description: "rsvp packages"
