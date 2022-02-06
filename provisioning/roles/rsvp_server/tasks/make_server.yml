@@ -3,7 +3,13 @@
 - name: Install the RSVPD package
   package:
     name: perl-rsvpd
-    state: present
+    state: latest
+  become: yes
+
+- name: Install the rsvpclient package
+  package:
+    name: perl-rsvpclient
+    state: latest
   become: yes
 
 - name: Start the RSVPD Service
@@ -19,8 +25,7 @@
 # Add the RSVP classes
 # For RHEL families we register only the major version of the distribution.
 - name: Add the RSVP classes
-  command: "/permabit/build/perl/lastrun/bin/rsvpclient.pl  \
-            --dhost localhost add_class {{ item }}"
+  command: "/usr/bin/rsvpclient  --dhost localhost add_class {{ item }}"
   register: result
   changed_when: "result.rc == 0"
   failed_when: "(result.rc != 0) and ('already exists' not in result.stderr)"
