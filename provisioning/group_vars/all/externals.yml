@@ -18,14 +18,6 @@ externals:
 
   # Resources provided by the group.
   first-party:
-    common-tools:
-      schema: rpm
-      host:
-        schema: http://
-        name: vdo-image-store.permabit.lab.eng.bos.redhat.com
-        path: /eng-common-repo/RPMs
-        keypath: None
-
     file-server:
       schema: rpm
       host:
