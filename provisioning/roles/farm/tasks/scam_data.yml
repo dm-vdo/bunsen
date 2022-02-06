@@ -1,12 +1,5 @@
 ---
 - block:
-  - name: Dummy SCAM directory
-    file:
-      path: /etc/scam
-      mode: 0755
-      state: directory
-    become: yes
-
   - name: SCAM data - Ansible
     copy:
       content: ANSIBLE=yes

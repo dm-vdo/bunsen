@@ -26,14 +26,6 @@ externals:
         path: /~awalsh/rpm_repo/lastrun
         keypath: None
 
-    main-tools:
-      schema: rpm
-      host:
-        schema: http://
-        name: vdo-image-store.permabit.lab.eng.bos.redhat.com
-        path: /eng-main-repo/RPMs
-        keypath: None
-
     rsvpd:
       schema: rpm
       host:
