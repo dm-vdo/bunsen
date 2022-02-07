@@ -42,14 +42,6 @@ externals:
         path: /eng-main-repo/RPMs
         keypath: None
 
-    permatest:
-      schema: rpm
-      host:
-        schema: http://
-        name: vdo-image-store.permabit.lab.eng.bos.redhat.com
-        path: /repository/permatest-repo
-        keypath: None
-
     rsvpd:
       schema: rpm
       host:

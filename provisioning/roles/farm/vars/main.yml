@@ -5,25 +5,8 @@ master_user: "{{ master_user_account }}"
 _farm_selection:
   distribution: "{{ ansible_distribution + ansible_distribution_version }}"
   architecture: "{{ ansible_machine }}"
-  environment:
-    - permatest
 
-# Farm repositories.
-_permatest: "{{ externals['first-party']['permatest']['host'] }}"
-_farm_repositories:
-  - environment:
-    - permatest:
-      - common:
-        - name: permatest
-          description: Custom repository for permatest kernel module
-          enabled: yes
-          gpgcheck: no
-          sslverify: no
-          baseurl: "{{ [_permatest['schema'],
-                        _permatest['name'],
-                        _permatest['path']] | join }}"
-
-farm_repositories: "{{ _farm_repositories | select_install(_farm_selection) }}"
+farm_repositories: "{{ [] }}"
 
 # Farm packages.
 _farm_packages:
@@ -41,6 +24,7 @@ _farm_packages:
     - libaio
     - lvm2
     - perf
+    - permatest
     - rsyslog
     - strace
     - sysstat
@@ -83,15 +67,6 @@ _farm_packages:
   # Common to all RHEL 7 and 8 family.
   - (CentOS|RedHat)(7|8)\.[0-9]+:
     - abrt
-
-  ##########################################################################
-  # Environment-specific.
-  ##########################################################################
-  - environment:
-    - permatest:
-      # Common to all distributions.
-      - common:
-        - permatest
 
 farm_packages: "{{ _farm_packages | select_install(_farm_selection) }}"
 
