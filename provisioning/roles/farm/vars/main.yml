@@ -25,6 +25,7 @@ _farm_packages:
     - lvm2
     - perf
     - permatest
+    - perl-Permabit-checkServer
     - rsyslog
     - strace
     - sysstat

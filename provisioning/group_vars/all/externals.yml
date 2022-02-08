@@ -18,28 +18,12 @@ externals:
 
   # Resources provided by the group.
   first-party:
-    common-tools:
-      schema: rpm
-      host:
-        schema: http://
-        name: vdo-image-store.permabit.lab.eng.bos.redhat.com
-        path: /eng-common-repo/RPMs
-        keypath: None
-
     file-server:
       schema: rpm
       host:
         schema: http://
         name: file.rdu.redhat.com
         path: /~awalsh/rpm_repo/lastrun
-        keypath: None
-
-    main-tools:
-      schema: rpm
-      host:
-        schema: http://
-        name: vdo-image-store.permabit.lab.eng.bos.redhat.com
-        path: /eng-main-repo/RPMs
         keypath: None
 
     rsvpd:

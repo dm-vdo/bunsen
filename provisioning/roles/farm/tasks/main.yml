@@ -31,5 +31,9 @@
 - include: storage.yml
 - include: required_packages_file.yml
 - include: udev.yml
+
+#XXX: This is a hack until we get perl code mirroring and packaging put
+#     together
+- include: temp_fix_athinfo.yml
 # This must be last, as a test could start using the machine afterwards.
 - include: rsvp.yml
