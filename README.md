@@ -53,6 +53,17 @@ be installed to satisfy dependencies of `python3-distributions`:
 * system supplied (if not already installed)
   * `pyyaml` 
 
+## III.3 hostname resolution
+Hosts in the `bunsen` environment must be able to reach each other by hostname. 
+`bunsen` can provision an environment provided by `vagrant` and take advantage 
+of its automatic handling of ssh connections (via `vagrant ssh`) by modifying 
+the ~/.ssh/config file to proxy through that command. This would allow for you 
+to ssh into the provisioned machines from the host directly as yourself.
+
+You can enable this behavior by providing the following additional argument to 
+`ansible-playbook`:
+* `--extra-vars=enable_proxy_vagrant_ssh_config=true"`  
+
 <!-- links -->
 [bunsen]: <insert url>
 
