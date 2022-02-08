@@ -13,6 +13,11 @@ user_password: $6$lr2pKxpIvVfQuSrI$7OJ1ldLqVMkQk2xDfZZ6B4hQaswWTfQA89HDRyRr6PV.M
 storage_server_account: admin
 storage_server_password: bunsen-storage-server
 
+# Update ~/.ssh/config to proxy through 'vagrant' when appropriate.  If
+# hostname resolution outside of the VM environment is not available, this may
+# be necessary to communicate with the various VMs directly from the host.
+enable_proxy_vagrant_ssh_config: False
+
 # Default retry values; used when specifying retries on a task, block or
 # anything else to which it applies.
 default_retry_count: 3
