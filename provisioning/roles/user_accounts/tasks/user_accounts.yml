@@ -61,9 +61,9 @@
         mode: 0755
       become: yes
 
-    - name: Add /etc/auto.bunsen-home to /etc/auto.bunsen
+    - name: Add /etc/auto.bunsen-home to /etc/auto.master
       lineinfile:
-        path: /etc/auto.bunsen
+        path: /etc/auto.master
         regexp: '^{{ user_homes_local }}[ \t]+/etc/auto\.bunsen-home'
         line: "{{ user_homes_local }} /etc/auto.bunsen-home"
       become: yes
