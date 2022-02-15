@@ -445,7 +445,7 @@ You can enable this behavior by providing the following additional argument to
   `-l` parameter, but the initial configuration of the "infrastructure" machine
   must happen with the first batch.
 
-  The Ansible script will create an account named "master" that you
+  The Ansible script will create an account named "bunsen" that you
   can log into using your SSH key, with its own home directory (stored
   on the infrastructure machine and NFS-mounted by the others). It
   will install the Permabit Perl and Python libraries under /permabit
@@ -476,7 +476,7 @@ You can enable this behavior by providing the following additional argument to
     of that machine will fail.
 
   After the Ansible script finishes, log into the "resources" machine as
-  "master", check out your VDO tree, build it and run tests,
+  "bunsen", check out your VDO tree, build it and run tests,
   etc. After you've compiled your VDO tree on the "resources" machine, you
   could run the VDO Perl tests from the "infrastructure" machine instead,
   if you've set up your inventory to list the "resources" machine also as

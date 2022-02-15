@@ -39,7 +39,7 @@
   command: "rsvpclient --dhost {{ rsvp_server }} add {{ farm }} \
             --classes {{ class_list }}"
   become: yes
-  become_user: "{{ master_user }}"
+  become_user: "{{ bunsen_user }}"
   register: result
   failed_when:
     - result.rc != 0
