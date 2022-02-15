@@ -1,6 +1,6 @@
 # Farm variables.
 ---
-master_user: "{{ master_user_account }}"
+bunsen_user: "{{ bunsen_user_account }}"
 
 _farm_selection:
   distribution: "{{ ansible_distribution + ansible_distribution_version }}"

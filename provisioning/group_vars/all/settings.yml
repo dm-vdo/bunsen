@@ -80,7 +80,7 @@ distribution_repo_root_url: "
   {{ root_url }}"
 
 # User accounts to create.
-master_user_account: master
+bunsen_user_account: bunsen
 
 deploying_user_account: "{{ deploying_account | default(lookup('env','USER')) }}"
 target_user_account: "{{ target_account | default(deploying_user_account) }}"
@@ -88,7 +88,7 @@ _target_user_accounts: "{{ target_accounts | default([target_user_account]) }}"
 target_user_accounts: "{{ _target_user_accounts | unique | list }}"
 
 _user_accounts: "{{
-  [master_user_account, deploying_user_account] + target_user_accounts }}"
+  [bunsen_user_account, deploying_user_account] + target_user_accounts }}"
 
 # Where we place local user account's home directories.
 # We do this to avoid, in a vagrant environment, the obscuring of the vagrant
