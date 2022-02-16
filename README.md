@@ -10,7 +10,7 @@ The basic environment established by `bunsen` consists of:
 * One or more "builder" systems (development systems)
 * One or more "farm" systems (testing targets)
 
-# II. Getting `bunsen`
+# II. Getting Bunsen
 As you're reading this README you may already have `bunsen`.  Or, perhaps, 
 someone has provided you with this README in which case `bunsen` can be 
 acquired from this location [bunsen].
@@ -22,10 +22,10 @@ controller.  To that end you will need to install `ansible` on some system.
 Additionally you will require `bunsen` runtime support code on that same
 system.
 
-## III.1 ansible
+## III.1 Ansible
 See your system vendor for `ansible`.
 
-## III.2 bunsen support
+## III.2 Bunsen Support
 There are two ways get the necessary `bunsen` support software.  The simplest
 is to let `bunsen` install it for you.  This is accomplished by overriding the
 default setting of the `install_bunsen_support` variable when invoking the
@@ -53,14 +53,103 @@ be installed to satisfy dependencies of `python3-distributions`:
 * system supplied (if not already installed)
   * `pyyaml` 
 
-## III.3 hostname resolution
-Hosts in the `bunsen` environment must be able to reach each other by hostname. 
-`bunsen` can provision an environment provided by `vagrant` and take advantage 
-of its automatic handling of ssh connections (via `vagrant ssh`) by modifying 
-the ~/.ssh/config file to proxy through that command. This would allow for you 
-to ssh into the provisioned machines from the host directly as yourself.
+# IV. Bunsen Environment
+As already mentioned `bunsen` establishes an environment consisting of an
+infrastructure system and one or more of both builder and farm systems.  In
+essence `bunsen` creates a simulated version of the `VDO` team's development
+laboratory.
 
-You can enable this behavior by providing the following additional argument to 
+## IV.1 Infrastructure System
+The infrastructure system functions as the laboratory's server.
+### IV.1.1 Roles
+* user home directories host
+* filesystems of required software host
+* farm reservation server
+
+## IV.2 Builder System
+_You will want at least one builder system for each Linux distribution for which
+you are developing._
+
+Think of a builder system as a GUI-less development workstation.
+
+### IV.2.1 Roles
+* software builder
+* test executor
+  * When running a system-level test a farm will automatically be reserved (via
+    the infrastructure system's role as a farm reservation server) and the test
+    will be executed against it. After the test is complete the farm 
+    reservation will be released.
+  * Builder systems target farm systems running the same Linux distribution as 
+    the builder system. 
+
+## IV.3 Farm System
+_You will want at least one farm system for each Linux distribution for which
+you are developing._  
+Multiple farm systems per Linux distribution may be desirable for parallelized
+testing. 
+
+### IV.3.1 Roles
+* system test target
+
+# V. System Virtualization
+There are many options available for the creation of virtualized systems to be
+deployed as part of a `bunsen` environment.  While not exhaustive here we
+detail hardware configurations, network access requirements as well as options 
+available and processes we follow for some virtualization mechanisms.
+
+## V.1 Hardware Configurations
+### V.1.1 Infrastructure System
+As user home directories are shared across all systems from the infrastructure
+machine you may wish to use a hard disk size greater than the minimum to
+provide more space for development.
+
+* CPUs: 2
+* Memory: 2 GiB
+* Network: Shared 
+* Hard Disk:
+    * system, minimum 10 GiB capacity
+        * 4 GiB consumed by bunsen provisioning (minimal Fedora 35)
+        
+### V.1.1 Builder System
+* CPUs: 2
+* Memory: 2 GiB
+* Network: Shared 
+* Hard Disk:
+    * system, minimum 10 GiB capacity
+        * 4 GiB consumed by bunsen provisioning (minimal Fedora 35)
+
+### V.1.1 Farm System
+* CPUs: 2
+* Memory: 2 GiB
+* Network: Shared 
+* Hard Disk: two, 256 GiB capacity each
+    * system, minimum 10 GiB capacity
+        * 5.5 GiB consumed by bunsen provisioning (minimal Fedora 35)
+    * test, minimum 200 GiB capacity
+
+## V.2 Network Access Requirements
+Whether provided automatically by your virtualization choice or via additional
+configuration the virtualized systems must be accessible via hostname from...
+* the `ansible` controller for `bunsen` provisioning
+* each other as part of the `bunsen` virtualized laboratory
+* your personal system(s) for development
+
+
+## V.3 Virtualization Mechanisms
+### V.3.1 Vagrant
+#### V.3.1.1 Plugins
+In order for `bunsen` to support options of a `vagrant` environnment the
+following plugins need to be installed:
+* `vagrant-libvirt`, if using `libvirt`
+* `vagrant-hostmanager`
+
+#### V.3.1.2 Hostname Resolution
+On the `ansible` controller system `bunsen` can provide the user running the
+`bunsen` playbook proxy `ssh` access (using the `vagrant` `ssh` key) to the
+systems in the `bunsen` environment.  This is accomplished by modifying the
+user's `~/.ssh/config` file.
+
+To enable this proxying option provide the following additional argument to 
 `ansible-playbook`:
 * `--extra-vars=enable_proxy_vagrant_ssh_config=true"`  
 
