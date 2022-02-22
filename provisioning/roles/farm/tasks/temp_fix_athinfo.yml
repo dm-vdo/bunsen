@@ -26,7 +26,7 @@
 # Check whether the isThirtyFive is present in the file.  If it's missing, then
 # register 'isThirtyFiveIsMissing'.  Using check_mode: yes to ensure the line
 # isn't actually added by this check.
-- name: Check for isThirtyFive
+- name: Check for 'isThirtyFive'
   lineinfile:
     dest: /usr/share/perl5/vendor_perl/Permabit/PlatformUtils.pm
     line: "^  isThirtyFive"
@@ -43,4 +43,25 @@
     state: present
   become: yes
   when: isThirtyFiveIsMissing
+
+# Check whether the 'ThirtyFive' is present in the $KNOWN_RELEASES.  If it's
+# missing, then register 'thirtyFiveIsMissing'.  Using check_mode: yes to
+# ensure the line isn't actually added by this check.
+- name: Check for 'ThirtyFive' in $KNOWN_RELEASES
+  lineinfile:
+    dest: /usr/share/perl5/vendor_perl/Permabit/PlatformUtils.pm
+    line: "ThirtyFour Rawhide"
+  check_mode: yes
+  register: thirtyFiveIsMissing
+
+# When we know that ThirtyFive is actually missing from above, let's add it
+# where we want to put it
+- name: Fix PlatformUtils Outdated Issue (add ThirtyFive to $KNOWN_RELEASES)
+  replace:
+    path: /usr/share/perl5/vendor_perl/Permabit/PlatformUtils.pm
+    regexp: 'ThirtyFour Rawhide\)'
+    replace: 'ThirtyFour ThirtyFive Rawhide)'
+  become: yes
+  when: thirtyFiveIsMissing
+
 
