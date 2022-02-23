@@ -18,14 +18,6 @@ externals:
 
   # Resources provided by the group.
   first-party:
-    file-server:
-      schema: rpm
-      host:
-        schema: http://
-        name: file.rdu.redhat.com
-        path: /~awalsh/rpm_repo/lastrun
-        keypath: None
-
     rsvpd:
       schema: rpm
       host:
