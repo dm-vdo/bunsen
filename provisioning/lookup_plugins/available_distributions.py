@@ -19,4 +19,5 @@ class LookupModule(LookupBase):
       if (_terms is not None) and (len(_terms) > 0):
         raise AnsibleError("incorrect number of arguments")
 
-      return Distribution.choices()
+      return [distribution.upper()
+              for distribution in Distribution.choices()]
