@@ -28,8 +28,10 @@
 
 # package_availability.yml has to run after packages.yml since it is
 # checking if certain packages are available in order to determine
-# what need to be done later during the build process.
+# what needs to be done later during the build process.
 - include: package_availability.yml
+
+- include: perl_configuration.yml
 
 - include: alternatives.yml
 - include: perl_libraries.yml

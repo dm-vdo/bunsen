@@ -1,0 +1,33 @@
+---
+
+# Install the perl Configuration package
+- name: Install the perl-Permabit-Configured package
+  package:
+    name: perl-Permabit-Configured
+    state: latest
+  become: yes
+
+#XXX: This should actually end up being unnecessary.  Unless we always want to
+#     retain a pristine copy at the default location and always re-copy/update
+#     it after doing changes.
+- name: Copy proper perl Config template into place
+  shell: cp -vf /usr/share/perl5/vendor_perl/Permabit/perl.yaml /etc/permabit/perl.yaml
+  become: yes
+
+- name: Enable the Permabit::RSVP module in perl.yaml
+  lineinfile:
+    path: /etc/permabit/perl.yaml
+    backrefs: yes
+    regexp: '^(\s*)[#]?Permabit::RSVP: ~'
+    line: '\1Permabit::RSVP:'
+  become: yes
+
+#XXX: Perhaps it makes sense to move other "default rsvp server" stuff to this
+#     location (or at least for the same role) as well?
+- name: Set default RSVP Server in perl.yaml
+  lineinfile:
+    path: /etc/permabit/perl.yaml
+    backrefs: yes
+    regexp: '^(\s*)[#]?defaultRSVPServer: ~'
+    line: '\1defaultRSVPServer: {{ rsvp_server }}'
+  become: yes
