@@ -15,19 +15,21 @@
 - name: Enable the Permabit::RSVP module in perl.yaml
   replace:
     path: /etc/permabit/perl.yaml
-    # backrefs: yes
     regexp: '^\s*[#]?Permabit::RSVP:.*$\n^\s*[#]?config:.*$'
     replace: >-
       Permabit::RSVP:
         config:
   become: yes
 
-#XXX: Perhaps it makes sense to move other "default rsvp server" stuff to this
-#     location (or at least for the same role) as well?
-- name: Set default RSVP Server in perl.yaml
+- name: Configure Permabit::RSVP in perl.yaml
   lineinfile:
     path: /etc/permabit/perl.yaml
     backrefs: yes
-    regexp: '^(\s*)[#]?defaultRSVPServer: ~'
-    line: '\1defaultRSVPServer: {{ rsvp_server }}'
+    regexp: '^(\s*)[#]?{{ item.key }}: .*'
+    line: '\1{{ item.key }}: {{ item.value }}'
   become: yes
+  with_items:
+    - { key: 'defaultRSVPServer', value: "{{ rsvp_server}}" }
+    - { key: 'emailDomain', value: not.required.com }
+    - { key: 'jiraBrowseURL', value: http://this.is.not.actually.required.com }
+    - { key: 'jiraForceUser', value: some_fake_user_account }
