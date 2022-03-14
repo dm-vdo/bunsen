@@ -7,19 +7,19 @@
     state: latest
   become: yes
 
-#XXX: This should actually end up being unnecessary.  Unless we always want to
-#     retain a pristine copy at the default location and always re-copy/update
-#     it after doing changes.
+# Always start from a fresh copy so that we have a known good starting point.
 - name: Copy proper perl Config template into place
   shell: cp -vf /usr/share/perl5/vendor_perl/Permabit/perl.yaml /etc/permabit/perl.yaml
   become: yes
 
 - name: Enable the Permabit::RSVP module in perl.yaml
-  lineinfile:
+  replace:
     path: /etc/permabit/perl.yaml
-    backrefs: yes
-    regexp: '^(\s*)[#]?Permabit::RSVP: ~'
-    line: '\1Permabit::RSVP:'
+    # backrefs: yes
+    regexp: '^\s*[#]?Permabit::RSVP:.*$\n^\s*[#]?config:.*$'
+    replace: >-
+      Permabit::RSVP:
+        config:
   become: yes
 
 #XXX: Perhaps it makes sense to move other "default rsvp server" stuff to this
