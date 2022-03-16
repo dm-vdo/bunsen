@@ -1,0 +1,27 @@
+---
+# Always start from a fresh copy so that we have a known good starting point.
+- name: Copy proper perl Config template into place
+  shell: cp -vf /usr/share/perl5/vendor_perl/Permabit/perl.yaml /etc/permabit/perl.yaml
+  become: yes
+
+- name: Enable the Permabit::RSVP module in perl.yaml
+  replace:
+    path: /etc/permabit/perl.yaml
+    regexp: '^\s*[#]?Permabit::RSVP:.*$\n^\s*[#]?config:.*$'
+    replace: >-
+      Permabit::RSVP:
+        config:
+  become: yes
+
+- name: Configure Permabit::RSVP in perl.yaml
+  lineinfile:
+    path: /etc/permabit/perl.yaml
+    backrefs: yes
+    regexp: '^(\s*)[#]?{{ item.key }}: .*'
+    line: '\1{{ item.key }}: {{ item.value }}'
+  become: yes
+  with_items:
+    - { key: 'defaultRSVPServer', value: "{{ rsvp_server}}" }
+    - { key: 'emailDomain', value: not.required.com }
+    - { key: 'jiraBrowseURL', value: http://this.is.not.actually.required.com }
+    - { key: 'jiraForceUser', value: some_fake_user_account }
