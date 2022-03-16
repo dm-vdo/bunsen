@@ -10,19 +10,6 @@
         msg: "requires at least Ansible version 2.7"
       run_once: true
 
-    - name: Copy bunsen log template and add image build date/time
-      vars:
-        image_date_time:
-          "{{ '%Y%m%d_%H%M%S' | strftime(ansible_date_time.epoch) }}"
-      template:
-        src: bunsen.log
-        dest: /var/log/bunsen.log
-        owner: root
-        group: root
-        mode: 0644
-        force: no
-      become: yes
-
 - hosts: all
   roles:
     # Install necessary bunsen support.
@@ -38,15 +25,39 @@
 
 - hosts: all
   roles:
-    # Install the base repositories and execute all tasks that may require a
-    # machine reboot.  The rebooting tasks include updating packages in case
-    # newer packages address complications that cause issues with subsequent
-    # provisioning.
+    # Install the base repositories and any packages that are required early
+    # for provisioning.
+    #
+    # The early_packages include updating packages in case newer packages
+    # address complications that cause issues with subsequent provisioning.
+    - repos
+    - early_packages
+
+- hosts: all
+  tasks:
+    - name: Copy bunsen log template and add image build date/time
+      vars:
+        image_date_time:
+          "{{ '%Y%m%d_%H%M%S' | strftime(ansible_date_time.epoch) }}"
+      template:
+        src: bunsen.log
+        dest: /var/log/bunsen.log
+        owner: root
+        group: root
+        mode: 0644
+        force: no
+      become: yes
+
+- hosts: all
+  roles:
+    # Execute all tasks that may require a machine reboot.
+    #
+    # The  ebooting tasks include updating packages in case newer packages
+    # address complications that cause issues with subsequent provisioning.
     #
     # We perform the reboot necessitating tasks here as a way to avoid issues
     # in some environments (those with questionable network behavior) where
     # later reboots have proven problematic.
-    - repos
     - rebooting_tasks
 
   # The storage server must be configured before any other provisioning.
