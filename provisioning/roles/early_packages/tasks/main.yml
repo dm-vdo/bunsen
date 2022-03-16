@@ -1,0 +1,10 @@
+---
+- name: Install early required packages.
+  package:
+    name: "{{ early_packages }}"
+    state: latest
+  register: result
+  until: result is success
+  retries: "{{ default_retry_count }}"
+  delay: 30
+  become: yes
