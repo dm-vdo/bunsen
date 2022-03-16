@@ -1,12 +1,4 @@
 ---
-
-# Install the perl Configuration package
-- name: Install the perl-Permabit-Configured package
-  package:
-    name: perl-Permabit-Configured
-    state: latest
-  become: yes
-
 # Always start from a fresh copy so that we have a known good starting point.
 - name: Copy proper perl Config template into place
   shell: cp -vf /usr/share/perl5/vendor_perl/Permabit/perl.yaml /etc/permabit/perl.yaml
