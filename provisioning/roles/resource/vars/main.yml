@@ -28,6 +28,10 @@ _packages:
     - libaio-devel
     - libuuid
     - libuuid-devel
+    # These perl-Permabit-* packages are needed to build and run tests of the
+    # VDO tree.
+    - perl-Permabit-Propertied
+    - perl-Permabit-TestRunner
     - redhat-rpm-config
     - rpm-build
     - texlive
