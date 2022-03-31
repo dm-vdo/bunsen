@@ -31,7 +31,9 @@ _packages:
     # These perl-Permabit-* packages are needed to build and run tests of the
     # VDO tree.
     - perl-Permabit-Propertied
+    - perl-Permabit-RemoteMachine
     - perl-Permabit-TestRunner
+    - perl-Permabit-VersionNumber
     - redhat-rpm-config
     - rpm-build
     - texlive
