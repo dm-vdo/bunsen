@@ -26,4 +26,4 @@ bunsen_support_repositories:
 # Packages.
 ##########################################################################
 bunsen_support_packages:
-  - python3-distributions
+  - python3-resource-discovery

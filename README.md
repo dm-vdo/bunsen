@@ -40,16 +40,12 @@ install available updates to the support software.
 The second way to get the `bunsen` support software is to install it yourself.
 For this you will want to execute the following commands:
 * `dnf copr enable <name>/<repo>`
-* `dnf install python3-distributions`
+* `dnf install python3-resource-discovery`
 
 Regardless of the method of installation you choose the following software will
-be installed to satisfy dependencies of `python3-distributions`:
+be installed to satisfy dependencies of `python3-resource-discovery`:
 * bunsen support
-  * `python3-architectures`
-  * `python3-command`
-  * `python3-defaults`
-  * `python3-factory`
-  * `python3-repos`
+  * `python3-utility-mill`
 * system supplied (if not already installed)
   * `pyyaml` 
 
@@ -76,7 +72,7 @@ You can enable this behavior by providing the following additional argument to
 ## Things You'll Need Installed
 * ansible
 * bunsen support
-  * python-distributions
+  * python-resource-discovery
 * python modules
   * requests
 * virtual machine; one or both of:

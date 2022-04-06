@@ -15,7 +15,7 @@ DOCUMENTATION = """
 """
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
-from distributions import Distribution
+from discovery.distributions import Distribution
 
 class LookupModule(LookupBase):
   def run(self, _terms, variables = None, **kwargs):
