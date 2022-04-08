@@ -16,6 +16,7 @@ _early_packages:
   # Common to all Fedora starting with Fedora35.
   - Fedora([1-9][0-9]{2,}|3[5-9]|[4-9][0-9]):
     - python3-libselinux
+    - python3-policycoreutils
 
   ##########################################################################
   # RHEL families
