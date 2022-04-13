@@ -21,7 +21,4 @@
     line: '\1{{ item.key }}: {{ item.value }}'
   become: yes
   with_items:
-    - { key: "defaultRSVPServer", value: "{{ rsvp_server}}" }
-    - { key: "emailDomain", value: "not.required.com" }
-    - { key: "jiraBrowseURL", value: "http://this.is.not.actually.required.com" }
-    - { key: "jiraForceUser", value: "some_fake_user_account" }
+    - { key: "defaultRSVPServer", value: "{{ rsvp_server }}" }
