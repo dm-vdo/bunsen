@@ -30,6 +30,7 @@ _packages:
     - libuuid-devel
     # These perl-Permabit-* packages are needed to build and run tests of the
     # VDO tree.
+    - perl-Permabit-checkServer-Utils
     - perl-Permabit-CommandString
     - perl-Permabit-CurrentVersionFile
     - perl-Permabit-Future
