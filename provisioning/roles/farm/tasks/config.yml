@@ -1,5 +1,4 @@
 ---
-- include: scam_data.yml
 - include: release_config_dir.yml
 
 # Do this after the reboot that ensures that crashkernel memory has been
