@@ -26,6 +26,9 @@
 - include: pre_alternatives.yml
 - include: packages.yml
 
+# Establish SCAM settings.
+- include: scam_data.yml
+
 # package_availability.yml has to run after packages.yml since it is
 # checking if certain packages are available in order to determine
 # what needs to be done later during the build process.
