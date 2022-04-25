@@ -15,6 +15,10 @@
     set_fact:
       is_devvm: true
 
+  - name: Setting farm fact
+    set_fact:
+      is_farm: "{{ inventory_hostname in groups['farms'] }}"
+
   - name: Get controller IPv4 info
     local_action:
       module: setup

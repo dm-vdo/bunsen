@@ -39,14 +39,17 @@
 
   - name: SCAM data - farm
     copy:
-      content: FARM=yes
+      # If we put FARM outside the evaluation either the quoted no/yes results
+      # in the quotes in the file or unquoted no/yes is treated as undefined
+      # variables.
+      content: "FARM={{ (is_farm | bool) | ternary('yes', 'no') }}"
       dest: /etc/scam/farm.conf
       mode: 0644
     become: yes
 
   - name: SCAM data - Albireo
     copy:
-      content: ALBIREO=yes
+      content: "ALBIREO={{ (is_farm | bool) | ternary('yes', 'no') }}"
       dest: /etc/scam/albireo.conf
       mode: 0644
     become: yes
