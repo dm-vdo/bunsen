@@ -10,32 +10,24 @@
         {{ distribution }}{{ ansible_distribution_major_version }}
       {%- endif -%}"
     classes:
-      - 64BITOK
       - ALBIREO
       - ALL
       - FARM
       - VDO
       - VFARM
-      - "{{ (ansible_memtotal_mb > bigmem_mb) | ternary('BIGMEM', omit) }}"
       - "{{ os_class }}"
       - "{{ is_fedora | bool | ternary('FEDORA', omit) }}"
       - "{{ ((is_fedora | bool) or (is_rhel8_family | bool))
             | ternary('LINUX-UDS', omit) }}"
       - "{{ ((is_fedora | bool) or (is_rhel8_family | bool))
             | ternary('LINUX-VDO', omit) }}"
-      - "{{ (ansible_virtualization_role == 'guest')
-            | ternary(omit, 'NTP') }}"
       - "{{ (inventory_hostname in performance_farms)
             | ternary('VDO-PMI', omit) }}"
-      - "{{ (ansible_virtualization_role == 'guest'
-             and ansible_virtualization_type == 'kvm')
-            | ternary('KVM', omit) }}"
     # For convenience above, we want to support something like the "omit"
     # construct, but it doesn't work in simple list contexts; "omit" just
     # expands to some magic cookie value which we still have to explicitly
     # filter out.
     class_list: "{{ classes | difference(omit) | join(',') }}"
-    bigmem_mb: 16384
   command: "rsvpclient --dhost {{ rsvp_server }} add {{ farm }} \
             --classes {{ class_list }}"
   become: yes
