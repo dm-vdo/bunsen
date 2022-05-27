@@ -43,6 +43,10 @@
     - VDO
     - VDO-PMI
     - FEDORA
+    - AARCH64
+    - PPC64LE
+    - S390X
+    - X86_64
     - "{{ query('available_distributions')
           | map('regex_replace', '^((CENTOS|RHEL)\\d).*', '\\1')
           | unique

@@ -1,6 +1,7 @@
 ---
 - name: Register with the RSVP server
   vars:
+    arch_class: "{{ ansible_architecture | upper }}"
     farm: "{{ inventory_hostname }}"
     os_class: "
       {%- set distribution = ansible_distribution | upper -%}
@@ -18,6 +19,7 @@
       - VFARM
       - "{{ (ansible_memtotal_mb > bigmem_mb) | ternary('BIGMEM', omit) }}"
       - "{{ os_class }}"
+      - "{{ arch_class }}"
       - "{{ is_fedora | bool | ternary('FEDORA', omit) }}"
       - "{{ ((is_fedora | bool) or (is_rhel8_family | bool))
             | ternary('LINUX-UDS', omit) }}"
