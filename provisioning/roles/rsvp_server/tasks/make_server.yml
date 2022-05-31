@@ -30,14 +30,10 @@
   changed_when: "result.rc == 0"
   failed_when: "(result.rc != 0) and ('already exists' not in result.stderr)"
   with_items:
-    - 64BITOK
     - ALBIREO
     - ALL
-    - BIGMEM
     - FARM
     - VFARM
-    - KVM
-    - NTP
     - LINUX-UDS
     - LINUX-VDO
     - VDO
