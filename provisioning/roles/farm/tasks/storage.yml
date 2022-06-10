@@ -1,23 +1,16 @@
 ---
-
-# There are several cases to consider.
+# If provisioning is not using a storage server we generally expect there to be
+# an auxiliary disk (/dev/sdb or /dev/vdb depending on virtualization type, if
+# any) that provides the necessary storage.  If such exists we use it.  If it
+# does not we consider the following in order:
+#   - if /home is a mount point create a loop device using a file
+#   - if there is a system root logical volume group use it to create a logical
+#     volume
 #
-# - The machine has sufficient local disk space for testing.
-#    - The space is free in the system volume group. (Fedora)
-#    - The space is on a disk not part of a volume group. (Vagrant)
-#    - The space is tied up in the /home file system/LV. (RHEL family)
-#      We could move /home onto the root and free up the space into the
-#      volume group, but that should be done before NFS-mounting various
-#      directories under /home in the nfs_client role.
-# Not handled yet:
-# - The machine does not have enough local disk space to be useful for
-#   testing.
-#    - We must resort to using some external storage server.
-# - The machine has some local disk space but not quite enough.
-
-# To make things more tricky, this should be idempotent. If the /u1
-# and vdo_scratch storage has been allocated, then we don't need to
-# worry about finding enough free space for them somewhere.
+# If using a storage server we expect it to provide the necessary storage.
+#
+# The expectation is that the above provides the necessary storage.  If it
+# does not provisioning will fail.
 
 - block:
   - name: Create /u1 mount point
@@ -31,56 +24,55 @@
   # Not using a storage server.
   - block:
     - block:
-      # System with no volume groups or 1 volume group of the name this task
-      # would give it; use the second disk.
+      # Use the auxiliary disk, if it exists.
       - name: Setting scratch volume group and test disk names
         set_fact:
           scratch_vg: scratch
-          test_disk: "{%- if ansible_virtualization_type == 'kvm' -%}
-                        /dev/vdb
-                      {%- else -%}
-                        /dev/sdb
-                      {%- endif -%}"
-      when: (ansible_lvm is not defined)
-              or ((ansible_lvm.vgs.keys() | length) == 0)
-              or (((ansible_lvm.vgs.keys() | length) == 1))
-                  and ('scratch' in ansible_lvm.vgs.keys())
+          test_disk: "/dev/{{aux_disk}}"
+
+      vars:
+        aux_disk: "{%- if ansible_virtualization_type == 'kvm' -%}
+                     vdb
+                   {%- else -%}
+                     sdb
+                   {%- endif -%}"
+      when: aux_disk in ansible_devices.keys()
 
     - block:
-        # System with at least one volume group.
-      - block:
-        # System with a /home logical volume: Create a big file and use it via
-        # a loop device as a physical volume.
+        # scratch_vg not defined and system has a /home mount.
+        # Create a big file on /home and use it via a loop device as a
+        # physical volume.
         - include_tasks: storage-loop.yml
           vars:
-            path: /home/big_file
+            mount: home
+            path: big_file
             min_size: "{{ required }}"
             max_size: "{{ (vdo_scratch_max_gb * 1024 * 1024) | int }}"
+            # test_disk is set by storage-loop.yml.
             disk_var: test_disk
 
         - name: Picking scratch volume group name
           set_fact:
             scratch_vg: "{{ ansible_default_ipv4.macaddress.split(':') | join }}"
-        when: ('home' in (ansible_lvm.lvs.keys() | list)
-               and '/home' in mount_points)
+      when: (scratch_vg is not defined) and ('/home' in mount_points)
 
-      - block:
-          # System without a /home logical volume: Assume any free space lives
-          # within the system volume group.
+    - block:
+        # scratch_vg not defined and system with a system volume group.
+        # Assume any free space lives within the system volume group.
         - name: Using system volume group name for scratch storage
           set_fact:
             scratch_vg: "{{ ansible_lvm.lvs['root'].vg }}"
             test_disk: ""
-        when: ('home' not in (ansible_lvm.lvs.keys() | list)
-               and '/home' not in mount_points)
-      when: (ansible_lvm is defined)
-              and ((ansible_lvm.vgs.keys() | length) > 0)
+      when: (scratch_vg is not defined)
+              and (ansible_lvm is defined)
+              and ('root' in ansible_lvm.lvs.keys())
     when: not use_storage_server
 
   # System with an external storage server specified: Use it.
   - block:
     - include_tasks: storage-targetd.yml
       vars:
+        # test_disk is set by storage-targetd.yml.
         disk_fact: test_disk
         ipaddr: "{{ lookup('dig', storage_server) }}"
         size: "{{ (required|int) * 1024 }}"
