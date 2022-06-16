@@ -20,7 +20,6 @@
       name: athinfod.socket
       state: started
       enabled: True
-    when: (not (system_has_xinetd | bool))
     become: yes
 
   - name: Make sure dkms is enabled
