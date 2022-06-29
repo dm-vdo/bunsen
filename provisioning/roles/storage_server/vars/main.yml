@@ -9,6 +9,6 @@ _server_selection:
 _server_packages:
   # Common to all distributions.
   - common:
-    - targetd-bunsen
+    - targetd
 
 server_packages: "{{ _server_packages | select_install(_server_selection) }}"
