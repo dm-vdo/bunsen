@@ -1,12 +1,6 @@
 ---
-- block:
-  - name: Ensure upstream targetd is not installed
-    package:
-      name: targetd
-      state: absent
-
-  - name: Install required packages
-    package:
-      name: "{{ server_packages }}"
-      state: present
-    become: yes
+- name: Install required packages
+  package:
+    name: "{{ server_packages }}"
+    state: present
+  become: yes
