@@ -1,5 +1,5 @@
 ---
-- include: packages.yml
+- include_tasks: packages.yml
 
 # This fix must be done after the lvm package is installed above
 # since lvm changes the default to 0 in the install.
@@ -23,17 +23,17 @@
   when: (is_fedora | bool) and (not (is_fedora31_or_later | bool))
   become: yes
 
-- include: perl_libraries.yml
-- include: load_permatest.yml
-- include: rsyslog.yml
-- include: config.yml
-- include: services.yml
-- include: storage.yml
-- include: required_packages_file.yml
-- include: udev.yml
+- include_tasks: perl_libraries.yml
+- include_tasks: load_permatest.yml
+- include_tasks: rsyslog.yml
+- include_tasks: config.yml
+- include_tasks: services.yml
+- include_tasks: storage.yml
+- include_tasks: required_packages_file.yml
+- include_tasks: udev.yml
 
 #XXX: This is a hack until we get perl code mirroring and packaging put
 #     together
-- include: temp_fix_athinfo.yml
+- include_tasks: temp_fix_athinfo.yml
 # This must be last, as a test could start using the machine afterwards.
-- include: rsvp.yml
+- include_tasks: rsvp.yml

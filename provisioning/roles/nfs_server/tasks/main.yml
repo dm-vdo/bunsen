@@ -1,3 +1,3 @@
 ---
-- include: directory_structure.yml
-- include: export_nfs.yml
+- include_tasks: directory_structure.yml
+- include_tasks: export_nfs.yml

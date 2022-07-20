@@ -1,5 +1,5 @@
 ---
-- include: release_config_dir.yml
+- include_tasks: release_config_dir.yml
 
 # Do this after the reboot that ensures that crashkernel memory has been
 # reserved.

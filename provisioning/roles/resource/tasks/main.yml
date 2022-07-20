@@ -1,4 +1,4 @@
 ---
-- include: packages.yml
-- include: perl_libraries.yml
+- include_tasks: packages.yml
+- include_tasks: perl_libraries.yml
 

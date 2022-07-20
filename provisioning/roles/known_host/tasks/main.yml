@@ -1,5 +1,5 @@
 ---
-- include: make_known.yml
+- include_tasks: make_known.yml
 # Make certain we're known by our FQDN.
 - include_tasks: make_known.yml
   vars:

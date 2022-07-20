@@ -1,2 +1,2 @@
 ---
-- include: mount.yml
+- include_tasks: mount.yml

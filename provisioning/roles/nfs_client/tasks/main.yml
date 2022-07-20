@@ -1,2 +1,2 @@
 ---
-- include: import_nfs.yml
+- include_tasks: import_nfs.yml

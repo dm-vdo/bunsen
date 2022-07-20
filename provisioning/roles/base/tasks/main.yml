@@ -6,7 +6,7 @@
   predetermined_network_configuration:
   become: yes
 
-- include: create_permabuild.yml
+- include_tasks: create_permabuild.yml
 
 - name: Set time zone
   timezone:
@@ -14,7 +14,7 @@
     hwclock: UTC
   become: yes
 
-- include: domain.yml
+- include_tasks: domain.yml
 
 - name: Create /u1 directory
   file:
@@ -23,26 +23,26 @@
     mode: 01777
   become: yes
 
-- include: pre_alternatives.yml
-- include: packages.yml
+- include_tasks: pre_alternatives.yml
+- include_tasks: packages.yml
 
 # Establish SCAM settings.
-- include: scam_data.yml
+- include_tasks: scam_data.yml
 
 # package_availability.yml has to run after packages.yml since it is
 # checking if certain packages are available in order to determine
 # what needs to be done later during the build process.
-- include: package_availability.yml
+- include_tasks: package_availability.yml
 
-- include: perl_configuration.yml
+- include_tasks: perl_configuration.yml
 
-- include: alternatives.yml
-- include: perl_libraries.yml
+- include_tasks: alternatives.yml
+- include_tasks: perl_libraries.yml
 
 # Do this before the first reboot.
-- include: persistent_journal.yml
+- include_tasks: persistent_journal.yml
 
-- include: ntp.yml
+- include_tasks: ntp.yml
 
 - name: Enabling smartd service
   systemd:
@@ -51,6 +51,6 @@
     enabled: True
   become: yes
 
-- include: search_path.yml
-- include: ssh.yml
+- include_tasks: search_path.yml
+- include_tasks: ssh.yml
   when: enable_proxy_vagrant_ssh_config | bool

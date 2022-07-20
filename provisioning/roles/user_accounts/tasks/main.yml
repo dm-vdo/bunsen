@@ -1,2 +1,2 @@
 ---
-- include: user_accounts.yml
+- include_tasks: user_accounts.yml

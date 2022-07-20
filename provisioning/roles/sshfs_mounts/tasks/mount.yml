@@ -2,7 +2,9 @@
 - block:
   # Add the account's remote side public key to the local account's
   # authorized_keys file.
-  - include: local_ssh_helper.yml account="{{ item }}"
+  - include_tasks: local_ssh_helper.yml
+    vars:
+      account: "{{ item }}"
     with_items: "{{ sshfs_user }}"
 
   - name: Allow sshfs fuse 'allow_other/allow_root'
