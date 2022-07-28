@@ -1,0 +1,20 @@
+---
+- block:
+  - name: Export shared directories
+    nfs_exports:
+      name: "{{ item }} Share"
+      action: add
+      path: "{{ item }}"
+      clients: "*"
+      read_only: false
+      update: true
+      root_squash: false
+    with_items: "{{ nfs_exports }}"
+    become: yes
+
+  - name: Start NFS Service
+    systemd:
+      name: nfs-server
+      state: restarted
+      enabled: true
+    become: yes

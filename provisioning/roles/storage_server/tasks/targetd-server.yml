@@ -1,0 +1,47 @@
+---
+# This assumes the one and only volume group on the system will be where you
+# allocate all your storage from.
+
+- block:
+  - name: Create exported filesystem root dir
+    file:
+      path: "{{ filesys_root }}"
+      state: directory
+      mode: 0755
+      owner: root
+    become: yes
+
+  - name: Configure targetd
+    lineinfile:
+      path: /etc/target/targetd.yaml
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+    with_items:
+      - { regexp: "^user:",     line: "user:     {{ storage_server_account }}" }
+      - { regexp: "^password:", line: "password: {{ storage_server_password }}" }
+      - { regexp: "^block_pools:",
+          line:   "block_pools:   [ {{ system_vg_name }} ]" }
+      - { regexp: "^filesys_pools:",
+          line:   "filesys_pools: [ {{ system_vg_name }} ]" }
+      - { regexp: "^filesys_root:",
+          line:   "filesys_root:  {{ filesys_root }}" }
+    vars:
+      vgs: "{{ ansible_lvm.vgs }}"
+      vg_names: "{{ vgs.keys() | list }}"
+      system_vg_name: "{{ vg_names[0] }}"
+
+  - name: Enable services
+    systemd:
+      name: "{{ item }}"
+      state: started
+      enabled: yes
+      daemon_reload: yes
+    with_items:
+      - target
+      - rpcbind
+      - nfs-server
+      - targetd
+
+  vars:
+    filesys_root: /mnt/filesys_root
+  become: yes

@@ -1,0 +1,4 @@
+---
+sshfs_host: "{{ ansible_controller_ip }}"
+sshfs_mounts: "{{ deploying_user_sshfs_mounts }}"
+sshfs_user: "{{ deploying_user_account | default('') }}"

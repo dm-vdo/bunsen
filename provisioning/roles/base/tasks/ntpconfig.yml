@@ -1,0 +1,45 @@
+---
+# Update an NTP configuration and restart a daemon, if necessary.
+#
+# This takes advantage of the fact that the server/peer configuration bits of
+# the ntpd and chronyd config files use the same syntax, so we can use common
+# tasks for both.
+#
+# Input variables: config_file daemon_name ntp_peers ntp_servers services
+# unit_name
+#
+# Sets variables: conf item
+
+- name: Checking for {{ config_file }}
+  stat:
+    path: "{{ config_file }}"
+  register: conf
+
+# If there's no config file, we can skip the rest.
+- block:
+
+    - name: Setting NTP peers in {{ config_file }}
+      lineinfile:
+        path: "{{ config_file }}"
+        regexp: "^(peer|server) {{ item }}"
+        line: "peer {{ item }}"
+      with_items: "{{ ntp_peers }}"
+      become: yes
+
+    - name: Setting NTP servers in {{ config_file }}
+      lineinfile:
+        path: "{{ config_file }}"
+        regexp: "^(peer|server) {{ item }}"
+        line: "server {{ item }}"
+      with_items: "{{ ntp_servers }}"
+      become: yes
+
+    - name: Restart {{ daemon_name }}
+      systemd:
+        name: "{{ unit_name }}"
+        state: restarted
+      when: unit_name in services and services[unit_name].state == 'running'
+      # TODO: Don't restart if lineinfile didn't change anything.
+      become: yes
+
+  when: conf.stat.exists

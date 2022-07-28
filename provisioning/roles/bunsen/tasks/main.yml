@@ -1,0 +1,6 @@
+---
+- block:
+  - include: install_support_repos.yml
+  - include: install_support_packages.yml
+  run_once: true
+  when: install_bunsen_support | bool

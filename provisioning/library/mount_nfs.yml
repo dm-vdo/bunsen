@@ -1,0 +1,43 @@
+---
+
+# Task list for mounting an NFS directory and verifying that the mount worked.
+# The standard Ansible "mount" module will update the system fstab and will
+# attempt the mount, but if the mount fails, sometimes it will continue on. We
+# don't want that behavior, so we verify each mount.
+#
+# Input vars: name, src, extra_opts (optional)
+#   extra_opts gets workaround_nfs_mount_opts added
+#
+# Modifies:
+#   ansible_mounts
+
+- block:
+
+    # "mount" module with state "mounted" creates the mount point
+
+    - name: "Mount {{ name }}"
+      mount:
+        name: "{{ name }}"
+        src: "{{ src }}"
+        fstype: nfs
+        state: mounted
+        opts: "{{ opts }}"
+      vars:
+        opts: "{{ [extra_opts, workaround_nfs_mount_opts]
+                   | select('defined')
+                   | reject('match', omit)
+                   | join(',') }}"
+      become: yes
+
+    - name: Update Ansible mount info
+      setup:
+        filter: ansible_mounts
+
+    # N.B.: Ansible's "mount" module will continue on if NFS mounts time out.
+    # We want to flag such cases.
+    - name: "Verify mount of {{ name }}"
+      assert:
+        that: "name in mount_points"
+
+  vars:
+    mount_points: "{{ ansible_mounts | map(attribute='mount') | list }}"

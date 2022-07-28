@@ -1,0 +1,21 @@
+---
+# Applies only to ansible controller (localhost).
+- name: Install bunsen support repositories.
+  become: yes
+  local_action:
+    module: yum_repository
+    file: "{{ item['file'] | default(item['name']) }}"
+    name: "{{ item['name'] }}"
+    description: "{{ item['description'] }}"
+    enabled: "{{ item['enabled'] }}"
+    gpgcheck: "{{ item['gpgcheck'] }}"
+    gpgkey: "{{ item['gpgkey'] | default(omit) }}"
+    sslverify: "{{ item['sslverify'] | default(omit) }}"
+    baseurl: "{{ item['baseurl'] | default(omit) }}"
+    metalink: "{{ item['metalink'] | default(omit) }}"
+    failovermethod: "{{ item['failovermethod'] | default(omit) }}"
+    cost: "{{ item['cost'] | default(omit) }}"
+    skip_if_unavailable: "{{ item['skip_if_unavailable'] | default(omit) }}"
+  with_items: "{{ bunsen_support_repositories }}"
+  loop_control:
+    label: "{{ [item['name'], item['metalink'] | default(item['baseurl'])] }}"

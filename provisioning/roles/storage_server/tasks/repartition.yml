@@ -1,0 +1,80 @@
+---
+# If /home is its own mount point, move the contents to the root, unmount it,
+# and remove the logical volume.
+
+- set_fact:
+    must_relocate_home: False
+
+- name: Retrieve LVM configuration
+  command: lvm fullreport --reportformat json
+  changed_when: False
+  register: lvm_report_result
+
+- block:
+   - set_fact:
+       must_relocate_home: True
+     when: "'/home' in mount_points and 'home' in existing_lvs"
+
+   - name: Checking volume groups
+     # Alternatively, we could work out which VG contains "home".
+     fail: msg="Expected exactly one volume group (found {{ existing_vgs }})"
+     when: (existing_vgs | length) != 1
+   - name: Ensuring rsync is available
+     package:
+       name: rsync
+       state: present
+
+   - name: Copy /home to /home2
+     # --acls --xattrs ?
+     shell: "mkdir /home2 && rsync -aHS /home/. /home2/."
+     args:
+       warn: False
+     when: must_relocate_home | bool
+     become: yes
+
+   - name: Unmount /home
+     mount:
+       path: /home
+       state: absent
+     when: must_relocate_home | bool
+     become: yes
+
+   - name: Deleting old /home logical volume
+     lvol:
+       vg: "{{ existing_vgs[0] }}"
+       lv: home
+       state: absent
+       force: yes
+     when: must_relocate_home | bool
+     become: yes
+
+   - name: Rescan mount points
+     setup:
+       filter: ansible_mounts
+     when: must_relocate_home | bool
+
+   - name: Move /home2 to /home
+     shell: "rm -rf /home && mv -f /home2 /home"
+     args:
+       warn: False
+     when: must_relocate_home | bool
+     become: yes
+
+  vars:
+    mount_points: "{{ ansible_mounts | json_query('[*].mount') }}"
+    existing_lvs: "
+      {%- set tmp = {} -%}
+      {%- for section in (lvm_report_result.stdout | from_json).report -%}
+        {%- for lv in section.lv -%}
+          {%- set x = tmp.update({ lv.lv_name : 1 }) -%}
+        {%- endfor -%}
+      {%- endfor -%}
+      {{ tmp.keys() | list }}"
+    existing_vgs: "
+      {%- set tmp = {} -%}
+      {%- for section in (lvm_report_result.stdout | from_json).report -%}
+        {%- for vg in section.vg -%}
+          {%- set x = tmp.update({ vg.vg_name : 1 }) -%}
+        {%- endfor -%}
+      {%- endfor -%}
+      {{ tmp.keys() | list }}"

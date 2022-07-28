@@ -1,0 +1,15 @@
+---
+- block:
+  - name: Add /sbin & /usr/sbin to path (csh)
+    copy:
+      content: "set path = ($path /sbin /usr/sbin)\n"
+      dest: /etc/profile.d/path.csh
+      mode: 0644
+    become: yes
+
+  - name: Add /sbin & /usr/sbin to path (sh)
+    copy:
+      content: "PATH=$PATH:/sbin:/usr/sbin\n"
+      dest: /etc/profile.d/path.sh
+      mode: 0644
+    become: yes

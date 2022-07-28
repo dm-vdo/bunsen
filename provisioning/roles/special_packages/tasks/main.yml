@@ -1,0 +1,8 @@
+---
+- name: Install base special case packages.
+  package:
+    name: "{{ special_case_packages }}"
+    state: latest
+    enablerepo: "{{ special_case_repositories
+                  | join(',', attribute='name') }}"
+  become: yes

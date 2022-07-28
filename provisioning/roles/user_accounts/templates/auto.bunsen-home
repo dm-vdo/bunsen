@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# If anything searches for .git, .dir-locals.el, or the like, don't
+# even bother trying to mount.
+case "$1" in
+    .* ) exit 1 ;;
+esac
+
+echo -fstype=nfs,rw,soft,tcp {{ nfs_server }}:{{ user_homes_local }}/$1
+
+exit 0

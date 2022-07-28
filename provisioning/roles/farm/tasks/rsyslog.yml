@@ -1,0 +1,46 @@
+---
+- name: Set up rsyslog to write kern.log
+  lineinfile:
+    dest: /etc/rsyslog.conf
+    state: present
+    regexp: '^kern\.'
+    line: 'kern.* /var/log/kern.log'
+  become: yes
+  register: kernlog_result
+
+# XXX Should test based on what version of the config file format is in use.
+- name: Disable rate limiting in rsyslog imjournal module
+  lineinfile:
+    dest: /etc/rsyslog.conf
+    regexp: '^module\(load=\"imjournal\"'
+    line: 'module(load="imjournal" Ratelimit.Interval="0"'
+    state: present
+  when: not (is_rhel_family and ansible_distribution_version.startswith('7'))
+  become: yes
+  register: ratelimit_result
+
+- name: restart rsyslog
+  service:
+    name: rsyslog
+    state: restarted
+  when: kernlog_result is changed or ratelimit_result is changed
+  become: yes
+
+- name: Add kern.log to logrotate configuration
+  copy:
+    dest: /etc/logrotate.d/kern
+    content: |
+      /var/log/kern.log {
+              size 50M
+              copytruncate
+              rotate 9
+              compress
+              delaycompress
+              missingok
+              notifempty
+              nodateext
+      }
+    mode: 0644
+    owner: root
+    group: root
+  become: yes

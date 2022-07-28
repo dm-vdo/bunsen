@@ -1,0 +1,9 @@
+---
+- block:
+  - name: Create shared dirs
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: 0777
+    with_items: "{{ nfs_directories }}"
+    become: yes

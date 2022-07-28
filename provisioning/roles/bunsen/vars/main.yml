@@ -1,0 +1,29 @@
+---
+# Default value controlling whether bunsen installs necessary support software
+# on the ansible controller machine.
+install_bunsen_support: false
+
+##########################################################################
+# Repositories.
+##########################################################################
+_bunsen: "{{ externals['bunsen'] }}"
+bunsen_support_repositories:
+  - name: bunsen-python-support
+    description: "bunsen python support"
+    skip_if_unavailable: no
+    enabled: yes
+    gpgcheck: no
+    repo_gpgcheck: 0
+    sslverify: yes
+    baseurl: "{{ [_bunsen['python-support']['host']['schema'],
+                  _bunsen['python-support']['host']['name'],
+                  _bunsen['python-support']['host']['path']] | join }}"
+    gpgkey: "{{ [_bunsen['python-support']['host']['schema'],
+                 _bunsen['python-support']['host']['name'],
+                 _bunsen['python-support']['host']['keypath']] | join }}"
+
+##########################################################################
+# Packages.
+##########################################################################
+bunsen_support_packages:
+  - python3-distributions

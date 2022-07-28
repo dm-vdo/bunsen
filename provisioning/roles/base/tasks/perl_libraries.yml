@@ -1,0 +1,6 @@
+---
+- block:
+  - name: Install required base Perl libraries.
+    include_tasks: "{{ playbook_dir }}/library/get_perl_modules.yml"
+    vars:
+      modules: "{{ perl_libraries }}"

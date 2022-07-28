@@ -1,0 +1,12 @@
+---
+# Applies only to ansible controller (localhost).
+- name: Install bunsen support packages.
+  become: yes
+  local_action:
+    module: package
+    name: "{{ bunsen_support_packages }}"
+    state: latest
+  register: result
+  until: result is success
+  retries: "{{ default_retry_count }}"
+  delay: 30

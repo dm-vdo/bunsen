@@ -1,0 +1,51 @@
+---
+# First thing, set pre-determined values for pre-determined network
+# configuration parameters.  These are parameters that we don't have access to
+# via ansible.
+- name: Set non-ansible accessible pre-determined network configuration
+  predetermined_network_configuration:
+  become: yes
+
+- include: create_permabuild.yml
+
+- name: Set time zone
+  timezone:
+    name: US/Eastern
+    hwclock: UTC
+  become: yes
+
+- include: domain.yml
+
+- name: Create /u1 directory
+  file:
+    path: /u1
+    state: directory
+    mode: 01777
+  become: yes
+
+- include: pre_alternatives.yml
+- include: packages.yml
+
+# package_availability.yml has to run after packages.yml since it is
+# checking if certain packages are available in order to determine
+# what need to be done later during the build process.
+- include: package_availability.yml
+
+- include: alternatives.yml
+- include: perl_libraries.yml
+
+# Do this before the first reboot.
+- include: persistent_journal.yml
+
+- include: ntp.yml
+
+- name: Enabling smartd service
+  systemd:
+    name: smartd.service
+    state: started
+    enabled: True
+  become: yes
+
+- include: search_path.yml
+- include: ssh.yml
+  when: enable_proxy_vagrant_ssh_config | bool

@@ -1,0 +1,6 @@
+---
+- name: Install required packages
+  package:
+    name: "{{ client_packages }}"
+    state: present
+  become: yes

@@ -1,0 +1,99 @@
+---
+# Create the default permabuild hierarchy including restructuring the
+# environment for machines that were provisioned with an earlier version of
+# bunsen that used /permabit/build as the base directory for building permabit
+# software
+- name: Stat /permabit/build
+  stat:
+    path: /permabit/build
+  register: pbit_build
+
+- block:
+  - name: Find /permabit/build directories
+    find:
+      paths: /permabit/build
+      file_type: directory
+      recurse: no
+    register: found_directories
+
+  - name: Unmount permabuild mounts
+    mount:
+      path: "{{ item }}"
+      state: absent
+    register: pbit_build_mount
+    with_items: "{{ mounts }}"
+    become: yes
+
+  - name: Update Ansible mount info
+    setup:
+      filter: ansible_mounts
+    when: pbit_build_mount is changed
+
+  - name: Verify permabuild mounts unmounted
+    assert:
+      that: "'{{ item }}' not in mount_points"
+    vars:
+      mount_points: "{{ ansible_mounts | map(attribute='mount') | list }}"
+    with_items: "{{ mounts }}"
+
+  vars:
+    mounts:
+      - "{{ found_directories.files | map(attribute='path') | list }}"
+      - /permabit/build
+  when: (inventory_hostname not in groups['infrastructure'])
+          and ((pbit_build.stat.isdir is defined) and pbit_build.stat.isdir)
+
+- name: Remove /permabit/build from infrastructure machine NFS exports
+  lineinfile:
+    regexp: '^/permabit/build\s+'
+    path: /etc/exports
+    state: absent
+  when: inventory_hostname in groups['infrastructure']
+  become: yes
+
+- block:
+  - name: Temporary rename /permabit/build directory
+    command:
+      cmd: mv /permabit/build /permabit/build.tmp
+      creates: /permabit/build.tmp
+    when: (pbit_build.stat.isdir is defined) and pbit_build.stat.isdir
+    become: yes
+
+  - name: Stat temporary /permabit/build directory
+    stat:
+      path: /permabit/build.tmp
+    register: pbit_buildtmp
+
+  - block:
+    - name: Make /permabit/builds directory
+      file:
+        name: /permabit/builds
+        mode: 0755
+        owner: "root"
+        state: directory
+      become: yes
+
+    - name: Move temporary /permabit/build to /permabit/builds/build directory
+      command:
+        cmd: mv /permabit/build.tmp /permabit/builds/build
+        creates: /permabit/builds/build
+      become: yes
+    when: (pbit_buildtmp.stat.isdir is defined) and pbit_buildtmp.stat.isdir
+
+- name: Create the permabuild directories.
+  file:
+    name: "{{ item }}"
+    mode: 0755
+    owner: "root"
+    state: directory
+  with_items: "{{ permabuild_directories }}"
+  become: yes
+
+- name: Create links to the permabuild directories.
+  file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    follow: no
+    state: link
+  with_items: "{{ permabuild_directories_links }}"
+  become: yes

@@ -1,0 +1,6 @@
+{%- if test_storage_device is defined -%}
+  KERNEL=="{{ test_storage_device }}",
+{%- else -%}
+  ENV{DM_VG_NAME}=="{{ scratch_vg }}", ENV{DM_LV_NAME}=="{{ scratch_lv }}",
+{%- endif -%}
+SYMLINK+="vdo_scratch"

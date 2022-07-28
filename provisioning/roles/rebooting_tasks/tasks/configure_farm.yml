@@ -1,0 +1,50 @@
+---
+- block:
+  - set_fact:
+      crashkernel_fixed: False
+
+  - name: Check crash dump status
+    slurp:
+      src: /sys/kernel/kexec_crash_loaded
+    register: slurpfile
+
+  # Fedora 28 kernels (or some of them) don't respect crashkernel=auto.
+  - block:
+    - name: Find grub config files
+      find:
+        paths: ["/boot/grub2", "/boot/efi/EFI/fedora"]
+        patterns: grub.cfg
+        recurse: no
+      register: grub
+      failed_when: grub.matched == 0
+      become: yes
+
+    - name: Edit /etc/default/grub to set crashkernel size
+      shell: |
+        sed -i -e '/CMDLINE_LINUX/{/crashkernel=[0-9]/!{s/crashkernel=auto//;s/="/="crashkernel=128M /;}}' /etc/default/grub
+      args:
+        warn: False
+      become: yes
+    - name: Rebuild grub configuration
+      command: "grub2-mkconfig -o {{ item.path }}"
+      become: yes
+      with_items: "{{ grub.files }}"
+    - set_fact:
+        crashkernel_fixed: True
+    # N.B.: Disabled for s390x until we adjust for the zipl boot loader.
+    when: (is_fedora and (not crashdump_was_enabled) and (not is_arch_s390x))
+    vars:
+      crashdump_was_enabled: "{{slurpfile['content']|b64decode == '1\n'}}"
+
+  - name: Restart system to apply kernel config changes
+    include_tasks: "{{ playbook_dir }}/library/restart_system.yml"
+    when: crashkernel_fixed | bool
+
+  - name: Make grub config world-readable
+    file:
+      path: /boot/grub2
+      mode: a+rX
+      recurse: yes
+    become: yes
+  when: ((inventory_hostname in (groups['farms'] | default([])))
+        or (inventory_hostname in (groups['performance_farms'] | default([]))))

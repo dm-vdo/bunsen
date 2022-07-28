@@ -1,0 +1,23 @@
+---
+# Perambit release config directory setup.
+- name: Permabit release config directory
+  file:
+    path: /etc/permabit
+    mode: 0755
+    state: directory
+  become: yes
+
+- name: Permabit release file
+  # Used by Permabit::PlatformUtils.
+  copy:
+    content: albireo
+    dest: /etc/permabit/current_release
+    mode: 0644
+  become: yes
+
+- name: Permabit release version file
+  copy:
+    content: 0
+    dest: /etc/permabit/current_version
+    mode: 0644
+  become: yes

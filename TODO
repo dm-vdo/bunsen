@@ -1,0 +1,37 @@
+Still need to make sure the following gets completed:
+  - test host setup
+    - block device of $X size (allow to specify)
+    - Allow customization of number of test hosts.
+  - Get a version of checkServer running
+    - We'll determine how restrictive we want to getlater.
+    - check for presence permatest kernel module
+    - Generate /etc/required_packages
+  - Set up variables to allow the user to tweak things.
+    - Git repo location of perforce tree
+    - Alternate location of RPM repository containing permabit-rsvpd,
+      athena-athinfod, etc.
+  - Detect OS version
+    - rhel vs fedora
+      - dnf vs yum
+  - Install missing pieces:
+    - Missing "something" (still needs investigation to resolve)
+      - /permabit/release doesn't exist.  Will this be a problem?
+        - Yes, but in the  meantime we can specify UDS_TOP
+
+- On the resource server:
+  - Tasks:
+    - Copy /permabit/build/{tools,perl,python} locations to the NFS locations
+      for lastrun usage on the clients
+
+- On the client:
+  - Tasks:
+    - Mount NFS locations:
+      - /home/nightly - 'nightly' homedir
+      - /permabit/not-backed-up
+      - /permabit/build/perl
+      - /permabit/build/python
+      - /permabit/build/tools
+      - Add those NFS mounts to /etc/fstab
+    - Establish ssh host keys between the hosts so that resource-vagrant can SSH to vagrant-farm
+    - Find out how to persist vdo_scratch symlink across reboots.
+      - afarms currently have a udev rule to do this, which we can't rely on for this purpose.

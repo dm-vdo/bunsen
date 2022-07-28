@@ -1,0 +1,67 @@
+---
+#XXX: Currently the /etc/athena/athinfo.defs is looking for checkServer at
+#     /permabit/build/tools/lastrun/checkServer.pl, but now that we're using
+#     the perl-Permabit-checkServer package the script is located at
+#     /usr/bin/checkServer.pl.
+- name: Update athinfo checkServer definition
+  lineinfile:
+    dest: /etc/athena/athinfo.defs
+    regexp: '^checkServer'
+    line: 'checkServer /usr/bin/checkServer.pl'
+    state: present
+  become: yes
+
+#XXX: Currently the /etc/athena/athinfo.defs is looking for checkServer at
+#     /permabit/build/tools/lastrun/checkServer.pl, but now that we're using
+#     the perl-Permabit-checkServer package the script is located at
+#     /usr/bin/checkServer.pl.
+- name: Update athinfo checkserver definition
+  lineinfile:
+    dest: /etc/athena/athinfo.defs
+    regexp: '^checkserver'
+    line: 'checkserver /usr/bin/checkServer.pl'
+    state: present
+  become: yes
+
+# Check whether the isThirtyFive is present in the file.  If it's missing, then
+# register 'isThirtyFiveIsMissing'.  Using check_mode: yes to ensure the line
+# isn't actually added by this check.
+- name: Check for 'isThirtyFive'
+  lineinfile:
+    dest: /usr/share/perl5/vendor_perl/Permabit/PlatformUtils.pm
+    line: "^  isThirtyFive"
+  check_mode: yes
+  register: isThirtyFiveIsMissing
+
+# When we know that isThirtyFive is actually missing from above, let's add it
+# where we want to put it
+- name: Fix PlatformUtils Outdated Issue (add isThirtyFive)
+  lineinfile:
+    dest: /usr/share/perl5/vendor_perl/Permabit/PlatformUtils.pm
+    insertafter: '^  isThirtyFour'
+    line: '  isThirtyFive'
+    state: present
+  become: yes
+  when: isThirtyFiveIsMissing
+
+# Check whether the 'ThirtyFive' is present in the $KNOWN_RELEASES.  If it's
+# missing, then register 'thirtyFiveIsMissing'.  Using check_mode: yes to
+# ensure the line isn't actually added by this check.
+- name: Check for 'ThirtyFive' in $KNOWN_RELEASES
+  lineinfile:
+    dest: /usr/share/perl5/vendor_perl/Permabit/PlatformUtils.pm
+    line: "ThirtyFour Rawhide"
+  check_mode: yes
+  register: thirtyFiveIsMissing
+
+# When we know that ThirtyFive is actually missing from above, let's add it
+# where we want to put it
+- name: Fix PlatformUtils Outdated Issue (add ThirtyFive to $KNOWN_RELEASES)
+  replace:
+    path: /usr/share/perl5/vendor_perl/Permabit/PlatformUtils.pm
+    regexp: 'ThirtyFour Rawhide\)'
+    replace: 'ThirtyFour ThirtyFive Rawhide)'
+  become: yes
+  when: thirtyFiveIsMissing
+
+

@@ -1,0 +1,10 @@
+---
+# Set the storage python version.
+- include_tasks: "{{ playbook_dir }}/library/set_python_alternative.yml"
+  vars:
+    alternative: "{{ python_alternative }}"
+    omit_link: no
+
+- include: repartition.yml
+- include: packages.yml
+- include: targetd-server.yml

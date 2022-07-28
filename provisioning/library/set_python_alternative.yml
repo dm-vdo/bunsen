@@ -1,0 +1,15 @@
+---
+# Arguments:
+#   alternative: string; the python alternative to use
+#   omit_link:   boolean; whether to omit the link value
+- name: Set the preferred Python version
+  alternatives:
+    name: python
+    link: "{{ (omit_link | bool) | ternary(omit, '/usr/bin/python') }}"
+    path: /usr/bin/{{ item }}
+    priority: 1000
+  # The one-item loop here is just so that the logged message will show the
+  # chosen alternative for each host.
+  with_items:
+    - "{{ alternative }}"
+  become: yes

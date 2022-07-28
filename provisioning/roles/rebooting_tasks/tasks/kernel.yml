@@ -1,0 +1,33 @@
+---
+- block:
+  # We can skip this for infrastructure servers as they are not systems under
+  # test.
+  - name: Update the kernel related packages that are installed
+    package:
+      name: "{{ kernel_packages }}"
+      state: latest
+    register: result
+    become: yes
+
+  # Sometimes installing/updating the kernel packages, if it includes the debug
+  # kernel, results in the debug kernel becoming the default kernel. We don't
+  # want that.
+  - block:
+      - name: Check default kernel name
+        command: grubby --default-kernel
+        become: yes
+        changed_when: false
+        register: grubby_result
+
+      - name: Update default kernel to a non-debug version
+        command: grubby --set-default "{{ new_default }}"
+        vars:
+          found_default: "{{ grubby_result.stdout_lines[0] }}"
+          new_default: "{{ found_default | regex_replace('[+]debug$', '') }}"
+        when: found_default.endswith("debug")
+    when: not is_family_s390 and result is changed
+
+  - name: Restart system to run new kernel
+    include_tasks: "{{ playbook_dir }}/library/restart_system.yml"
+    when: result is changed
+  when: (inventory_hostname not in groups['infrastructure'] or is_vagrant)

@@ -1,0 +1,243 @@
+---
+
+# There are several cases to consider.
+#
+# - The machine has sufficient local disk space for testing.
+#    - The space is free in the system volume group. (Fedora)
+#    - The space is on a disk not part of a volume group. (Vagrant)
+#    - The space is tied up in the /home file system/LV. (RHEL family)
+#      We could move /home onto the root and free up the space into the
+#      volume group, but that should be done before NFS-mounting various
+#      directories under /home in the nfs_client role.
+# Not handled yet:
+# - The machine does not have enough local disk space to be useful for
+#   testing.
+#    - We must resort to using some external storage server.
+# - The machine has some local disk space but not quite enough.
+
+# To make things more tricky, this should be idempotent. If the /u1
+# and vdo_scratch storage has been allocated, then we don't need to
+# worry about finding enough free space for them somewhere.
+
+- block:
+  - name: Create /u1 mount point
+    file:
+      path: /u1
+      state: directory
+      mode: 0755
+    when: "'/u1' not in mount_points"
+    become: yes
+
+  # Not using a storage server.
+  - block:
+    - block:
+      # System with no volume groups or 1 volume group of the name this task
+      # would give it; use the second disk.
+      - name: Setting scratch volume group and test disk names
+        set_fact:
+          scratch_vg: scratch
+          test_disk: "{%- if ansible_virtualization_type == 'kvm' -%}
+                        /dev/vdb
+                      {%- else -%}
+                        /dev/sdb
+                      {%- endif -%}"
+      when: (ansible_lvm is not defined)
+              or ((ansible_lvm.vgs.keys() | length) == 0)
+              or (((ansible_lvm.vgs.keys() | length) == 1))
+                  and ('scratch' in ansible_lvm.vgs.keys())
+
+    - block:
+        # System with at least one volume group.
+      - block:
+        # System with a /home logical volume: Create a big file and use it via
+        # a loop device as a physical volume.
+        - include_tasks: storage-loop.yml
+          vars:
+            path: /home/big_file
+            min_size: "{{ required }}"
+            max_size: "{{ (vdo_scratch_max_gb * 1024 * 1024) | int }}"
+            disk_var: test_disk
+
+        - name: Picking scratch volume group name
+          set_fact:
+            scratch_vg: "{{ ansible_default_ipv4.macaddress.split(':') | join }}"
+        when: ('home' in (ansible_lvm.lvs.keys() | list)
+               and '/home' in mount_points)
+
+      - block:
+          # System without a /home logical volume: Assume any free space lives
+          # within the system volume group.
+        - name: Using system volume group name for scratch storage
+          set_fact:
+            scratch_vg: "{{ ansible_lvm.lvs['root'].vg }}"
+            test_disk: ""
+        when: ('home' not in (ansible_lvm.lvs.keys() | list)
+               and '/home' not in mount_points)
+      when: (ansible_lvm is defined)
+              and ((ansible_lvm.vgs.keys() | length) > 0)
+    when: not use_storage_server
+
+  # System with an external storage server specified: Use it.
+  - block:
+    - include_tasks: storage-targetd.yml
+      vars:
+        disk_fact: test_disk
+        ipaddr: "{{ lookup('dig', storage_server) }}"
+        size: "{{ (required|int) * 1024 }}"
+        targetd_user: "{{ storage_server_account }}"
+        targetd_password: "{{ storage_server_password }}"
+        targetd_args: "--host {{ storage_server }} \
+                       --user {{ targetd_user }} \
+                       --password {{ targetd_password }}"
+
+    - name: Setting scratch volume group name
+      set_fact:
+        scratch_vg: "{{ ansible_default_ipv4.macaddress.split(':') | join }}"
+
+    when: use_storage_server
+
+  # If we ran across something unexpected, we won't get the results we want.
+  - name: Verifying storage variables have been set
+    assert:
+      that:
+        - scratch_vg is defined
+        - test_disk is defined
+
+  - name: Add physical volume to volume group
+    lvg:
+      vg: "{{ scratch_vg }}"
+      pvs: "{{ test_disk }}"
+    when: test_disk != ""
+    become: yes
+
+  - name: Create logical volume for /u1
+    lvol:
+      vg: "{{ scratch_vg }}"
+      lv: "{{ u1_lv }}"
+      size: "{{ u1_size_gb }}G"
+    become: yes
+
+  - name: Create file system for /u1
+    filesystem:
+      fstype: xfs
+      dev: "/dev/{{ u1_lv_full }}"
+    become: yes
+
+  - name: Mount u1
+    mount:
+      name: /u1
+      src: "/dev/{{ u1_lv_full }}"
+      fstype: xfs
+      state: mounted
+      opts: "{%- if use_storage_server -%}
+               _netdev
+             {%- else -%}
+               defaults
+             {%- endif -%}"
+    become: yes
+
+  - name: Adjust mounted /u1 permissions
+    file:
+      path: /u1
+      state: directory
+      mode: 01777
+    become: yes
+
+  - block:
+
+      - name: Query for existence of vdo_scratch device
+        stat:
+          path: "{{ full_path }}"
+        register: stat_result
+
+      - name: Verify vdo_scratch device presence
+        assert:
+          that:
+            - stat_result.stat.isblk is defined
+            - stat_result.stat.isblk
+          fail_msg: "{{ full_path }} must be an existing block device"
+
+    vars:
+      full_path: "/dev/{{ test_storage_device }}"
+    when: test_storage_device is defined
+
+  # We've changed the name to have the numeric prefix. Remove the old file, in
+  # case anyone tries to update an installation made with the old
+  # configuration.
+  - name: Remove old vdo_scratch.rules file
+    file:
+      path: /etc/udev/rules.d/vdo_scratch.rules
+      state: absent
+    become: yes
+
+  - name: Set up vdo_scratch udev rule
+    # For a raw device, use KERNEL=="vdb" or whatever, but for device-mapper
+    # devices (/dev/dm-##) we don't want to make assumptions about numbering.
+    template:
+      src: vdo_scratch.rules
+      dest: /etc/udev/rules.d/99-vdo_scratch.rules
+      mode: 0644
+      owner: root
+    register: udev_result
+    become: yes
+
+  - block:
+      - name: Reload udev rules
+        command: udevadm control --reload
+        become: yes
+
+      - name: Trigger udev processing
+        command: udevadm trigger
+        become: yes
+
+      # Should we wait (udevadm settle), and verify that the link has been
+      # created?
+
+    when: udev_result is changed
+
+  - setup:
+      filter: ansible_mounts
+    become: yes
+
+  - setup:
+      filter: ansible_lvm
+    become: yes
+
+  - name: Create scratch logical volume for testing
+    lvol:
+      vg: "{{ scratch_vg }}"
+      lv: "{{ scratch_lv }}"
+      size: "{{ (free_gb | float < vdo_scratch_min_gb)
+                | ternary(vdo_scratch_min_gb | string + 'G',
+                          (free_gb | float > vdo_scratch_max_gb)
+                          | ternary(vdo_scratch_max_gb | string + 'G',
+                                    '100%FREE')) }}"
+    when: ((scratch_lv_full not in existing_lvs)
+           and (test_storage_device is not defined))
+    become: yes
+    vars:
+      free_gb: "{{ ansible_lvm.vgs[scratch_vg].free_g }}"
+
+  vars:
+    u1_size_gb: 48
+    vdo_scratch_min_gb: 100
+    # Cap test storage at around 150 GB based on test configs.
+    vdo_scratch_max_gb: 150
+    existing_lvs: "
+      {%- set tmp = {} -%}
+      {%- set lvs = (ansible_lvm is defined) | ternary(ansible_lvm.lvs, {}) -%}
+      {%- for lv in lvs -%}
+        {%- set x = tmp.update({ lvs[lv].vg+'/'+lv : 1 }) -%}
+      {%- endfor -%}
+      {{ tmp.keys() | list }}"
+    scratch_lv: "vdo_scratch"
+    scratch_lv_full: "{{ scratch_vg }}/{{ scratch_lv }}"
+    # checkServer.pl expects the LV for /u1 to be named "scratch", if it's an
+    # LV at all and not a plain partition.
+    u1_lv: "scratch"
+    u1_lv_full: "{{ scratch_vg }}/{{ u1_lv }}"
+    # kB required for u1 + vdo_scratch + slop
+    required: "{{ ((u1_size_gb | int) + vdo_scratch_min_gb + 1) * 1024 * 1024 }}"
+    # mount point directory names
+    mount_points: "{{ ansible_mounts | map(attribute='mount') | list }}"
+

@@ -1,0 +1,33 @@
+---
+# If we're not in a "checkServer requires NTP configuration, the distro may
+# still be running chronyd, and for VMs, that may turn out to be the right
+# thing these days, as some don't automatically stay in sync with the host
+# clock. So update the config files for both daemons.
+- block:
+    - name: Checking service status
+      service_facts:
+
+    - include_tasks: ntpconfig.yml
+      vars:
+        config_file: /etc/chrony.conf
+        daemon_name: chronyd
+        unit_name: chronyd.service
+
+    - include_tasks: ntpconfig.yml
+      vars:
+        config_file: /etc/ntp.conf
+        daemon_name: ntpd
+        unit_name: ntpd.service
+
+  vars:
+    # Everybody talks to the infrastructure box, to keep in sync with each
+    # other. (If there isn't one, well, rely on there being other servers or
+    # peers configured.)
+    ntp_peers: "{%- if 'infrastructure' not in groups -%}
+                  {{ [] }}
+                {%- elif inventory_hostname in groups['infrastructure'] -%}
+                  {{ groups['all'] }}
+                {%- else -%}
+                  {{ groups['infrastructure'] }}
+                {%- endif -%}"
+    ntp_servers: "{{ common_ntp_servers }}"

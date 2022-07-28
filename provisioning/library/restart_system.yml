@@ -1,0 +1,95 @@
+---
+
+# This is a separate file because we may trigger reboots from two
+# places, and we may need to tweak this a bit to get it to work right,
+# since it involves losing our connection to the target machine etc.
+
+# Note that Ansible 2.7 has a "reboot" module, but Fedora 28 ships
+# with Ansible 2.6.5. (CSB is RHEL 7.4 with 2.4.2.0.) Perhaps once we
+# can assume 2.7 we can use that and drop this file.
+
+# Some recommended advice from the net uses "sleep 5 && reboot" with
+# "async: 1" and "poll: 0" to trigger the reboot, which worked with
+# RHEL 7.5, but doesn't seem to work with Fedora 28. We don't know why
+# yet.
+
+- block:
+
+  # The sequence used in the Red Hat "rhts_reboot" script is to use
+  # BootCurrent if set, otherwise the content of
+  # /root/EFI_BOOT_ENTRY.TXT if present, otherwise just take whatever
+  # we get.
+
+  - name: Checking for EFI boot manager
+    command: efibootmgr
+    changed_when: False
+    failed_when: False
+    register: efi
+
+  - set_fact:
+      use_efi: "{{ efi.rc == 0 }}"
+      efi_boot_entry: ""
+      efi_next_entry: ""
+
+  - block:
+    - name: Checking for EFI current boot entry
+      set_fact:
+        efi_boot_entry: "{{ current_line_list[0].split()[1] }}"
+      when: efi.rc == 0 and current_line_found
+    - name: Checking for EFI next boot entry
+      set_fact:
+        efi_next_entry: "{{ next_line_list[0].split()[1] }}"
+      when: efi.rc == 0 and next_line_found
+    vars:
+      current_line_list: "{{ (efi.stdout_lines
+                              | map('regex_search','BootCurrent:.*')
+                              | select('string') | list) }}"
+      current_line_found: "{{ (current_line_list | length) > 0 }}"
+      next_line_list: "{{ (efi.stdout_lines
+                           | map('regex_search','BootNext:.*')
+                           | select('string') | list) }}"
+      next_line_found: "{{ (next_line_list | length) > 0 }}"
+    when: efi.rc == 0
+
+  - name: Check for EFI_BOOT_ENTRY file
+    stat:
+      path: /root/EFI_BOOT_ENTRY.TXT
+    register: efi_boot_entry_file
+    when: use_efi and efi_boot_entry == ""
+
+  - name: Read EFI_BOOT_ENTRY file
+    slurp:
+      src: /root/EFI_BOOT_ENTRY.TXT
+    register: efi_boot_entry_data
+    when: use_efi and efi_boot_entry == "" and efi_boot_entry_file.stat.exists
+
+  - name: Record EFI boot entry from file
+    set_fact:
+      efi_boot_entry: "{{ efi_boot_entry_data['content'] | b64decode | trim }}"
+    when: use_efi and efi_boot_entry == "" and efi_boot_entry_file.stat.exists
+
+  - name: Set EFI boot-next device
+    command: "efibootmgr -n {{ efi_boot_entry }}"
+    when: use_efi and efi_boot_entry != "" and efi_boot_entry != efi_next_entry
+
+  # Specifying a time of "now" could cause the system to go down
+  # before the ssh command returns its success indication. Delaying
+  # 60s is probably enough time to get back the success indication.
+  #
+  # The --no-wall option seems to avoid the warning from Ansible about
+  # extra text after the JSON payload.
+
+  - name: Restart system
+    command: "shutdown --no-wall -r +1"
+    become: yes
+
+  # After 60 seconds, the above command will *start* the reboot
+  # sequence, which involves cleanly shutting down system services. On
+  # a simple farm configuration, it's not likely to take long, but
+  # we're gambling on that. Better would be to wait for the machine to
+  # be reachable *and* for its reported uptime to indicate that it has
+  # rebooted.
+
+  - name: Wait for system to become available
+    wait_for_connection:
+      delay: 90

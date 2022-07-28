@@ -1,0 +1,248 @@
+# Repository variables.
+---
+_repos_selection:
+  distribution: "{{ ansible_distribution + ansible_distribution_version }}"
+  architecture: "{{ ansible_machine }}"
+  environment:
+
+_rsvpd: "{{ externals['first-party']['rsvpd']['host'] }}"
+_third_party_common: "{{ externals['third-party']['third-party-common']['host'] }}"
+_repositories:
+  # Common to all distributions.
+  - common:
+    - name: third-party-common
+      description: "Common repo for third-party packages"
+      enabled: yes
+      baseurl: "{{ [_third_party_common['schema'],
+                    _third_party_common['name'],
+                    _third_party_common['path']] | join }}"
+      gpgcheck: no
+      gpgkey: "{{ [_third_party_common['schema'],
+                   _third_party_common['name'],
+                   _third_party_common['keypath']] | join }}"
+      repo_gpgcheck: 0
+      sslverify: yes
+
+    - name: rsvpd
+      description: "rsvp packages"
+      enabled: yes
+      baseurl: "{{ [_rsvpd['schema'],
+                    _rsvpd['name'],
+                    _rsvpd['path']] | join }}"
+      gpgcheck: no
+      gpgkey: "{{ [_rsvpd['schema'],
+                   _rsvpd['name'],
+                   _rsvpd['keypath']] | join }}"
+      repo_gpgcheck: 0
+      sslverify: yes
+
+  # Common to all Fedora starting with Fedora28.
+  - Fedora([1-9][0-9]{2,}|2[8-9]|[3-9][0-9]):
+    # fedora-debuginfo is preinstalled; we just need to enable it, but we
+    # can't just do that.  Ansible checks that things like the source url is
+    # specified. So, for that and commonality purposes, we specify attributes
+    # we expect even if they are already present.
+    - name: fedora-debuginfo
+      file: fedora
+      description: "Fedora $releasever - $basearch - Debug"
+      enabled: yes
+      gpgcheck: yes
+      gpgkey: "file:///etc/pki/rpm-gpg/\
+                RPM-GPG-KEY-fedora-$releasever-$basearch"
+      sslverify: no
+      metalink: "https://mirrors.fedoraproject.org/metalink?\
+                  repo=fedora-debug-$releasever&arch=$basearch"
+      failovermethod: priority
+
+  # Common to all RHEL 7 family starting with RHEL 7.5 family.
+  # There are no pre-built epel repos for s390 family.
+  - (CentOS|RedHat)7\.([1-9][0-9]+|[5-9]):
+    - name: epel
+      description: "Extra Packages for Enterprise Linux 7 - $basearch"
+      enabled: "{{ not is_family_s390 }}"
+      gpgcheck: no
+      gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7"
+      sslverify: no
+      metalink: "https://mirrors.fedoraproject.org/metalink?\
+                  repo=epel-7&arch=$basearch"
+      failovermethod: priority
+
+    - name: epel-debuginfo
+      description: "Extra Packages for Enterprise Linux 7 - $basearch - Debug"
+      enabled: no
+      gpgcheck: no
+      gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7"
+      sslverify: no
+      metalink: "https://mirrors.fedoraproject.org/metalink?\
+                  repo=epel-debug-7&arch=$basearch"
+      failovermethod: priority
+
+    - name: epel-source
+      description: "Extra Packages for Enterprise Linux 7 - $basearch - Source"
+      enabled: no
+      gpgcheck: no
+      gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-7"
+      sslverify: no
+      metalink: "https://mirrors.fedoraproject.org/metalink?\
+                  repo=epel-source-7&arch=$basearch"
+      failovermethod: priority
+
+    - name: ga
+      description: "GA Repo"
+      enabled: yes
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ distribution_repo_root_url }}/Server/$basearch/os"
+
+    - name: ga-optional
+      description: "GA Optional"
+      enabled: yes
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ distribution_repo_root_url }}/Server-optional/$basearch/os"
+
+    - name: ga-debug
+      description: "GA Debug"
+      enabled: yes
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ distribution_repo_root_url }}/Server/$basearch/debug/tree"
+
+    - name: ga-optional-debug
+      description: "GA Optional Debug"
+      enabled: yes
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ distribution_repo_root_url }}/\
+                  Server-optional/$basearch/debug/tree"
+
+  # Common to all RHEL 8 family only.
+  - (CentOS|RedHat)8\.([1-9][0-9]+|[0-9]):
+    - name: epel
+      description: "Extra Packages for Enterprise Linux 8 - $basearch"
+      enabled: yes
+      gpgcheck: no
+      gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-8"
+      sslverify: no
+      metalink: "https://mirrors.fedoraproject.org/metalink?\
+                  repo=epel-8&arch=$basearch"
+      failovermethod: priority
+
+    - name: epel-debuginfo
+      description: "Extra Packages for Enterprise Linux 8 - $basearch - Debug"
+      enabled: no
+      gpgcheck: no
+      gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-8"
+      sslverify: no
+      metalink: "https://mirrors.fedoraproject.org/metalink?\
+                  repo=epel-debug-8&arch=$basearch"
+      failovermethod: priority
+
+    - name: epel-source
+      description: "Extra Packages for Enterprise Linux 8 - $basearch - Source"
+      enabled: no
+      gpgcheck: no
+      gpgkey: "file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-8"
+      sslverify: no
+      metalink: "https://mirrors.fedoraproject.org/metalink?\
+                  repo=epel-source-8&arch=$basearch"
+      failovermethod: priority
+
+  # Common to all RHEL families starting with RHEL 8.0 family.
+  - (CentOS|RedHat)(?![1-7]\.[0-9]+)[1-9][0-9]*\.[0-9]+:
+    - name: ga
+      file: ga
+      description: "GA Repo"
+      enabled: yes
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ distribution_repo_root_url }}/BaseOS/$basearch/os"
+
+    - name: ga-debug
+      file: ga
+      description: "GA Debug"
+      enabled: "{{ is_rhel | bool }}"
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ distribution_repo_root_url }}/BaseOS/$basearch/debug/tree"
+
+    - name: ga-appstream
+      file: ga
+      description: "GA AppStream"
+      enabled: yes
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ distribution_repo_root_url }}/AppStream/$basearch/os"
+
+    - name: ga-appstream-debug
+      file: ga
+      description: "GA AppStream Debug"
+      enabled: "{{ is_rhel | bool }}"
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ distribution_repo_root_url }}/\
+                  AppStream/$basearch/debug/tree"
+
+    - name: ga-appstream-latest
+      file: ga
+      description: "GA Appstream Repo latest"
+      enabled: no
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ query('latest_repo_roots',
+                          (target_distribution, ansible_architecture)
+                            | join('/'))[0] }}/\
+                  AppStream/$basearch/os/"
+
+    - name: ga-extras
+      file: ga
+      description: "GA Extras"
+      enabled: "{{ is_rhel | bool }}"
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ distribution_repo_root_url }}/CRB/$basearch/os"
+
+    - name: ga-latest
+      file: ga
+      description: "GA Repo latest"
+      enabled: no
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ query('latest_repo_roots',
+                          (target_distribution, ansible_architecture)
+                            | join('/'))[0] }}/\
+                  BaseOS/$basearch/os/"
+
+    - name: ga-powertools
+      file: ga
+      description: "GA PowerTools"
+      enabled: "{{ is_centos | bool }}"
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ distribution_repo_root_url }}/PowerTools/$basearch/os"
+
+# Special repository variables for packages such as 'unifdef' which are not
+# otherwise provided.  These are not enabled by default and must be
+# specifically enabled when installing the special packages.
+# They have very high costs to drive them as repos of last resort.
+_special_repositories:
+  # Common to all RHEL families starting with RHEL 7.5 family.
+  - (CentOS|RedHat)([1-9][0-9]+\.[0-9]+|([7-9])\.([1-9][0-9]+)|7\.[5-9]|[8-9]\.[0-9]):
+    - name: special
+      file: special
+      description: "specially provided packages"
+      enabled: no
+      gpgcheck: no
+      sslverify: no
+      baseurl: "{{ query('special_released_repo_roots',
+                         (target_distribution, ansible_architecture)
+                         | join('/'))[0] }}/\
+                  Everything/$basearch/os"
+      cost: 1000000
+
+special_repositories: "\
+  {{ _special_repositories | select_install(_repos_selection) }}"
+
+repositories: "\
+  {{ (_repositories | select_install(_repos_selection))
+      + special_repositories }}"

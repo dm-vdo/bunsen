@@ -1,0 +1,91 @@
+---
+- block:
+  - name: Create staff group
+    group:
+      name: staff
+      state: present
+    become: yes
+
+  # Add all accounts locally.
+  - name: Create local user homes directory
+    file:
+      dest: "{{ user_homes_local }}"
+      state: directory
+    when: inventory_hostname == nfs_server
+    become: yes
+
+  # The password_hash filter (run on the controller) uses facilities not
+  # present on macOS.  We get the controller's OS and use that to either
+  # invoke the filter or use a pre-generated hash in the case of macOS.
+  # The pre-generated hash is created by providing the password as input to
+  # the command 'mkpasswd --method=sha-512'.
+  - name: Get the controller's operating system
+    local_action: command uname -s
+    become: no
+    changed_when: False
+    register: os_result
+
+  - block:
+    # These two blocks must create the same list of accounts, in the same
+    # order, in order to ensure matching UID allocations!
+    - name: Add local user accounts to infrastructure system
+      user:
+        name: "{{ item }}"
+        home: "{{ user_accounts[item].home }}"
+        create_home: True
+        password: "{{ user_password }}"
+        group: staff
+        append: yes
+      with_items: "{{ user_names_local }}"
+      when: inventory_hostname == nfs_server
+      become: yes
+
+    # Now that the home directories exist, they can be mounted remotely.
+    - name: Add local user accounts to non-infrastructure systems
+      user:
+        name: "{{ item }}"
+        home: "{{ user_accounts[item].home }}"
+        create_home: False
+        password: "{{ user_password }}"
+        group: staff
+        append: yes
+      with_items: "{{ user_names_local }}"
+      when: inventory_hostname != nfs_server
+      become: yes
+
+  - block:
+    - name: Create /etc/auto.bunsen-home autofs map file
+      template:
+        src: auto.bunsen-home
+        dest: /etc/auto.bunsen-home
+        mode: 0755
+      become: yes
+
+    - name: Add /etc/auto.bunsen-home to /etc/auto.master
+      lineinfile:
+        path: /etc/auto.master
+        regexp: '^{{ user_homes_local }}[ \t]+/etc/auto\.bunsen-home'
+        line: "{{ user_homes_local }} /etc/auto.bunsen-home"
+      become: yes
+
+    - name: Start autofs
+      systemd:
+        name: autofs
+        state: restarted
+        enabled: true
+      become: yes
+    when: inventory_hostname != nfs_server
+
+  - name: Create the user's sudoers file for passwordless sudo
+    lineinfile:
+      dest: "/etc/sudoers.d/{{ item }}"
+      state: present
+      regexp: "^{{ item }}"
+      line: "{{ item }} ALL=(ALL) NOPASSWD: ALL"
+      validate: "visudo -cf %s"
+      create: yes
+      mode: 0600
+      owner: root
+      group: root
+    with_items: "{{ user_names_local }}"
+    become: yes

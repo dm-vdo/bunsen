@@ -1,0 +1,141 @@
+# This is the playbook for provisioning a testing virtual environment.
+
+- hosts: all
+  pre_tasks:
+    - name: Verify Ansible version is new enough
+      assert:
+        that:
+          - "ansible_version.full is version_compare('2.7', '>=')"
+          # Check Jinja version somehow, since it can be updated independently?
+        msg: "requires at least Ansible version 2.7"
+      run_once: true
+
+    - name: Copy bunsen log template and add image build date/time
+      vars:
+        image_date_time:
+          "{{ '%Y%m%d_%H%M%S' | strftime(ansible_date_time.epoch) }}"
+      template:
+        src: bunsen.log
+        dest: /var/log/bunsen.log
+        owner: root
+        group: root
+        mode: 0644
+        force: no
+      become: yes
+
+- hosts: all
+  roles:
+    # Install necessary bunsen support.
+    - bunsen
+
+- hosts: all
+  roles:
+    # Establish environment facts.
+    # This is performed regardless of tag specification as some tagged roles
+    # depend on these being established.
+    - environment_facts
+  tags: always
+
+- hosts: all
+  roles:
+    # Install the base repositories and execute all tasks that may require a
+    # machine reboot.  The rebooting tasks include updating packages in case
+    # newer packages address complications that cause issues with subsequent
+    # provisioning.
+    #
+    # We perform the reboot necessitating tasks here as a way to avoid issues
+    # in some environments (those with questionable network behavior) where
+    # later reboots have proven problematic.
+    - repos
+    - rebooting_tasks
+
+  # The storage server must be configured before any other provisioning.
+- hosts: storage_server
+  roles:
+    - storage_server
+
+- hosts: all
+  roles:
+    # Base setup.
+    - base
+
+- hosts: farms performance_farms
+  roles:
+    # Move /home to the root if it was a separate logical volume, on farms
+    # (where we want the space for testing in /u1 and vdo_scratch) but not
+    # infrastructure boxes (where we want plenty of space for saving log
+    # files).
+    #
+    # This must happen before farms set up automounting on /home/bunsen-home.
+    - repartition_home
+
+- hosts: infrastructure resources farms performance_farms
+  roles:
+    # Create the user accounts, including mounting or setting up automounting
+    # for home directories if needed.
+    - user_accounts
+
+- hosts: infrastructure resources
+  roles:
+    # We need to be able to build some code.
+    - resource
+
+- hosts: infrastructure
+  roles:
+    # Establish the common infrastructure necessities.
+    - infrastructure
+    # Set up the NFS exports for everyone to consume (even ourself)
+    - nfs_server
+    # Set up the build exports.
+    - permabuild_server
+    # Set up the RSVP Server.
+    - rsvp_server
+
+- hosts: farms performance_farms
+  roles:
+    # Make certain any targetd client has the necessary packages.
+    - targetd_client
+
+- hosts: resources farms performance_farms
+  roles:
+    # Mount the various NFS shares.
+    - nfs_client
+    # Add the required symlink for rsvpclient (requires NFS).
+    - rsvp_client
+
+- hosts: all
+  roles:
+    # Because this messes with repo selection, this should happen after as many
+    # other package installations as possible (so we pick up the native
+    # packaging if possible), but it needs to happen before the build of UDS.
+    - special_packages
+
+- hosts: infrastructure resources farms performance_farms
+  serial: 1   # Serialized as this changes shared files.
+  roles:
+    # Add ourself as a known host for every user.
+    - known_host
+
+- hosts: infrastructure resources farms performance_farms
+  roles:
+    # Mount specified sshfs mounts.
+    - sshfs_mounts
+  tags: sshfs-mounts
+
+- hosts: farms performance_farms
+  roles:
+    # Set up the farm specific requirements.
+    # This ends with registering with RSVP, so it ought to be last.
+    - farm
+
+- hosts: all
+  post_tasks:
+    - name: Update bunsen log with successful install date/time
+      vars:
+        install_date_time:
+          "{{ '%Y%m%d_%H%M%S' | strftime(ansible_date_time.epoch) }}"
+      lineinfile:
+        path: /var/log/bunsen.log
+        regexp: '^Install Date:'
+        line: 'Install Date: {{ install_date_time }}'
+      become: yes

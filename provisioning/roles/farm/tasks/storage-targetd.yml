@@ -1,0 +1,139 @@
+---
+
+# inputs: disk_fact, ipaddr, permabuild_target_path, size, targetd_args,
+# ansible_iscsi_iqn, ansible_default_ipv4
+
+# sets facts/registers: {{disk_fact}}, lun_exports, pool_output, scsi,
+# iscsi_disks
+
+- name: Checking that storage server is set
+  assert:
+    that:
+      - disk_fact is defined
+
+- name: Install iSCSI tools
+  package:
+    name: iscsi-initiator-utils
+    state: present
+  become: yes
+
+- name: Re-retrieving IQN
+  setup:
+    filter: ansible_iscsi_iqn
+
+# XX Perhaps we should create a Python module implementing idempotent
+# operations to ensure the existence (or nonexistence) of a target LUN.
+
+- name: Fetch current LUN exports
+  command: "export_list {{ targetd_args }} --all"
+  register: lun_exports
+  changed_when: False
+
+- block:
+
+   - name: Fetch pool names
+     command: "pool_list {{ targetd_args }}"
+     register: pool_output
+     changed_when: False
+
+   - name: Create LUN export to host
+     command: "createLun {{ targetd_args }} \
+                     --pool {{ pool_name }} \
+                     --name scratch_{{ macaddress }} \
+                     --size {{ size }} --lun 0"
+     vars:
+       macaddress: "{{ ansible_default_ipv4.macaddress.split(':') | join }}"
+       pool_labels: "{{ pool_output.stdout_lines[0].split() }}"
+       all_pools: "\
+           {%- set temp = [] -%}
+           {%- for line in pool_output.stdout_lines[1:] -%}
+             {%- set fields = line.split() -%}
+             {%- set newval = {} -%}
+             {%- for i in range(0,pool_labels|length) -%}
+               {%- set z = newval.update({ pool_labels[i] : fields[i] }) -%}
+             {%- endfor -%}
+             {%- set z = temp.append(newval) -%}
+           {%- endfor -%}
+           {{ temp }}"
+       block_pools: "\
+           {{ all_pools | selectattr('Type', 'match', '^block$') | list }}"
+       #fs_pools: "\
+       #    {{ all_pools | selectattr('Type', 'match', '^fs$') | list }}"
+       pool_name: "{{ block_pools[0].Pool }}"
+
+  vars:
+    labels: "{{ lun_exports.stdout_lines[0].split() }}"
+    all_luns: "\
+        {%- set temp = [] -%}
+        {%- for line in lun_exports.stdout_lines[1:] -%}
+          {%- set fields = line.split() -%}
+          {%- set newval = {} -%}
+          {%- for i in range(0,labels|length) -%}
+            {%- set z = newval.update({ labels[i] : fields[i] }) -%}
+          {%- endfor -%}
+          {%- set z = temp.append(newval) -%}
+        {%- endfor -%}
+        {{ temp }}"
+    # N.B.: The IQN may have dots, so the regexp could theoretically match more
+    # than we want it to, but it shouldn't have other special chars.
+    host_luns: "\
+        {{ all_luns
+           | selectattr('initiator_wwn', 'match',
+                        '^' + ansible_iscsi_iqn + '$')
+           | list }}"
+  when: (host_luns | length) == 0
+
+- block:
+
+  - name: Scan for iSCSI server
+    open_iscsi:
+      show_nodes: yes
+      discover: yes
+      portal: "{{ ipaddr }}"
+    register: scsi
+
+  - name: Check for multiple iSCSI sessions
+    assert:
+      that: (scsi.nodes | length) == 1
+      msg: "Only one iSCSI node expected by script ({{ scsi.nodes }})"
+
+  - name: Log into iSCSI server
+    open_iscsi:
+      login: yes
+      target: "{{ scsi.nodes[0] }}"
+      auto_node_startup: yes
+
+  # Force rescan in case we were already connected.
+  # XXX We should scan just the host and target that we care about, but
+  # we check above that there's only one connection anyway.
+  - name: Force iSCSI rescan
+    shell: "tee host*/device/scsi_host/host*/scan"
+    args:
+      stdin: "- - -"
+      chdir: /sys/class/iscsi_host
+    become: yes
+
+  # XXX Wait for scan of target to complete, we hope.
+  - name: Pause for scan of iSCSI target devices
+    wait_for:
+      timeout: 10
+
+  - name: Wait for udev to settle
+    command: udevadm settle
+    changed_when: False
+
+  - name: Look up iSCSI disk
+    find:
+      paths: /dev/disk/by-path
+      patterns: "ip-{{ ipaddr }}:*-iscsi-*-lun-*"
+      file_type: link
+    register: iscsi_disks
+
+  - name: Check for correct number of LUNs found
+    assert:
+      that: iscsi_disks.matched == 1
+      msg: "expected exactly one iscsi disk in /dev/disk/by-path ({{ iscsi_disks.files }})"
+
+  - name: Set test disk to iSCSI disk
+    set_fact:
+      "{{ disk_fact }}": "{{ iscsi_disks.files[0].path }}"

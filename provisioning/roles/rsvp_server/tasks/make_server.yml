@@ -1,0 +1,49 @@
+---
+# Install the package
+- name: Install the RSVPD package
+  package:
+    name: perl-rsvpd
+    state: latest
+  become: yes
+
+- name: Install the rsvpclient package
+  package:
+    name: perl-rsvpclient
+    state: latest
+  become: yes
+
+- name: Start the RSVPD Service
+  systemd:
+    name: rsvpd
+    state: started
+  become: yes
+
+- name: Wait for RSVPD service to be active
+  wait_for:
+    port: 1752  # The rsvp server we deploy listens on 1752.
+
+# Add the RSVP classes
+# For RHEL families we register only the major version of the distribution.
+- name: Add the RSVP classes
+  command: "/usr/bin/rsvpclient  --dhost localhost add_class {{ item }}"
+  register: result
+  changed_when: "result.rc == 0"
+  failed_when: "(result.rc != 0) and ('already exists' not in result.stderr)"
+  with_items:
+    - 64BITOK
+    - ALBIREO
+    - ALL
+    - BIGMEM
+    - FARM
+    - VFARM
+    - KVM
+    - NTP
+    - LINUX-UDS
+    - LINUX-VDO
+    - VDO
+    - VDO-PMI
+    - FEDORA
+    - "{{ query('available_distributions')
+          | map('regex_replace', '^((CENTOS|RHEL)\\d).*', '\\1')
+          | unique
+          | list }}"

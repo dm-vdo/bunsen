@@ -1,0 +1,14 @@
+---
+# If /home is its own mount point, move the contents to the root, unmount it,
+# and remove the logical volume.
+
+# TODO: Robustness against interruption & replay. If interrupted at various
+# points, currently there's no automatic recovery possible; you must reinstall
+# the machine and start over, or patch things up manually.
+
+- include_tasks: repartition.yml
+  # ansible_user_dir looks tempting but when running with -b, it's root's
+  # homedir, not ansible_user's.
+  when: "'/home' in mount_points
+          and 'home' in existing_lvs
+          and '/home' not in ansible_env['PWD']"

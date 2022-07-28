@@ -1,0 +1,4 @@
+---
+- name: Change root password
+  user: name=root update_password=always password={{ root_password }}
+  tags: rootpw

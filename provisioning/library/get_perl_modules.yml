@@ -1,0 +1,152 @@
+---
+
+# Given a list of desired Perl modules, install RPM packages for those
+# that we can find, and install the rest from CPAN. Maintain the
+# original order, as some CPAN modules have undocumented dependencies
+# which we may have to resolve with the module ordering. (RPM modules
+# should just get it right, we hope.)
+
+# input var: modules
+
+# internally maintained var: perl_rpms
+
+# Hack! We disable scanning of repos "*-debuginfo" everywhere as the Perl
+# packages are not necessarily binary compatible.
+
+# ?? We might want to rebuild perl_rpms if the system repo list has
+# changed. Is there a trivial way to check that? For now just assume
+# any repo list updates were done already.
+
+# ?? Support for specifying CPAN mirror?
+
+- block:
+
+  # What about architectures? The x86_64 repo has x86_64, i386, and
+  # noarch packages; we want x86_64 and noarch but not i386.
+  #
+  # The "unique" processing below will discard duplicates, but if we
+  # hit a case where a package is available for i386 but not x86_64
+  # (for example) then we could have problems.
+
+  - name: List Perl module packages
+    shell: |
+      {{ ansible_pkg_mgr }} search \
+                 --disablerepo '*-debuginfo' \
+                 perl- 2>/dev/null
+    args:
+      warn: False
+    become: yes
+    changed_when: False
+    register: dnf
+
+  - name: Parse and save {{ ansible_pkg_mgr }} list of Perl module packages
+    set_fact:
+      # regex_replace: Make lines with .src package names disappear.
+      # regex_search+select: Pick only package names, not descriptions or
+      #   lines with output section headers.
+      # regex_replace: Strip off the trailing architecture spec.
+      # unique: Handle the fact that, for example, i386 and x86_64 packages
+      #   for a Perl module are both present, so the arch-less name is
+      #   duplicated. Probably not critical.
+      # list: unique makes a set which seems to get turned into a
+      #   simple string, and "<pkg> in <string>" matches substrings of
+      #   RPM names; we really need to do list operations.
+      perl_rpms: "{{ dnf.stdout_lines
+                     | map('regex_replace', '[^ ]*\\.src : .*', '')
+                     | map('regex_search','^perl-[^ ]*')
+                     | select('string')
+                     | map('regex_replace', '\\.[a-z0-9_]*$', '')
+                     | unique
+                     | list }}"
+      cpanm_installed: False
+
+  when: perl_rpms is not defined
+
+- name: Trivial validation of Perl RPM info
+  assert:
+    that:
+      - "perl_rpms | length > 0"
+      - "'perl-App-cpanminus' in perl_rpms"
+
+# We can't reach cpan.org by IPv6 from the Red Hat network.
+#
+# Leave IPv6 open as a fallback in case someone's using this on a laptop
+# outside the Red Hat network and their network is flaky. If we're failing both
+# ways, it's okay to take a couple extra minutes before failing.
+- name: Ensure CPANM fetching prefers IPv4
+  lineinfile:
+    regexp: '(?i)^[# \t]*prefer[-_ ]*family *='
+    line: 'prefer-family = IPv4'
+    path: /etc/wgetrc
+    create: yes
+  become: yes
+
+- block:
+
+  #- debug: var=sorted_modules
+
+  # Install cpanm, if necessary.
+  - block:
+    - name: Install cpanm package
+      package:
+        name: perl-App-cpanminus
+        state: present
+      become: yes
+
+    - name: Record cpanm installation
+      set_fact:
+        cpanm_installed: True
+
+    when: "(((sorted_modules.cpanver | length) > 0)
+            or ((sorted_modules.cpan | length) > 0))
+           and (not cpanm_installed)"
+
+  # Install Perl modules of specific versions first to avoid, as far as
+  # possible, installation of later versions based on dependencies of other
+  # modules.
+  #
+  # N.B.: Combined loops here, retrying until success and looping over
+  # packages.
+  - name: Install Perl modules of specific versions from CPAN
+    cpanm:
+      name: "{{ item }}"
+    become: yes
+    register: result
+    until: result is success
+    retries: "{{ default_retry_count }}"
+    delay: "{{ default_retry_delay }}"
+    with_items: "{{ sorted_modules.cpanver }}"
+
+  - name: Install Perl modules from packages
+    package:
+      name: "{{ sorted_modules.rpms }}"
+      state: present
+    become: yes
+    when: sorted_modules.rpms | length > 0
+
+  - name: Install Perl modules from CPAN
+    cpanm:
+      name: "{{ item }}"
+    become: yes
+    register: result
+    until: result is success
+    retries: "{{ default_retry_count }}"
+    delay: "{{ default_retry_delay }}"
+    with_items: "{{ sorted_modules.cpan }}"
+
+  vars:
+    sorted_modules: '
+      {%- set tmp = { "rpms": [], "cpan": [], "cpanver": [] } -%}
+      {%- for module in modules -%}
+        {%- if "~\"" in module -%}
+          {%- set x = tmp.cpanver.append(module) -%}
+        {%- else -%}
+          {%- set package = "perl-" + (module | replace("::","-")) -%}
+          {%- if package in perl_rpms -%}
+            {%- set x = tmp.rpms.append(package) -%}
+          {%- else -%}
+            {%- set x = tmp.cpan.append(module) -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {{ tmp }}'

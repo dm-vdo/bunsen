@@ -1,0 +1,21 @@
+---
+- block:
+
+  - name: Fetch SSH public key(s)
+    command: "ssh-keyscan -4 {{ host }}"
+    changed_when: False
+    register: keyscan_result
+
+  - name: Register as a known host
+    known_hosts:
+    args:
+      key: "{{ item[1] }}"
+      name: "{{ host }}"
+    become: yes
+    become_user: "{{ item[0] }}"
+    with_nested:
+      - "{{ user_accounts.keys() | list }}"
+      - "{{ keyscan_result.stdout_lines }}"
+
+  vars:
+    host: "{{ inventory_hostname }}"

@@ -1,0 +1,10 @@
+---
+- name: Install base packages.
+  package:
+    name: "{{ packages }}"
+    state: present
+  register: result
+  until: result is success
+  retries: "{{ default_retry_count }}"
+  delay: 30
+  become: yes

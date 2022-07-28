@@ -1,0 +1,43 @@
+---
+- block:
+  - name: Install repositories.
+    yum_repository:
+      file: "{{ item['file'] | default(item['name']) }}"
+      name: "{{ item['name'] }}"
+      description: "{{ item['description'] }}"
+      enabled: "{{ item['enabled'] }}"
+      gpgcheck: "{{ item['gpgcheck'] }}"
+      gpgkey: "{{ item['gpgkey'] | default(omit) }}"
+      sslverify: "{{ item['sslverify'] | default(omit) }}"
+      baseurl: "{{ item['baseurl'] | default(omit) }}"
+      metalink: "{{ item['metalink'] | default(omit) }}"
+      failovermethod: "{{ item['failovermethod'] | default(omit) }}"
+      cost: "{{ item['cost'] | default(omit) }}"
+      skip_if_unavailable: "{{ item['skip_if_unavailable'] | default(omit) }}"
+    with_items: "{{ repositories }}"
+    loop_control:
+      label: "{{ [item['name'], item['metalink'] | default(item['baseurl'])] }}"
+    become: yes
+
+  - name: Enable Fedora updates repositories
+    ini_file:
+      path: /etc/yum.repos.d/fedora-updates.repo
+      section: "{{ item }}"
+      option: enabled
+      value: "1"
+      create: no
+    with_items:
+      - updates-debuginfo
+      - updates-source
+    when: is_fedora | bool
+    become: yes
+
+  - name: Set special case repositories for use by others.
+    set_fact:
+      special_case_repositories: "
+        {%- if special_repositories is defined -%}
+          {{ special_repositories
+              + (special_case_repositories | default([])) }}
+        {%- else -%}
+          {{ special_case_repositories | default([]) }}
+        {%- endif -%}"

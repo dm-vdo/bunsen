@@ -1,0 +1,42 @@
+---
+# XXX Should we use the user's .ssh/config file, which could be shared across
+# machines via net mounting of home dirs, or /etc/ssh/ssh_config, which would
+# be specific to the machine hosting the VMs but shared by all users on that
+# host, including users who wouldn't have accounts on the VMs?
+
+- block:
+  - name: Touch the user's .ssh config file
+    local_action:
+      module: file
+      state: touch
+      path: "{{ ssh_config }}"
+      owner: "{{ lookup('env', 'HOME') | basename }}"
+      mode: 0644
+    become: no
+    run_once: True
+
+  - name: Save ssh config info for Vagrant VMs
+    local_action:
+      module: blockinfile
+      path: "{{ ssh_config }}"
+      # Multiplexing?
+      block: |
+        Host {{ hosts | join(' ') }}
+          UserKnownHostsFile /dev/null
+          StrictHostKeyChecking no
+
+        Match originalhost {{ hosts | join(',') }} exec "{{ vagrant_test }}"
+          ProxyCommand sh -c "cd {{ vagrant_dir }} && exec {{ vssh_proxy }}"
+      marker: "# {mark} ANSIBLE MANAGED BLOCK FROM {{ vagrant_dir }}"
+    become: no
+    run_once: True
+
+  vars:
+    hosts: "{{ groups.all | sort | list }}"
+    ssh_config: "{{ lookup('env', 'HOME') }}/.ssh/config"
+    vagrant_dir: "{{ lookup('pipe', 'cd {{ playbook_dir }}/.. && pwd -P') }}"
+    vagrant_test: "test -d {{ vagrant_dir }} && ! host %n && type vagrant"
+    vssh_proxy: "vagrant ssh %h -- -W 127.0.0.1:%p -o ClearAllForwardings=no"
+  when: is_vagrant | bool
+
+# TODO: Automatically update the block when destroying VMs?

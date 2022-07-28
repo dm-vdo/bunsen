@@ -1,0 +1,37 @@
+---
+- include: configure_selinux.yml
+
+- name: Update installed non-special packages.
+  package:
+    name: "*"
+    state: latest
+  register: result
+  until: result is success
+  retries: "{{ default_retry_count }}"
+  delay: 30
+  when: is_vagrant
+  become: yes
+
+# Install/update kernel packages.
+- include: kernel.yml
+
+- include: configure_farm.yml
+
+# Only keep the latest kernel. The required_packages code gets unhappy if
+# multiple versions of a package are installed.
+
+- name: Check for older packages to be uninstalled
+  command: dnf repoquery --installonly --latest-limit=-1 -q
+  args:
+    warn: False
+  # Really, if packaging system is DNF vs Yum...
+  when: ansible_pkg_mgr == "dnf"
+  changed_when: False
+  register: repoquery
+
+- name: Remove older kernels
+  command: "dnf remove --assumeyes {{ repoquery.stdout }}"
+  args:
+    warn: False
+  become: yes
+  when: (ansible_pkg_mgr == "dnf") and (repoquery.stdout != "")

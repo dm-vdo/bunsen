@@ -1,0 +1,146 @@
+---
+# Default passwords and storage server account name.
+# The root and user passwords must be encrypted.
+# See https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-encrypted-passwords-for-the-user-module
+# for guidance on generating encrypted passwords.
+#
+# The user password will be used for all user account creation.
+# The storage server password, if provisioning a storage server, must be
+# cleartext.
+root_password: $6$lr2pKxpIvVfQuSrI$7OJ1ldLqVMkQk2xDfZZ6B4hQaswWTfQA89HDRyRr6PV.MwK8bNa2dcBeG5/PUYRXT/8DEqxRp6Ye4/INMvrEy1
+user_password: $6$lr2pKxpIvVfQuSrI$7OJ1ldLqVMkQk2xDfZZ6B4hQaswWTfQA89HDRyRr6PV.MwK8bNa2dcBeG5/PUYRXT/8DEqxRp6Ye4/INMvrEy1
+
+storage_server_account: admin
+storage_server_password: bunsen-storage-server
+
+# Update ~/.ssh/config to proxy through 'vagrant' when appropriate.  If
+# hostname resolution outside of the VM environment is not available, this may
+# be necessary to communicate with the various VMs directly from the host.
+enable_proxy_vagrant_ssh_config: False
+
+# Default retry values; used when specifying retries on a task, block or
+# anything else to which it applies.
+default_retry_count: 3
+default_retry_delay: 20
+
+# The targeted platform.
+target_distribution_name: "{{ ansible_distribution }}"
+target_distribution_major_number: "{{ ansible_distribution_version.split('.')[0] }}"
+
+# Fedora does not have a minor number, for it we use 0.
+target_distribution_minor_number: "
+  {%- set minor = 0 -%}
+  {%- if target_distribution_name != 'Fedora' -%}
+    {%- set minor = ansible_distribution_version.split('.')[1] %}
+  {%- endif -%}
+  {{ minor }}"
+
+target_distribution_major_name: "{{target_distribution_name}}{{ target_distribution_major_number}}"
+target_distribution: "{{ target_distribution_name }}{{ ansible_distribution_version | regex_replace('\\.') }}"
+# Machine architecture family variables
+is_family_ppc: '{{ ansible_machine.startswith("ppc") }}'
+is_family_s390: '{{ ansible_machine.startswith("s390") }}'
+is_family_x86: '{{ (ansible_machine == "i386")
+                    or ansible_machine.startswith("x86") }}'
+# Machine architecture variables
+is_arch_s390x: '{{ ansible_machine == "s390x" }}'
+
+# Checking for Fedora vs. CentOS/RHEL
+is_fedora: '{{target_distribution_name == "Fedora"}}'
+is_fedora31_or_later: '{{is_fedora and ((target_distribution_major_number | int) >= 31)}}'
+is_fedora32_or_later: '{{is_fedora and ((target_distribution_major_number | int) >= 32)}}'
+is_fedora34_or_later: '{{is_fedora and ((target_distribution_major_number | int) >= 34)}}'
+
+is_rhel: '{{target_distribution_name == "RedHat"}}'
+is_rhel7: '{{is_rhel and ((target_distribution_major_number | int) == 7)}}'
+is_rhel8: '{{is_rhel and ((target_distribution_major_number | int) == 8)}}'
+is_rhel80: '{{is_rhel8 and ((target_distribution_minor_number | int) == 0)}}'
+is_rhel8_or_later: '{{is_rhel and ((target_distribution_major_number | int) >= 8)}}'
+
+is_centos: '{{target_distribution_name == "CentOS"}}'
+is_centos7: '{{is_centos and ((target_distribution_major_number | int) == 7)}}'
+is_centos8: '{{is_centos and ((target_distribution_major_number | int) == 8)}}'
+is_centos80: '{{is_centos8 and ((target_distribution_minor_number | int) == 0)}}'
+is_centos8_or_later: '{{is_rhel and ((target_distribution_major_number | int) >= 8)}}'
+
+is_rhel_family: '{{is_centos or is_rhel}}'
+is_rhel7_family: '{{is_rhel_family and ((target_distribution_major_number | int) == 7)}}'
+is_rhel8_family: '{{is_rhel_family and ((target_distribution_major_number | int) == 8)}}'
+is_rhel80_family: '{{is_rhel8_family and ((target_distribution_minor_number | int) == 0)}}'
+is_rhel8_or_later_family: '{{is_rhel_family and ((target_distribution_major_number | int) >= 8)}}'
+
+# Distribution repo base url.
+distribution_repo_root_url: "
+  {%- set root_url = (repo_root_url | default('')) -%}
+  {%- if root_url == '' -%}
+    {%- set root_url = query('released_repo_roots',
+                             (target_distribution, ansible_architecture)
+                              | join('/'))[0] -%}
+  {%- endif -%}
+  {{ root_url }}"
+
+# User accounts to create.
+bunsen_user_account: bunsen
+
+deploying_user_account: "{{ deploying_account | default(lookup('env','USER')) }}"
+target_user_account: "{{ target_account | default(deploying_user_account) }}"
+_target_user_accounts: "{{ target_accounts | default([target_user_account]) }}"
+target_user_accounts: "{{ _target_user_accounts | unique | list }}"
+
+_user_accounts: "{{
+  [bunsen_user_account, deploying_user_account] + target_user_accounts }}"
+
+# Where we place local user account's home directories.
+# We do this to avoid, in a vagrant environment, the obscuring of the vagrant
+# user that would result if we just used /home.
+user_homes_local: /home/bunsen-home
+
+# We unique the list to cover the possibility of redundancies in account
+# specification then we remove 'root' from the list of users as if we treat it
+# as we do any other account we create it messes up provisioning.
+user_accounts: "
+  {%- set tmp = {} -%}
+  {%- for user in (_user_accounts | unique | difference(['root'])) -%}
+    {%- set x = tmp.update({user: {'home' : user_homes_local + '/' + user,
+                                   'type' : 'local'}}) -%}
+  {%- endfor -%}
+  {{ tmp }}"
+
+# Sort the list of usernames for consistent ordering while provisioning.
+user_names_local: "{{ user_accounts.keys() | sort }}"
+
+# Deploying user sshfs mounts to mount.
+deploying_user_sshfs_mounts: "{{ deploying_user_mounts | default([]) }}"
+
+# The permabit build directory location and link.
+permabuild_directory: /permabit/builds/build
+permabuild_directories:
+  - "{{ permabuild_directory }}"
+
+permabuild_directories_links:
+  - { dest: /permabit/build,  src: builds/build }
+
+common_ntp_servers: []
+
+# Common nfs mount options.  Primarily for use in an environment that has some
+# problematic behavior that should be avoided for all mounts and can be done
+# so via nfs mount optiopns; e.g., IPv6 issues.
+workaround_nfs_mount_opts: proto=tcp
+
+# Provide a default performance farms list to handle the case where the
+# inventory does not have such a group.
+performance_farms: "{{ groups['performance_farms'] | default([]) }}"
+
+# Server definitions.
+# Currently each of these services is tied to the infrastructure role.
+nfs_server: "{{ groups['infrastructure'][0] }}"
+permabuild_server: "{{ groups['infrastructure'][0] }}"
+rsvp_server: "{{ groups['infrastructure'][0] }}"
+
+# Is this machine functioning as a storage server?
+# Default of empty list in determining whether this machine is a storage server
+# for inventories that don't have a storage_server section.
+is_storage_server: "\
+  {{ inventory_hostname in (groups['storage_server'] | default([])) }}"
+storage_server: "{{ groups['storage_server'][0] | default('') }}"
+use_storage_server: "{{ storage_server != '' }}"

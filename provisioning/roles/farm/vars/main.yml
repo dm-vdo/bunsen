@@ -1,0 +1,82 @@
+# Farm variables.
+---
+bunsen_user: "{{ bunsen_user_account }}"
+
+_farm_selection:
+  distribution: "{{ ansible_distribution + ansible_distribution_version }}"
+  architecture: "{{ ansible_machine }}"
+
+farm_repositories: "{{ [] }}"
+
+# Farm packages.
+_farm_packages:
+  # Common to all distributions.
+  - common:
+    - blktrace
+    - crash
+    - cryptsetup
+    - dwarves
+    - elfutils
+    - gdb
+    - iscsi-initiator-utils
+    - kernel-debuginfo
+    - kexec-tools
+    - libaio
+    - lvm2
+    - perf
+    - permatest
+    - perl-Permabit-checkServer
+    - rsyslog
+    - strace
+    - sysstat
+    - systemtap-client
+    - systemtap-devel
+    - targetcli
+    - valgrind
+    - xfsdump
+    - yum-plugin-auto-update-debug-info
+
+  ##########################################################################
+  # Fedora
+  ##########################################################################
+  - Fedora28:
+    - python-numpy
+
+  # Common to all Fedora starting with Fedora28.
+  - Fedora([1-9][0-9]{2,}|2[8-9]|[3-9][0-9]):
+    - abrt
+    - btrfs-progs
+    - dosfstools
+    - kernel-devel
+    - postfix
+    - python3-numpy
+    - xfsprogs
+
+  # Common to all Fedora starting with Fedora29.
+  - Fedora([1-9][0-9]{2,}|29|[3-9][0-9]):
+    - numpy
+
+  # Common to all RHEL 7 family starting with RHEL 7.5 family.
+  - (CentOS|RedHat)7\.([1-9][0-9]+|[5-9]):
+    - numpy
+
+  # Common to all RHEL families starting with RHEL 8.0 family.
+  - (CentOS|RedHat)(?![1-7]\.[0-9]+)[1-9][0-9]*\.[0-9]+:
+    - dosfstools
+    - python3-numpy
+
+  # Common to all RHEL 7 and 8 family.
+  - (CentOS|RedHat)(7|8)\.[0-9]+:
+    - abrt
+
+farm_packages: "{{ _farm_packages | select_install(_farm_selection) }}"
+
+# Perl modules to install, either as RPMs or from CPAN.
+#
+# N.B. The modules are specified based on order dependence.
+_perl_libraries:
+  # Common to all.
+  - common:
+    - Time::HiRes
+
+perl_libraries: "{{ _perl_libraries | select_install(_farm_selection) }}"

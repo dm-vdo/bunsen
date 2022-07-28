@@ -1,0 +1,39 @@
+---
+- include: packages.yml
+
+# This fix must be done after the lvm package is installed above
+# since lvm changes the default to 0 in the install.
+- name: Enable logical volume scanning on RHEL8 for lvm commands
+  lineinfile:
+    regexp: "^[\t #]*scan_lvs[\t ]*="
+    line: "\tscan_lvs = 1"
+    state: present
+    path: /etc/lvm/lvm.conf
+  when: (is_rhel_family | bool) or (is_fedora31_or_later | bool)
+  become: yes
+
+# lvmetad has been removed from RHEL8 on the grounds that it doesn't provide
+# enough benefit to be worthwhile. It has also been removed from Fedora 31.
+# It causes problems on Fedora29.
+- name: Disable lvmetad on Fedora 30 or before
+  lineinfile:
+    path: /etc/lvm/lvm.conf
+    regexp: "^[\t ]*use_lvmetad[\t ]*="
+    line: "\tuse_lvmetad = 0"
+  when: (is_fedora | bool) and (not (is_fedora31_or_later | bool))
+  become: yes
+
+- include: perl_libraries.yml
+- include: load_permatest.yml
+- include: rsyslog.yml
+- include: config.yml
+- include: services.yml
+- include: storage.yml
+- include: required_packages_file.yml
+- include: udev.yml
+
+#XXX: This is a hack until we get perl code mirroring and packaging put
+#     together
+- include: temp_fix_athinfo.yml
+# This must be last, as a test could start using the machine afterwards.
+- include: rsvp.yml

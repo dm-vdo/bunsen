@@ -1,0 +1,72 @@
+---
+
+# Set up a big file (sparse is okay) and a loop device to act as a volume group
+# for VDO test storage.
+
+# Inputs: path, min_size, max_size, disk_var.
+# Sets facts, registers: {{disk_var}}, losetup_result.
+
+- name: Checking free space
+  setup:
+    filter: ansible_mounts
+
+- block:
+
+  # XXX If the file has already been created and lots of stuff written to it,
+  # we may not find free space, but we may not need it after all.
+
+  - name: Check for enough scratch space under /home
+    assert:
+      that: (free_space_kb | int) >= (min_size | int)
+      msg: "Unable to find enough free space under /home \
+                 (need {{ min_size }}k)"
+
+  - name: Create scratch loop file
+    command: "dd if=/dev/zero of={{ path }} bs=4096 count=1 \
+                 seek={{ scratch_size_blocks }}"
+    args:
+      creates: "{{ path }}"
+
+  vars:
+    free_space_kb: "{{ (ansible_mounts
+                        | selectattr('mount', 'match', '^/home$')
+                        | list)[0].size_available / 1024 }}"
+    scratch_fraction: 0.9
+    supplied_min_size_blocks: "{{ ((min_size | int) / 4) | int }}"
+    supplied_max_size_blocks: "{{ ((max_size | int) / 4) | int }}"
+    max_scratch_size_blocks: "{{ ((free_space_kb | int)
+                                  * scratch_fraction / 4) | int }}"
+    scratch_size_blocks: "{{ [ supplied_max_size_blocks | int,
+                               [ supplied_min_size_blocks | int,
+                                 max_scratch_size_blocks | int] | max ]
+                             | min }}"
+
+- name: Set up loop device system unit
+  copy:
+    src: "{{ item }}"
+    dest: /etc/systemd/system/loop-setup.service
+    mode: 0644
+  with_items: "
+      {%-if is_rhel8_or_later_family -%}
+        loop-setup.service.rhel8
+      {%- else -%}
+        loop-setup.service
+      {%- endif -%}"
+  become: yes
+
+- name: Starting loop device
+  systemd:
+    name: loop-setup
+    state: started
+    enabled: True
+  become: yes
+
+- name: Scanning for loop device
+  command: "losetup -j {{ path }}"
+  changed_when: False
+  register: losetup_result
+  become: yes
+
+- name: Identifying loop device
+  set_fact:
+    "{{ disk_var }}": "{{ losetup_result.stdout.split(':')[0] }}"

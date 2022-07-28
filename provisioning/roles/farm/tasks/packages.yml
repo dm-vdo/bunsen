@@ -1,0 +1,15 @@
+---
+- block:
+  - name: Install required packages
+    package:
+      name: "{{ farm_packages }}"
+      state: present
+    become: yes
+
+  - name: Ensure distro VDO packages are not installed
+    package:
+      name:
+        - kmod-kvdo
+        - vdo
+      state: absent
+    become: yes

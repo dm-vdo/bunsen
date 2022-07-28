@@ -1,0 +1,20 @@
+
+- name: "Check if package is in the system"
+  package_facts:
+    manager: "auto"
+
+- name: "Check xinetd"
+  set_fact:
+    system_has_xinetd: "{{ 'xinetd' in ansible_facts.packages }}"
+
+- name: "Check ntpd"
+  set_fact:
+    system_has_ntpd: "{{ 'xinetd' in ansible_facts.packages }}"
+
+- name: "Check pip3"
+  set_fact:
+    system_has_pip3: "{{ 'python3-pip' in ansible_facts.packages }}"
+
+- name: "Check pip2"
+  set_fact:
+    system_has_pip2: "{{ 'python2-pip' in ansible_facts.packages }}"

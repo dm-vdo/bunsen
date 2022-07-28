@@ -1,0 +1,3 @@
+# Repo NFS server variables.
+---
+bunsen_user: "{{ bunsen_user_account }}"

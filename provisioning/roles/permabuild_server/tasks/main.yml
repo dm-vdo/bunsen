@@ -1,0 +1,6 @@
+---
+- include_role:
+    name: nfs_server
+  vars:
+    nfs_directories: "{{ permabuild_directories }}"
+    nfs_exports: "{{ permabuild_exports }}"

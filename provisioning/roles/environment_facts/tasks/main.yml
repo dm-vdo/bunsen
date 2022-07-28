@@ -1,0 +1,40 @@
+---
+- block:
+  - name: Checking for Vagrant account
+    getent: database=passwd key=vagrant
+    failed_when: False
+    register: getpwent_result
+
+  # These are currently the only priority configurations.
+  # There will probably be others to distinguish eventually.
+  - name: Setting vagrant facts
+    set_fact:
+      is_vagrant: '{{ "ansible_facts" in (getpwent_result.keys() | list) }}'
+
+  - name: Setting devvm fact
+    set_fact:
+      is_devvm: true
+
+  - name: Get controller IPv4 info
+    local_action:
+      module: setup
+      filter: ansible_default_ipv4
+    delegate_facts: true
+    run_once: true
+
+  - name: Get controller IPv4 address
+    set_fact:
+      ansible_controller_ip: "{{ hostvars['localhost']['ansible_default_ipv4']['address'] }}"
+
+  - name: Setting default alternative package facts
+    # If the machine is being used as the storage server it needs to use
+    # python3 as its default python as the storage software used for iSCSI
+    # assumes that plain python resolves to python3.
+    set_fact:
+      python_alternative: '
+        {%- if is_fedora32_or_later or is_rhel8_or_later_family
+              or is_storage_server -%}
+          python3
+        {%- else -%}
+          python2
+        {%- endif -%}'

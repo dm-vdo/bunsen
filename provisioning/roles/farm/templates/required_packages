@@ -1,0 +1,9 @@
+---{{newline}}
+{%- for pkgname in ansible_facts.packages.keys()|sort(case_sensitive=True) -%}
+  {%- set pkg = ansible_facts.packages[pkgname] -%}
+  {%- if pkgname in excludes -%}
+    {# do nothing - checkServer explicitly ignores these #}
+  {%- else -%}
+    {{ pkg[0].name }}.{{ pkg[0].arch }}: {{ pkg[0].version }}-{{ pkg[0].release }}{{ newline }}
+  {%- endif -%}
+{%- endfor -%}
