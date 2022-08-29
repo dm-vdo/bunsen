@@ -26,6 +26,7 @@ _farm_packages:
     - perf
     - permatest
     - perl-Permabit-checkServer
+    - rpm-build
     - rsyslog
     - strace
     - sysstat
@@ -65,6 +66,9 @@ _farm_packages:
   - (CentOS|RedHat)(?![1-7]\.[0-9]+)[1-9][0-9]*\.[0-9]+:
     - dosfstools
     - python3-numpy
+    - device-mapper-devel
+    - device-mapper-eveent-devel
+    - valgrind-devel
 
   # Common to all RHEL 7 and 8 family.
   - (CentOS|RedHat)(7|8)\.[0-9]+:

@@ -197,8 +197,8 @@ _perl_libraries:
     - aarch64:
     - ppc64le:
     - s390x:
-      # Common to all RHEL families starting with RHEL 8.0 family.
-      - (CentOS|RedHat)(?![1-7]\.[0-9]+)[1-9][0-9]*\.[0-9]+:
+      # Common to all RHEL 8 families through RHEL 8.5 family.
+      - (CentOS|RedHat)8\.([1-9][0-9]+|[0-5]):
         # Clone (required by PPI) version 0.42 and later has a new dependency
         # on B::COW (which is at version 0.001, so there's nothing to roll back
         # to there) which doesn't install on RHEL8 for S390X.  So, we specify a
