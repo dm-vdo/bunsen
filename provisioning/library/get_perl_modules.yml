@@ -34,8 +34,6 @@
                  --disablerepo '*-debuginfo' \
                  {{ extra_repos | trim }} \
                  perl- 2>/dev/null
-    args:
-      warn: False
     become: yes
     changed_when: False
     register: dnf

@@ -22,8 +22,6 @@
 
 - name: Check for older packages to be uninstalled
   command: dnf repoquery --installonly --latest-limit=-1 -q
-  args:
-    warn: False
   # Really, if packaging system is DNF vs Yum...
   when: ansible_pkg_mgr == "dnf"
   changed_when: False
@@ -31,7 +29,5 @@
 
 - name: Remove older kernels
   command: "dnf remove --assumeyes {{ repoquery.stdout }}"
-  args:
-    warn: False
   become: yes
   when: (ansible_pkg_mgr == "dnf") and (repoquery.stdout != "")
