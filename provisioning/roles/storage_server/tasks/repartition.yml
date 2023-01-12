@@ -27,8 +27,6 @@
    - name: Copy /home to /home2
      # --acls --xattrs ?
      shell: "mkdir /home2 && rsync -aHS /home/. /home2/."
-     args:
-       warn: False
      when: must_relocate_home | bool
      become: yes
 
@@ -55,8 +53,6 @@
 
    - name: Move /home2 to /home
      shell: "rm -rf /home && mv -f /home2 /home"
-     args:
-       warn: False
      when: must_relocate_home | bool
      become: yes
 
