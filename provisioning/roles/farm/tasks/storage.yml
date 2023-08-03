@@ -48,6 +48,27 @@
                    {%- endif -%}"
       when: aux_disk in ansible_devices.keys()
 
+    # Prepare the farm systems to use iscsi for testing.
+    - block:
+      # Starting with Fedora34, the /etc/iscsi/initiatorname.iscsi file is no longer
+      # provided by the iscsi-initiator-utils package.  Instead, it is generated with
+      # the start of the iscsi-init.service.
+      - name: Start iscsi-init.service (generate /etc/iscsi/initiatorname.iscsi)
+        service:
+          name: iscsi-init.service
+          enabled: yes
+          state: started
+        become: yes
+        when: (is_fedora34_or_later | bool)
+
+      - name: Start and enable iscsid service
+        systemd:
+          name: iscsid
+          state: started
+          enabled: yes
+          daemon_reload: yes
+        become: yes
+
     - block:
         # scratch_vg not defined and system has a /home mount.
         # Create a big file on /home and use it via a loop device as a

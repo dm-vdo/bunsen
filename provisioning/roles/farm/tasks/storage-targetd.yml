@@ -17,14 +17,6 @@
     state: present
   become: yes
 
-- name: Start and enable iscsid service
-  systemd:
-    name: iscsid
-    state: started
-    enabled: yes
-    daemon_reload: yes
-  become: yes
-
 - name: Re-retrieving IQN
   setup:
     filter: ansible_iscsi_iqn
