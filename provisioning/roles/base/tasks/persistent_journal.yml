@@ -10,6 +10,7 @@
     dest: /etc/systemd/journald.conf
     remote_src: yes
     force: false
+  become: yes
   when: has_lib_journald_conf.stat.exists
 
 - name: Update journald.conf
