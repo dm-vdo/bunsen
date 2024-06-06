@@ -1,4 +1,17 @@
 ---
+- name: Check lib journald.conf
+  stat:
+    path: /usr/lib/systemd/journald.conf
+  register: has_lib_journald_conf
+
+- name: Copy journald.conf
+  ansible.builtin.copy:
+    src: /usr/lib/systemd/journald.conf
+    dest: /etc/systemd/journald.conf
+    remote_src: yes
+    force: false
+  when: has_lib_journald_conf.stat.exists
+
 - name: Update journald.conf
   lineinfile:
     path: /etc/systemd/journald.conf
