@@ -1,17 +1,6 @@
 ---
 - include_tasks: release_config_dir.yml
 
-# Do this after the reboot that ensures that crashkernel memory has been
-# reserved.
-- name: Enabling kdump service
-  systemd:
-    name: kdump.service
-    state: started
-    enabled: True
-  # See above re: zipl boot loader.
-  when: is_fedora and (not is_arch_s390x)
-  become: yes
-
 - name: Enable use of /proc/sysrq-trigger
   sysctl:
     name: kernel.sysrq
