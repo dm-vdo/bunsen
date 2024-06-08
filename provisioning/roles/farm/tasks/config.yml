@@ -19,6 +19,20 @@
   when: is_vagrant | bool
   become: yes
 
+- name: Check lib system.conf
+  stat:
+    path: /usr/lib/systemd/system.conf
+  register: has_lib_system_conf
+
+- name: Copy system.conf
+  ansible.builtin.copy:
+    src: /usr/lib/systemd/system.conf
+    dest: /etc/systemd/system.conf
+    remote_src: yes
+    force: false
+  become: yes
+  when: has_lib_system_conf.stat.exists
+
 - name: Enable core dump generation
   lineinfile:
     path: /etc/systemd/system.conf
