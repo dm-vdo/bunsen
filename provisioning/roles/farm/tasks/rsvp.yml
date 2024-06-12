@@ -18,12 +18,16 @@
       - VFARM
       - "{{ os_class }}"
       - "{{ arch_class }}"
-      - "{{ is_fedora | bool | ternary('FEDORA', omit) }}"
+      # Replace omit with 'ALL' since omit stops working with Ansible in
+      # Fedora 39. We use 'ALL' temporary, until the omit bug is fixed.
+      # 'ALL' archive the same result since rsvp will ignore duplicate
+      # value.
+      - "{{ is_fedora | bool | ternary('FEDORA', 'ALL') }}"
       - "{{ ((is_fedora | bool) or (is_rhel8_or_later_family | bool))
-            | ternary('LINUX-UDS', omit) }}"
+            | ternary('LINUX-UDS', 'ALL') }}"
       - "{{ ((is_fedora | bool) or (is_rhel8_or_later_family | bool))
-            | ternary('LINUX-VDO', omit) }}"
-      - "{{ is_performance_farm | ternary('VDO-PMI', omit) }}"
+            | ternary('LINUX-VDO', 'ALL') }}"
+      - "{{ is_performance_farm | bool | ternary('VDO-PMI', 'ALL') }}"
     # For convenience above, we want to support something like the "omit"
     # construct, but it doesn't work in simple list contexts; "omit" just
     # expands to some magic cookie value which we still have to explicitly
