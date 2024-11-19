@@ -29,6 +29,12 @@
 - include_tasks: config.yml
 - include_tasks: services.yml
 - include_tasks: storage.yml
+# We need to use dnf4 to remove older version software.
+# dnf5 is default in Fedora 41, and it cannot do that, yet.
+- name: Remove duplicate packages
+  shell: "dnf4 remove --oldinstallonly -y"
+  become: yes
+  when: (is_fedora41_or_later | bool)
 - include_tasks: required_packages_file.yml
 - include_tasks: udev.yml
 
