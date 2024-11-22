@@ -1,4 +1,15 @@
 ---
+- name: Install python3-libdnf5
+  # python3-libdnf5 is needed by ansible package module.
+  # If it is not installed, package and dnf ansible module will
+  # fail. python3-libnfs5 is not installed in Fedora 41 by default,
+  # therefore we need to install it first before we use the package
+  # module below.
+  shell:
+    cmd: "dnf install -y python3-libdnf5"
+  become: yes
+  when: (is_fedora41_or_later | bool)
+
 - name: Install early required packages.
   package:
     name: "{{ early_packages }}"

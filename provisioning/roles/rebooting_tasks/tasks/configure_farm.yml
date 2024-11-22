@@ -12,7 +12,7 @@
   - block:
     - name: Find grub config files
       find:
-        paths: ["/boot/grub2", "/boot/efi/EFI/fedora"]
+        paths: ["/boot/grub2"]
         patterns: grub.cfg
         recurse: no
       register: grub

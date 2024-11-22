@@ -7,7 +7,6 @@ _kernel_selection:
 _kernel_packages:
   # Common to all distributions.
   - common:
-    - kernel
     - kernel-devel
     - kernel-headers
     - kernel-tools
@@ -23,6 +22,14 @@ _kernel_packages:
     - grubby
     - kernel-core
     - kernel-modules
+
+  # Add kernel package to CentOS, RHEL and Fedora before Fedora41
+  # since kernel package is not avaiable after Fedora40.
+  - Fedora(2[8-9]|3[0-9]|40):
+    - kernel
+
+  - (CentOS|RedHat)(?![1-7]\.[0-9]+)[1-9][0-9]*\.[0-9]+:
+    - kernel
 
   ##########################################################################
   # Architecture-specific.

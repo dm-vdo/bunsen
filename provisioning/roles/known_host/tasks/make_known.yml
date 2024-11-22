@@ -2,7 +2,7 @@
 - block:
 
   - name: Fetch SSH public key(s)
-    command: "ssh-keyscan -4 {{ host }}"
+    shell: "ssh-keyscan -4 {{ host }} | grep -v ^#"
     changed_when: False
     register: keyscan_result
 

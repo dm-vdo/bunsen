@@ -41,6 +41,7 @@
   - name: Parse and save {{ ansible_pkg_mgr }} list of Perl module packages
     set_fact:
       # regex_replace: Make lines with .src package names disappear.
+      # regex_replace: Remove leading space.
       # regex_search+select: Pick only package names, not descriptions or
       #   lines with output section headers.
       # regex_replace: Strip off the trailing architecture spec.
@@ -51,8 +52,9 @@
       #   simple string, and "<pkg> in <string>" matches substrings of
       #   RPM names; we really need to do list operations.
       perl_rpms: "{{ dnf.stdout_lines
-                     | map('regex_replace', '[^ ]*\\.src : .*', '')
-                     | map('regex_search','^perl-[^ ]*')
+                     | map('regex_replace', '[^ ]*\\.src ?: .*', '')
+                     | map('regex_replace', '^\\s*', '')
+                     | map('regex_search', '^perl-[^ :]*')
                      | select('string')
                      | map('regex_replace', '\\.[a-z0-9_]*$', '')
                      | unique

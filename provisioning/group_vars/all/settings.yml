@@ -50,6 +50,7 @@ is_fedora: '{{target_distribution_name == "Fedora"}}'
 is_fedora31_or_later: '{{is_fedora and ((target_distribution_major_number | int) >= 31)}}'
 is_fedora32_or_later: '{{is_fedora and ((target_distribution_major_number | int) >= 32)}}'
 is_fedora34_or_later: '{{is_fedora and ((target_distribution_major_number | int) >= 34)}}'
+is_fedora41_or_later: '{{is_fedora and ((target_distribution_major_number | int) >= 41)}}'
 
 is_rhel: '{{target_distribution_name == "RedHat"}}'
 is_rhel7: '{{is_rhel and ((target_distribution_major_number | int) == 7)}}'
