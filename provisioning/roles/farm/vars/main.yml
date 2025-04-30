@@ -15,6 +15,7 @@ _farm_packages:
     - blktrace
     - crash
     - cryptsetup
+    - crontabs
     - device-mapper-event-devel
     - dwarves
     - elfutils
