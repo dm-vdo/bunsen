@@ -1,5 +1,12 @@
 ---
 - block:
+  - name: Start NFS Service
+    systemd:
+      name: nfs-server
+      state: restarted
+      enabled: true
+    become: yes
+
   - name: Export shared directories
     nfs_exports:
       name: "{{ item.src }} Share"
@@ -17,10 +24,3 @@
     vars:
       port: 2049/tcp
       open: true
-
-  - name: Start NFS Service
-    systemd:
-      name: nfs-server
-      state: restarted
-      enabled: true
-    become: yes

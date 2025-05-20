@@ -62,3 +62,29 @@
     path: /var/lock/vdo
     state: absent
   become: yes
+
+- name: Create kdump directory
+  ansible.builtin.file:
+    path: /crash
+    state: directory
+  become: yes
+
+- name: Replace /var/crash with /crash
+  ansible.builtin.replace:
+    path: /etc/kdump.conf
+    regexp: '^path /var/crash'
+    replace: 'path /crash'
+  become: yes
+
+- name: Remove /var/crash
+  ansible.builtin.file:
+    path: /var/crash
+    state: absent
+  become: yes
+
+- name: link /crash to /var/crash
+  ansible.builtin.file:
+    src: /crash
+    dest: /var/crash
+    state: link
+  become: yes
