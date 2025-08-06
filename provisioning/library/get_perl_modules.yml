@@ -52,9 +52,9 @@
       #   simple string, and "<pkg> in <string>" matches substrings of
       #   RPM names; we really need to do list operations.
       perl_rpms: "{{ dnf.stdout_lines
-                     | map('regex_replace', '[^ ]*\\.src ?: .*', '')
+                     | map('regex_replace', '[^ ]*\\.src( ?:|\t) .*', '')
                      | map('regex_replace', '^\\s*', '')
-                     | map('regex_search', '^perl-[^ :]*')
+                     | map('regex_search', '^perl-[^ :\t]*')
                      | select('string')
                      | map('regex_replace', '\\.[a-z0-9_]*$', '')
                      | unique
