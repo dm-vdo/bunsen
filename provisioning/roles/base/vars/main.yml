@@ -267,12 +267,14 @@ _perl_libraries:
     - Perl::Critic::More
     - Perl::Critic::Policy::Miscellanea::RequireRcsKeywords
     - Proc::ProcessTable
+    - Proc::Simple
     - Regexp::Common
     - SOAP::Lite
     - Statistics::Descriptive
     - String::ShellQuote
     - Sys::CPU
     - Test::Unit::Lite
+    - Test::Unit
     - Tie::IxHash
     - Time::Duration
     - XML::Generator
